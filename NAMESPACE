@@ -1,0 +1,3 @@
+useDynLib(semipaddgt2pop, .registration=TRUE)
+exportPattern("^[[:alpha:]]+")
+importFrom(Rcpp, evalCpp)

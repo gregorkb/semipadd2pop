@@ -1,0 +1,62 @@
+[
+    {
+        "definitions" : [
+            {
+                "column" : 7,
+                "file" : "/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/src/semipaddgt2pop.cpp",
+                "kind" : 6,
+                "line" : 17,
+                "name" : "SoftThresh_scalar(float, float)",
+                "parent_name" : "",
+                "usr" : "c:@F@SoftThresh_scalar#f#f#"
+            },
+            {
+                "column" : 14,
+                "file" : "/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/src/semipaddgt2pop.cpp",
+                "kind" : 6,
+                "line" : 73,
+                "name" : "FoygelDrton_Armadillo(arma::colvec, arma::mat, double, arma::colvec, arma::mat)",
+                "parent_name" : "",
+                "usr" : "c:@F@FoygelDrton_Armadillo#$@N@arma@S@Col>#d#$@N@arma@S@Mat>#d#d#S0_#S1_#"
+            },
+            {
+                "column" : 6,
+                "file" : "/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/src/semipaddgt2pop.cpp",
+                "kind" : 6,
+                "line" : 128,
+                "name" : "grouplasso2pop_logreg(Rcpp::NumericVector, Rcpp::NumericMatrix, Rcpp::IntegerVector, Rcpp::NumericVector, Rcpp::NumericMatrix, Rcpp::IntegerVector, float, float, float, float, Rcpp::NumericVector, Rcpp::NumericVector, Rcpp::NumericVector, Rcpp::List, Rcpp::List, Rcpp::IntegerVector, float, int, Rcpp::NumericVector, Rcpp::NumericVector)",
+                "parent_name" : "",
+                "usr" : "c:@F@grouplasso2pop_logreg#I#I#I#I#I#I#f#f#f#f#I#I#I#I#I#I#f#I#I#I#"
+            },
+            {
+                "column" : 11,
+                "file" : "/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/src/semipaddgt2pop.cpp",
+                "kind" : 6,
+                "line" : 543,
+                "name" : "all_binary_sequences(int)",
+                "parent_name" : "",
+                "usr" : "c:@F@all_binary_sequences#I#"
+            },
+            {
+                "column" : 14,
+                "file" : "/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/src/semipaddgt2pop.cpp",
+                "kind" : 6,
+                "line" : 590,
+                "name" : "EYexact(Rcpp::IntegerMatrix, Rcpp::IntegerMatrix, Rcpp::NumericMatrix, Rcpp::NumericVector, Rcpp::NumericVector, Rcpp::NumericVector)",
+                "parent_name" : "",
+                "usr" : "c:@F@EYexact#I#I#I#I#I#I#"
+            },
+            {
+                "column" : 21,
+                "file" : "/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/src/semipaddgt2pop.cpp",
+                "kind" : 6,
+                "line" : 863,
+                "name" : "EYgibbs(int, Rcpp::NumericVector, Rcpp::NumericMatrix, Rcpp::NumericMatrix, Rcpp::NumericVector, Rcpp::NumericVector, int, int)",
+                "parent_name" : "",
+                "usr" : "c:@F@EYgibbs#I#I#I#I#I#I#I#I#"
+            }
+        ],
+        "file" : "/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/src/semipaddgt2pop.cpp",
+        "file_last_write" : 1594916779.000000
+    }
+]
