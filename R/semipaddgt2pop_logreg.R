@@ -876,7 +876,6 @@ grouplasso2pop_logreg_cv_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,
   
 }
 
-
 #' Choose tuning parameters by crossvalidation for grouplasso2pop logreg.
 #'
 #' @param Y1 the binary response vector of data set 1

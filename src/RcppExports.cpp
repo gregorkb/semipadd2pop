@@ -33,6 +33,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// grouplasso_logreg
+List grouplasso_logreg(NumericVector rY, NumericMatrix rX, IntegerVector groups, float lambda, NumericVector w, float tol, int maxiter, NumericVector beta_init);
+RcppExport SEXP _semipaddgt2pop_grouplasso_logreg(SEXP rYSEXP, SEXP rXSEXP, SEXP groupsSEXP, SEXP lambdaSEXP, SEXP wSEXP, SEXP tolSEXP, SEXP maxiterSEXP, SEXP beta_initSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type rY(rYSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type rX(rXSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type groups(groupsSEXP);
+    Rcpp::traits::input_parameter< float >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< float >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type beta_init(beta_initSEXP);
+    rcpp_result_gen = Rcpp::wrap(grouplasso_logreg(rY, rX, groups, lambda, w, tol, maxiter, beta_init));
+    return rcpp_result_gen;
+END_RCPP
+}
 // grouplasso2pop_logreg
 List grouplasso2pop_logreg(NumericVector rY1, NumericMatrix rX1, IntegerVector groups1, NumericVector rY2, NumericMatrix rX2, IntegerVector groups2, float rho1, float rho2, float lambda, float eta, NumericVector w1, NumericVector w2, NumericVector w, List rAA1, List rAA2, IntegerVector rCom, float tol, int maxiter, NumericVector beta1_init, NumericVector beta2_init);
 RcppExport SEXP _semipaddgt2pop_grouplasso2pop_logreg(SEXP rY1SEXP, SEXP rX1SEXP, SEXP groups1SEXP, SEXP rY2SEXP, SEXP rX2SEXP, SEXP groups2SEXP, SEXP rho1SEXP, SEXP rho2SEXP, SEXP lambdaSEXP, SEXP etaSEXP, SEXP w1SEXP, SEXP w2SEXP, SEXP wSEXP, SEXP rAA1SEXP, SEXP rAA2SEXP, SEXP rComSEXP, SEXP tolSEXP, SEXP maxiterSEXP, SEXP beta1_initSEXP, SEXP beta2_initSEXP) {
@@ -112,6 +130,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_semipaddgt2pop_SoftThresh_scalar", (DL_FUNC) &_semipaddgt2pop_SoftThresh_scalar, 2},
     {"_semipaddgt2pop_FoygelDrton_Armadillo", (DL_FUNC) &_semipaddgt2pop_FoygelDrton_Armadillo, 5},
+    {"_semipaddgt2pop_grouplasso_logreg", (DL_FUNC) &_semipaddgt2pop_grouplasso_logreg, 8},
     {"_semipaddgt2pop_grouplasso2pop_logreg", (DL_FUNC) &_semipaddgt2pop_grouplasso2pop_logreg, 20},
     {"_semipaddgt2pop_all_binary_sequences", (DL_FUNC) &_semipaddgt2pop_all_binary_sequences, 1},
     {"_semipaddgt2pop_EYexact", (DL_FUNC) &_semipaddgt2pop_EYexact, 6},

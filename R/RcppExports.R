@@ -51,6 +51,25 @@ FoygelDrton_Armadillo <- function(h, L, lambda, evals, evecs) {
     .Call(`_semipaddgt2pop_FoygelDrton_Armadillo`, h, L, lambda, evals, evecs)
 }
 
+#' Minimize the objective function of the group lasso problem with a binary response
+#'
+#' @param Y the binary response vector
+#' @param X matrix containing the design matrices
+#' @param groups a vector of integers indicating to which group each covariate belongs
+#' @param lambda the level of sparsity penalization
+#' @param w vector of group-specific weights for different penalization of groups
+#' @param eigen a list of eigen info on groups
+#' @param tol a convergence criterion
+#' @param max.iter the maximum allowed number of iterations
+#' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
+#' @param beta_init optional starting value for beta
+#' @return Returns the minimizer of the group lasso objective function
+#'
+#' @examples
+grouplasso_logreg <- function(rY, rX, groups, lambda, w, tol, maxiter, beta_init = as.numeric( c())) {
+    .Call(`_semipaddgt2pop_grouplasso_logreg`, rY, rX, groups, lambda, w, tol, maxiter, beta_init)
+}
+
 #' Minimize the objective function of the 2-population group lasso problem with a binary response
 #'
 #' @param Y1 the binary response vector of data set 1

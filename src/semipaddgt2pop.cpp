@@ -96,6 +96,184 @@ arma::colvec FoygelDrton_Armadillo(arma::colvec h, arma::mat L, double lambda, a
 }
 
 
+//' Minimize the objective function of the group lasso problem with a binary response
+//'
+//' @param Y the binary response vector
+//' @param X matrix containing the design matrices
+//' @param groups a vector of integers indicating to which group each covariate belongs
+//' @param lambda the level of sparsity penalization
+//' @param w vector of group-specific weights for different penalization of groups
+//' @param eigen a list of eigen info on groups
+//' @param tol a convergence criterion
+//' @param max.iter the maximum allowed number of iterations
+//' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
+//' @param beta_init optional starting value for beta
+//' @return Returns the minimizer of the group lasso objective function
+//'
+//' @examples
+// [[Rcpp::export]]
+List grouplasso_logreg(NumericVector rY,
+                       NumericMatrix rX,
+                       IntegerVector groups,
+                       float lambda,
+                       NumericVector w,
+                       float tol,
+                       int maxiter,
+                       NumericVector beta_init = NumericVector::create()){
+                      
+  // get dimensions
+  int n = rY.size();
+  int q = rX.ncol();
+  
+  int i,j,k;
+  
+  int g = max(groups);
+  
+  LogicalVector got_eigen(g);
+  
+  IntegerVector d(g);
+  
+  IntegerVector is_grp_singleton(g);
+  IntegerVector grp_begin_ind(g);
+  
+
+  // identify singleton and non-singleton groups
+  j = 1;
+  for(i = 0; i < q; i++){
+    
+    if(groups[i] != j){
+      
+      if( d[j-1] == 1){
+        
+        is_grp_singleton[j-1] = 1;
+        
+      }
+      
+      j++;
+      
+    }
+    
+    d[j-1]++;
+    
+  }
+  
+  grp_begin_ind[0] = 0;
+  for(j = 1; j < g;j++){
+    
+    grp_begin_ind[j] = sum(d[Range(0,j-1)]);
+    
+  }
+  
+  // make Armadillo matrices/vectors
+  arma::colvec Y(rY.begin(),n,false);
+  arma::colvec P(n);
+  arma::mat X(rX.begin(),n,q,false);
+  arma::colvec b = arma::zeros(q);
+  
+  // Set up initial values if provided
+  if( beta_init.size() == q ){
+    
+    arma::colvec b_silly_copy(beta_init.begin(),q,false);
+    b = b_silly_copy;
+    
+  }
+  
+  arma::colvec b_0 = b;
+
+  arma::colvec Zj_tilde(n);
+  arma::colvec h(n);
+  arma::mat LtL1(max(d),max(d));
+  
+  
+  arma::field<arma::vec> eigval(g);
+  arma::field<arma::mat> eigvec(g);
+  arma::field<arma::mat> cholLtL(g);
+  
+  // define other floats
+  float sxj, sxzj_scalar, xzj_norm;
+  //float sx1j_AA, sx1z1j_AAb2_scalar, x1z1j_AAb2_norm;
+  
+  // algorithmic control
+  bool conv = false;
+  int iter = 0;
+  NumericVector obj_val(maxiter);
+  
+  // begin looping!
+  while( (conv == false) & (iter < maxiter)){
+    
+    b_0 = b;
+  
+    // go through groups
+    for( j = 0; j < g ; j++){
+      
+      // update probs
+      P = 1/(1 + exp( - X * b  ));
+      
+      if(any(P > 1-1e-10) | any(P < 1e-10)){
+        
+        Rcpp::Rcout << "warning: failure to converge due to complete or quasi-complete separation" << std::endl;
+        
+      }
+      
+      // first and last columns of X belonging to group
+      i = grp_begin_ind[j];
+      k = i + d[j] - 1;
+
+      if(d[j] == 1){
+        
+        
+        Zj_tilde = X.cols(i,i) * b(i) / 2 + 2 * ( Y - P);
+        sxj = arma::as_scalar(X.cols(i,i).t() * X.cols(i,i)) / 4;
+        sxzj_scalar = arma::as_scalar(X.cols(i,i).t() * Zj_tilde) / 2;
+        b(i) = SoftThresh_scalar(sxzj_scalar,lambda * w[j] / 2) / sxj;
+        
+      } else {
+        
+        Zj_tilde = X.cols(i,k) * b.rows(i,k) / 2 + 2 * ( Y - P);
+        xzj_norm = sqrt(arma::accu(pow(trans(X.cols(i,k)) * Zj_tilde,2))) / 2;
+        
+        if( xzj_norm < lambda * w[j]/2){
+          
+          b.rows(i,k) = arma::zeros(k-i+1);
+          
+        } else {
+          
+          if(got_eigen[j] == false){
+            
+            eig_sym(eigval(j),eigvec(j),X.cols(i,k).t() * X.cols(i,k) / 4);
+            got_eigen[j] = true;
+            
+          } 
+          
+          b.rows(i,k) = FoygelDrton_Armadillo(Zj_tilde, X.cols(i,k) / 2, lambda * w[j]/2, eigval(j), eigvec(j).t());
+          
+        }
+        
+      }
+      
+    }
+    
+    if(any(abs(b - b_0) > tol)){
+      
+      conv = false;
+      
+    } else {
+      
+      conv = true;
+    }
+    
+    iter++;
+    
+  }
+  // close while statement
+  
+  return Rcpp::List::create(Named("beta.hat") = b,
+                            Named("iter") = iter);
+  
+}
+
+
+
 //' Minimize the objective function of the 2-population group lasso problem with a binary response
 //'
 //' @param Y1 the binary response vector of data set 1

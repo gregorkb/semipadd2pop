@@ -150,7 +150,17 @@ semipadd2pop_to_grouplasso2pop <- function(X1,nonparm1,X2,nonparm2,nCom,d1,d2,xi
 
     } else {
 
-      int.knots <- quantile(X1[,j],seq(0,1,length=d1[j]-2+1)) # add one, so that one can be removed after centering to restore full-rank.
+      if(d1[j] < 0){
+        
+        int.knots <- seq(min(X1[,j]), max(X1[,j]), length = -d1[j] - 2 + 1 )
+        d1[j] <- -d1[j]
+        
+      } else {
+      
+        int.knots <- quantile(X1[,j],seq(0,1,length=d1[j]-2+1)) # add one, so that one can be removed after centering to restore full-rank.
+      
+      }
+      
       boundary.knots <- range(int.knots)
       all.knots <- sort(c(rep(boundary.knots,3),int.knots))
       knots.list1[[j]] <- all.knots
@@ -224,9 +234,18 @@ semipadd2pop_to_grouplasso2pop <- function(X1,nonparm1,X2,nonparm2,nCom,d1,d2,xi
       groups2 <- c(groups2,j)
 
     } else {
-
-
-      int.knots <- quantile(X2[,j],seq(0,1,length=d2[j]-2+1)) # add one, so that one can be removed after centering to restore full-rank.
+      
+      if(d2[j] < 0){
+        
+        int.knots <- seq(min(X2[,j]), max(X2[,j]), length = -d2[j] - 2 + 1 )
+        d2[j] <- -d2[j]
+        
+      } else {
+        
+        int.knots <- quantile(X2[,j],seq(0,1,length=d2[j]-2+1)) # add one, so that one can be removed after centering to restore full-rank.
+        
+      }
+      
       boundary.knots <- range(int.knots)
       all.knots <- sort(c(rep(boundary.knots,3),int.knots))
       knots.list2[[j]] <- all.knots
@@ -896,6 +915,30 @@ corrBern <- function(n,probs,Rho)
 }
 
 
+#' Generate a data set with binary responses
+#'
+#' @param n the sample size
+#' @return a list containing the data
+#' @export
+get_grouplasso_logreg_data <- function(n){
+  
+  d <- c(1,1,3,4)
+  q <- length(d)
+  X <- matrix(rnorm(n*sum(d)),n,sum(d))
+  groups <- numeric() ; for(j in 1:q){ groups <- c(groups,rep(j,d[j])) }
+  beta <- c(0,2,0,0,0,1,1,1,1)
+  Y <- rbinom(n,1,logit(X %*% beta))
+  
+  # set tuning parameters
+  w <- rexp(q,2)
+  
+  output <- list(Y = Y,
+                 X = X,
+                 groups = groups,
+                 w = w,
+                 beta = beta)
+}
+
 
 #' Generate two data sets for semiparametric additive modeling with continuous responses and some common covariates
 #'
@@ -1007,7 +1050,7 @@ get_semipadd2pop_linreg_data <- function(n1,n2)
 }
 
 
-#' Generate two data sets with group testing responses and some common covariates
+#' Generate two data sets with binary responses and some common covariates
 #'
 #' @param n1 the sample size for the first data set
 #' @param n2 the sample size for the second data set
@@ -1272,7 +1315,7 @@ get_semipaddgt2pop_data <- function(n1,n2)
   # generate true response values
   Y1.true <- rbinom(n1,1,logit(apply(f1.design,1,sum)))
 
-  # generate group testing outcomes
+  # generate dorfman testing outcomes
   Se1 <- c(.98,.96)
   Sp1 <- c(.97,.99)
   assay1.out <- dorfman.assay.gen(Y1.true,Se1,Sp1,cj=4)
@@ -1286,7 +1329,7 @@ get_semipaddgt2pop_data <- function(n1,n2)
   zeta2 <- 10/20
   W2 <- cbind(corrBern(n2,probs=c(1:p2)/(2*p2),Rho = zeta1^abs(outer(1:p2,1:p2,"-"))))
   X2 <- (corrUnif(n2,Rho = zeta2^abs(outer(1:q2,1:q2,"-")))-.5)*5
-  X2[,1] <- X2[,1] - 2.5 # impose different supports for some covariates
+  X2[,1] <- X2[,1] - 1 # impose different supports for some covariates
   X2[,2] <- X2[,2] + 2
 
   XX2 <- cbind(1,W2[,c(1,2)],X2[,c(1,2)],W2[,-c(1,2)],X2[,-c(1,2)])
@@ -1317,9 +1360,9 @@ get_semipaddgt2pop_data <- function(n1,n2)
   # generate true response values
   Y2.true <- rbinom(n2,1,logit(apply(f2.design,1,sum)))
 
-  # generate group testing outcomes
-  Se2 <- .98
-  Sp2 <- .97
+  # generate individual testing outcomes
+  Se2 <- .96
+  Sp2 <- .99
   assay2.out <- individual.assay.gen(Y2.true,Se2,Sp2,cj=1)
   Z2 <- assay2.out$Z
   Y2 <- assay2.out$Y
