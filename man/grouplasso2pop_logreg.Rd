@@ -4,14 +4,37 @@
 \alias{grouplasso2pop_logreg}
 \title{Minimize the objective function of the 2-population group lasso problem with a binary response}
 \usage{
-grouplasso2pop_logreg(rY1, rX1, groups1, rY2, rX2, groups2, lambda, eta, w1, w2,
-  w, rAA1, rAA2, rCom, tol, maxiter, beta1_init = as.numeric(c()),
-  beta2_init = as.numeric(c()))
+grouplasso2pop_logreg(
+  rY1,
+  rX1,
+  groups1,
+  rY2,
+  rX2,
+  groups2,
+  rho1,
+  rho2,
+  lambda,
+  eta,
+  w1,
+  w2,
+  w,
+  rAA1,
+  rAA2,
+  rCom,
+  tol,
+  maxiter,
+  beta1_init = as.numeric(c()),
+  beta2_init = as.numeric(c())
+)
 }
 \arguments{
 \item{groups1}{a vector of integers indicating to which group each covariate in data set 1 belongs}
 
 \item{groups2}{a vector of integers indicating to which group each covariate in data set 1 belongs}
+
+\item{rho1}{weight placed on the first data set}
+
+\item{rho2}{weight placed on the second data set}
 
 \item{lambda}{the level of sparsity penalization}
 
@@ -37,8 +60,6 @@ grouplasso2pop_logreg(rY1, rX1, groups1, rY2, rX2, groups2, lambda, eta, w1, w2,
 
 \item{X2}{matrix containing the design matrices for data set 2}
 
-\item{AA1}{a list of the matrices A1j}
-
 \item{AA1}{a list of the matrices A2j}
 
 \item{eigen1}{a list of eigen info on groups from data set 1}
@@ -56,4 +77,26 @@ Returns the minimizers of the 2-population group lasso objective function for th
 }
 \description{
 Minimize the objective function of the 2-population group lasso problem with a binary response
+}
+\examples{
+grouplasso2pop_logreg_data <- get_grouplasso2pop_logreg_data(n1 = 400, n2 = 600)
+
+grouplasso2pop_logreg.out <- grouplasso2pop_logreg(rY1 = grouplasso2pop_logreg_data$Y1,
+                                                   rX1 = grouplasso2pop_logreg_data$X1,
+                                                   groups1 = grouplasso2pop_logreg_data$groups1,
+                                                   rY2 = grouplasso2pop_logreg_data$Y2,
+                                                   rX2 = grouplasso2pop_logreg_data$X2,
+                                                   groups2 = grouplasso2pop_logreg_data$groups2,
+                                                   rho1 = 2,
+                                                   rho2 = 1,
+                                                   lambda = 1,
+                                                   eta = 1,
+                                                   w1 = grouplasso2pop_logreg_data$w1,
+                                                   w2 = grouplasso2pop_logreg_data$w2,
+                                                   w = grouplasso2pop_logreg_data$w,
+                                                   rAA1 = grouplasso2pop_logreg_data$AA1,
+                                                   rAA2 = grouplasso2pop_logreg_data$AA2,
+                                                   rCom = grouplasso2pop_logreg_data$Com,
+                                                   tol = 1e-4,
+                                                   maxiter = 500)
 }

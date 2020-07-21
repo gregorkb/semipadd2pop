@@ -10,4 +10,4 @@ License: GPL (>= 2)
 Depends: splines
 Imports: Rcpp (>= 1.0.4)
 LinkingTo: Rcpp, RcppArmadillo
-RoxygenNote: 6.0.1
+RoxygenNote: 7.1.1

@@ -263,7 +263,7 @@ grouplassogt2pop_grid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,grou
                                                tol = tol,
                                                max.iter = max.iter,
                                                init = init,
-                                               report.prog=FALSE)
+                                               report.prog = FALSE)
 
       b1 <- grouplassogt2pop.out$beta1.hat
       b2 <- grouplassogt2pop.out$beta2.hat
@@ -428,6 +428,7 @@ grouplassogt2pop_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2
                   eta.seq = eta.seq,
                   iterations = iterations)
 }
+
 #' Choose tuning parameters by crossvalidation for grouplassogt2pop when given a fixed grid of lambda and eta values
 #'
 #' @param Y1 Group testing output for data set 1 in the format as output by one of the functions \code{individual.assay.gen}, \code{masterpool.assay.gen}, \code{dorfman.assay.gen}, or \code{array.assay.gen}.
