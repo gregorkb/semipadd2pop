@@ -50,6 +50,6 @@ grouplasso_logreg.out <- grouplasso_logreg(rY = grouplasso_logreg_data$Y,
                                            groups = grouplasso_logreg_data$groups,
                                            lambda = 10,
                                            w = grouplasso_logreg_data$w,
-                                           tol = 1e-4,
+                                           tol = 1e-4,                               
                                            maxiter = 500)
 }

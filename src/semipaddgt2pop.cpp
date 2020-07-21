@@ -111,6 +111,15 @@ arma::colvec FoygelDrton_Armadillo(arma::colvec h, arma::mat L, double lambda, a
 //' @return Returns the minimizer of the group lasso objective function
 //'
 //' @examples
+//' grouplasso_logreg_data <- get_grouplasso_logreg_data(n = 500)
+//' 
+//' grouplasso_logreg.out <- grouplasso_logreg(rY = grouplasso_logreg_data$Y,
+//'                                            rX = grouplasso_logreg_data$X,
+//'                                            groups = grouplasso_logreg_data$groups,
+//'                                            lambda = 10,
+//'                                            w = grouplasso_logreg_data$w,
+//'                                            tol = 1e-4,                               
+//'                                            maxiter = 500)
 // [[Rcpp::export]]
 List grouplasso_logreg(NumericVector rY,
                        NumericMatrix rX,
@@ -302,6 +311,26 @@ List grouplasso_logreg(NumericVector rY,
 //' @return Returns the minimizers of the 2-population group lasso objective function for the two data sets.
 //'
 //' @examples
+//' grouplasso2pop_logreg_data <- get_grouplasso2pop_logreg_data(n1 = 400, n2 = 600)
+//' 
+//' grouplasso2pop_logreg.out <- grouplasso2pop_logreg(rY1 = grouplasso2pop_logreg_data$Y1,
+//'                                                    rX1 = grouplasso2pop_logreg_data$X1,
+//'                                                    groups1 = grouplasso2pop_logreg_data$groups1,
+//'                                                    rY2 = grouplasso2pop_logreg_data$Y2,
+//'                                                    rX2 = grouplasso2pop_logreg_data$X2,
+//'                                                    groups2 = grouplasso2pop_logreg_data$groups2,
+//'                                                    rho1 = 2,
+//'                                                    rho2 = 1,
+//'                                                    lambda = 1,
+//'                                                    eta = 1,
+//'                                                    w1 = grouplasso2pop_logreg_data$w1,
+//'                                                    w2 = grouplasso2pop_logreg_data$w2,
+//'                                                    w = grouplasso2pop_logreg_data$w,
+//'                                                    rAA1 = grouplasso2pop_logreg_data$AA1,
+//'                                                    rAA2 = grouplasso2pop_logreg_data$AA2,
+//'                                                    rCom = grouplasso2pop_logreg_data$Com,
+//'                                                    tol = 1e-4,
+//'                                                    maxiter = 500)
 // [[Rcpp::export]]
 List grouplasso2pop_logreg(NumericVector rY1,
                                NumericMatrix rX1,

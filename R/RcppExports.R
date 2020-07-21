@@ -66,6 +66,15 @@ FoygelDrton_Armadillo <- function(h, L, lambda, evals, evecs) {
 #' @return Returns the minimizer of the group lasso objective function
 #'
 #' @examples
+#' grouplasso_logreg_data <- get_grouplasso_logreg_data(n = 500)
+#' 
+#' grouplasso_logreg.out <- grouplasso_logreg(rY = grouplasso_logreg_data$Y,
+#'                                            rX = grouplasso_logreg_data$X,
+#'                                            groups = grouplasso_logreg_data$groups,
+#'                                            lambda = 10,
+#'                                            w = grouplasso_logreg_data$w,
+#'                                            tol = 1e-4,                               
+#'                                            maxiter = 500)
 grouplasso_logreg <- function(rY, rX, groups, lambda, w, tol, maxiter, beta_init = as.numeric( c())) {
     .Call(`_semipaddgt2pop_grouplasso_logreg`, rY, rX, groups, lambda, w, tol, maxiter, beta_init)
 }
@@ -98,6 +107,26 @@ grouplasso_logreg <- function(rY, rX, groups, lambda, w, tol, maxiter, beta_init
 #' @return Returns the minimizers of the 2-population group lasso objective function for the two data sets.
 #'
 #' @examples
+#' grouplasso2pop_logreg_data <- get_grouplasso2pop_logreg_data(n1 = 400, n2 = 600)
+#' 
+#' grouplasso2pop_logreg.out <- grouplasso2pop_logreg(rY1 = grouplasso2pop_logreg_data$Y1,
+#'                                                    rX1 = grouplasso2pop_logreg_data$X1,
+#'                                                    groups1 = grouplasso2pop_logreg_data$groups1,
+#'                                                    rY2 = grouplasso2pop_logreg_data$Y2,
+#'                                                    rX2 = grouplasso2pop_logreg_data$X2,
+#'                                                    groups2 = grouplasso2pop_logreg_data$groups2,
+#'                                                    rho1 = 2,
+#'                                                    rho2 = 1,
+#'                                                    lambda = 1,
+#'                                                    eta = 1,
+#'                                                    w1 = grouplasso2pop_logreg_data$w1,
+#'                                                    w2 = grouplasso2pop_logreg_data$w2,
+#'                                                    w = grouplasso2pop_logreg_data$w,
+#'                                                    rAA1 = grouplasso2pop_logreg_data$AA1,
+#'                                                    rAA2 = grouplasso2pop_logreg_data$AA2,
+#'                                                    rCom = grouplasso2pop_logreg_data$Com,
+#'                                                    tol = 1e-4,
+#'                                                    maxiter = 500)
 grouplasso2pop_logreg <- function(rY1, rX1, groups1, rY2, rX2, groups2, rho1, rho2, lambda, eta, w1, w2, w, rAA1, rAA2, rCom, tol, maxiter, beta1_init = as.numeric( c()), beta2_init = as.numeric( c())) {
     .Call(`_semipaddgt2pop_grouplasso2pop_logreg`, rY1, rX1, groups1, rY2, rX2, groups2, rho1, rho2, lambda, eta, w1, w2, w, rAA1, rAA2, rCom, tol, maxiter, beta1_init, beta2_init)
 }

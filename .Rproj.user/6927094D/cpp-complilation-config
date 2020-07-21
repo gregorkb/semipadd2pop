@@ -8,14 +8,15 @@
         "-I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.1/include",
         "-I/Library/Developer/CommandLineTools/usr/include",
         "-I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include",
-        "-I/Library/Frameworks/R.framework/Versions/3.5/Resources/library/Rcpp/include",
-        "-I/Library/Frameworks/R.framework/Versions/3.5/Resources/library/RcppArmadillo/include",
+        "-I/Library/Frameworks/R.framework/Versions/4.0/Resources/library/Rcpp/include",
+        "-I/Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppArmadillo/include",
+        "-std=gnu++11",
         "-I/Library/Frameworks/R.framework/Resources/include",
         "-DNDEBUG",
         "-I/usr/local/include",
         "-fPIC"
     ],
-    "hash" : "1587759223",
+    "hash" : "1595349595",
     "is_cpp" : true,
     "pch" : "Rcpp"
 }
