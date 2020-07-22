@@ -221,6 +221,7 @@ List grouplasso_logreg(NumericVector rY,
       if(any(P > 1-1e-10) | any(P < 1e-10)){
         
         Rcpp::Rcout << "warning: failure to converge due to complete or quasi-complete separation" << std::endl;
+        iter = maxiter;
         
       }
       
@@ -277,7 +278,8 @@ List grouplasso_logreg(NumericVector rY,
   // close while statement
   
   return Rcpp::List::create(Named("beta.hat") = b,
-                            Named("iter") = iter);
+                            Named("iter") = iter,
+                            Named("conv") = conv);
   
 }
 
@@ -535,6 +537,7 @@ List grouplasso2pop_logreg(NumericVector rY1,
       if(any(P1 > 1-1e-10) | any(P1 < 1e-10)){
         
         Rcpp::Rcout << "warning: failure to converge due to complete or quasi-complete separation" << std::endl;
+        iter = maxiter;
         
       }
       
@@ -635,6 +638,7 @@ List grouplasso2pop_logreg(NumericVector rY1,
       if(any(P2 > 1-1e-10) | any(P2 < 1e-10)){
         
         Rcpp::Rcout << "warning: failure to converge due to complete or quasi-complete separation" << std::endl;
+        iter = maxiter;
         
       }
       
@@ -739,7 +743,8 @@ List grouplasso2pop_logreg(NumericVector rY1,
   
   return Rcpp::List::create(Named("beta1.hat") = b1,
                             Named("beta2.hat") = b2,
-                            Named("iter") = iter);
+                            Named("iter") = iter,
+                            Named("conv") = conv);
   
 }
 

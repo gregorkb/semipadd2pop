@@ -1341,7 +1341,7 @@ get_semipadd2pop_linreg_data <- function(n1,n2)
   zeta2 <- 10/20
   W2 <- cbind(corrBern(n2,probs=c(1:p2)/(2*p2),Rho = zeta1^abs(outer(1:p2,1:p2,"-"))))
   X2 <- (corrUnif(n2,Rho = zeta2^abs(outer(1:q2,1:q2,"-")))-.5)*5
-  X2[,1] <- X2[,1] - 2.5 # impose different supports for some covariates
+  X2[,1] <- X2[,1] - 1 # impose different supports for some covariates
   X2[,2] <- X2[,2] + 2
 
   XX2 <- cbind(1,W2[,c(1,2)],X2[,c(1,2)],W2[,-c(1,2)],X2[,-c(1,2)])
@@ -1410,7 +1410,9 @@ get_grouplasso2pop_logreg_data <- function(n1,n2){
   X1 <- matrix(rnorm(n1*sum(d1)),n1,sum(d1))
   groups1 <- numeric() ; for(j in 1:q1){ groups1 <- c(groups1,rep(j,d1[j])) }
   beta1 <- rnorm(ncol(X1))
-  Y1 <- rbinom(n1,1,logit(X1 %*% beta1))
+  
+  P1 <- logit(X1 %*% beta1)
+  Y1 <- rbinom(n1,1,P1)
 
   d2 <- c(1,1,4,3,4,1)
   q2 <- length(d2)
@@ -1418,7 +1420,8 @@ get_grouplasso2pop_logreg_data <- function(n1,n2){
   groups2 <- numeric() ; for(j in 1:q2){ groups2 <- c(groups2,rep(j,d2[j])) }
   beta2 <- rnorm(ncol(X2))
 
-  Y2 <- rbinom(n2,1,logit(X2 %*% beta2))
+  P2 <- logit(X2 %*% beta2)
+  Y2 <- rbinom(n2,1,P2)
 
   # set tuning parameters
   Com <- c(3,4)
@@ -1444,7 +1447,9 @@ get_grouplasso2pop_logreg_data <- function(n1,n2){
                  w = w,
                  AA1 = AA1,
                  AA2 = AA2,
-                 Com = Com)
+                 Com = Com,
+                 P1 = P1,
+                 P2 = P2)
 
 }
 
@@ -1455,8 +1460,8 @@ get_grouplasso2pop_logreg_data <- function(n1,n2){
 #' @param n2 the sample size for the second data set
 #' @return a list containing the data
 #' @export
-get_semipadd2pop_logreg_data <- function(n1,n2)
-{
+get_semipadd2pop_logreg_data <- function(n1,n2){
+  
   p1 <- 6
   q1 <- 4
   zeta1 <- 3/20
@@ -1470,18 +1475,21 @@ get_semipadd2pop_logreg_data <- function(n1,n2)
 
   # set up the true functions
   f1 <- vector("list",pp1)
-  f1[[1]] <- function(x){0} # intercept
+  f1[[1]] <- function(x){-5} # intercept
   f1[[2]] <- function(x){x*2}
   f1[[3]] <- function(x){x*0}
   f1[[4]] <- function(x){-2*sin(x*2)}
-  f1[[5]] <- function(x){-x}
+  f1[[5]] <- function(x){x}
   f1[[6]] <- function(x){x*2}
   f1[[7]] <- function(x){x*0}
   f1[[8]] <- function(x){0*x}
   f1[[9]] <- function(x){0*x}
   f1[[10]] <- function(x){0*x}
   f1[[11]] <- function(x){(exp(-x)-2/5*sinh(5/2))/2}
-
+  
+  # record coefficients for covariates to be fit parametrically
+  beta1 <- c(-5,2,0,NA,NA,2,0,0,0,NA,NA)
+  
   f1.design <- matrix(0,n1,pp1)
   for(j in 1:pp1){
     if(nonparm1[j]==1){
@@ -1491,7 +1499,8 @@ get_semipadd2pop_logreg_data <- function(n1,n2)
     }
   }
 
-  Y1 <- rbinom(n1,1,logit(apply(f1.design,1,sum)))
+  P1 <- logit(apply(f1.design,1,sum))
+  Y1 <- rbinom(n1,1,P1)
 
   # generate second data set
   p2 <- 3
@@ -1500,7 +1509,7 @@ get_semipadd2pop_logreg_data <- function(n1,n2)
   zeta2 <- 10/20
   W2 <- cbind(corrBern(n2,probs=c(1:p2)/(2*p2),Rho = zeta1^abs(outer(1:p2,1:p2,"-"))))
   X2 <- (corrUnif(n2,Rho = zeta2^abs(outer(1:q2,1:q2,"-")))-.5)*5
-  X2[,1] <- X2[,1] - 2.5 # impose different supports for some covariates
+  X2[,1] <- X2[,1] - 1 # impose different supports for some covariates
   X2[,2] <- X2[,2] + 2
 
   XX2 <- cbind(1,W2[,c(1,2)],X2[,c(1,2)],W2[,-c(1,2)],X2[,-c(1,2)])
@@ -1509,7 +1518,7 @@ get_semipadd2pop_logreg_data <- function(n1,n2)
 
   # set up the true functions
   f2 <- vector("list",pp2)
-  f2[[1]] <- function(x){ -1 } # intercept
+  f2[[1]] <- function(x){ - 4 } # intercept
   f2[[2]] <- function(x){ 2 * x  }
   f2[[3]] <- function(x){ 0 * x}
   f2[[4]] <- function(x){ -2*sin(x*2) }
@@ -1518,6 +1527,9 @@ get_semipadd2pop_logreg_data <- function(n1,n2)
   f2[[7]] <- function(x){x^2 - 25/12}
   f2[[8]] <- function(x){ 0 * x }
   f2[[9]] <- function(x){ 0 * x }
+  
+  # record coefficients for covariates to be fit parametrically
+  beta2 <- c(-4,2,0,NA,NA,-1,NA,NA,NA)
 
   f2.design <- matrix(0,n2,pp2)
   for(j in 1:pp2){
@@ -1527,27 +1539,29 @@ get_semipadd2pop_logreg_data <- function(n1,n2)
       f2.design[,j] <- f2[[j]](XX2[,j])
     }
   }
-  Y2 <- rbinom(n2,1,logit(apply(f2.design,1,sum)))
+  
+  P2 <- logit(apply(f2.design,1,sum))
+  Y2 <- rbinom(n2,1,P2)
 
   nCom <- 4
 
   output <- list(X1 = XX1,
                  nonparm1 = nonparm1,
                  f1 = f1,
+                 beta1 = beta1,
                  X2 = XX2,
                  nonparm2 = nonparm2,
                  f2 = f2,
+                 beta2 = beta2,
                  Y1 = Y1,
                  Y2 = Y2,
+                 P1 = P1,
+                 P2 = P2,
                  nCom = nCom)
 
   return(output)
 
 }
-
-
-
-
 
 #' Generate a data set for semiparametric additive modeling with binary responses and some common covariates
 #'
