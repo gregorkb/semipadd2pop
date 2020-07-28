@@ -2,7 +2,7 @@
 % Please edit documentation in R/semipadd_misc.R
 \name{get_grouplasso_logreg_data}
 \alias{get_grouplasso_logreg_data}
-\title{Generate a data set with binary responses}
+\title{Generate a data set with binary responses for group lasso}
 \usage{
 get_grouplasso_logreg_data(n)
 }
@@ -13,5 +13,5 @@ get_grouplasso_logreg_data(n)
 a list containing the data
 }
 \description{
-Generate a data set with binary responses
+Generate a data set with binary responses for group lasso
 }
