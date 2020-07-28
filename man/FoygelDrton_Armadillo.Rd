@@ -38,7 +38,7 @@ evals <- eigen.out$values
 evecs <- t(eigen.out$vectors)
 
 # find minimizer
-FoygelDrton(h,L,lambda,evals,evecs)
+FoygelDrton_Armadillo(h,L,lambda,evals,evecs)
 
 # compare to using optim() to minimize the same function
 obj <- function(beta,L,h,lambda){

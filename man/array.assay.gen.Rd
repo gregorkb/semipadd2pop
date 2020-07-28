@@ -34,14 +34,6 @@ see McMahan et al. (2017).
 Generates array testing data.
 }
 \examples{
-# generate individual covariate values and disease statuses
-N <- 100
-data <- model1(N)
-X <- data$X
-Y.true <- data$Yi
-Se <- c(.95,.92) # set row/col and individual assay sensitivity
-Sp <- c(.97,.98) # set row/col and individual assay specificity
-cj <- 4 # set dimension of arrays
-# subject individuals to array testing
-assay.data <- array.assay.gen(Y.true,Se,Sp,cj)
+Y.true <- rbinom(100,1,p=.05)
+assay.data <- array.assay.gen(Y.true,Se=c(.95,.92),Sp=c(.97,.98),cj=5)
 }

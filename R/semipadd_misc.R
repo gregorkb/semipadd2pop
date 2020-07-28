@@ -765,9 +765,9 @@ plot_semipaddgt_cv <- function(x,true.functions=NULL)
 
 
 
-#' Plot method for class semipaddgt2pop
+#' Plot method for class semipadd2pop_gt
 #' @export
-plot_semipaddgt2pop <- function(x,true.functions=NULL)
+plot_semipadd2pop_gt <- function(x,true.functions=NULL)
 {
 
   f1.hat <- x$f1.hat
@@ -865,9 +865,9 @@ plot_semipaddgt2pop <- function(x,true.functions=NULL)
 }
 
 
-#' Plot method for class semipaddgt2pop_grid
+#' Plot method for class semipadd2pop_gt_grid
 #' @export
-plot_semipaddgt2pop_grid <- function(x,true.functions=NULL)
+plot_semipadd2pop_gt_grid <- function(x,true.functions=NULL)
 {
 
   f1.hat <- x$f1.hat
@@ -984,9 +984,9 @@ plot_semipaddgt2pop_grid <- function(x,true.functions=NULL)
 }
 
 
-#' Plot method for class semipaddgt2pop_cv
+#' Plot method for class semipadd2pop_gt_cv
 #' @export
-plot_semipaddgt2pop_cv <- function(x,true.functions=NULL)
+plot_semipadd2pop_gt_cv <- function(x,true.functions=NULL)
 {
 
   f1.hat <- x$f1.hat
@@ -1227,7 +1227,7 @@ corrBern <- function(n,probs,Rho)
 }
 
 
-#' Generate a data set with binary responses
+#' Generate a data set with binary responses for group lasso
 #'
 #' @param n the sample size
 #' @return a list containing the data
@@ -1240,6 +1240,30 @@ get_grouplasso_logreg_data <- function(n){
   groups <- numeric() ; for(j in 1:q){ groups <- c(groups,rep(j,d[j])) }
   beta <- c(0,2,0,0,0,1,1,1,1)
   Y <- rbinom(n,1,logit(X %*% beta))
+  
+  # set tuning parameters
+  w <- rexp(q,2)
+  
+  output <- list(Y = Y,
+                 X = X,
+                 groups = groups,
+                 w = w,
+                 beta = beta)
+}
+
+#' Generate a data set with continuous responses for group lasso
+#'
+#' @param n the sample size
+#' @return a list containing the data
+#' @export
+get_grouplasso_linreg_data <- function(n){
+  
+  d <- c(1,1,3,4)
+  q <- length(d)
+  X <- matrix(rnorm(n*sum(d)),n,sum(d))
+  groups <- numeric() ; for(j in 1:q){ groups <- c(groups,rep(j,d[j])) }
+  beta <- c(0,2,0,0,0,1,1,1,1)
+  Y <- X %*% beta + rnorm(n)
   
   # set tuning parameters
   w <- rexp(q,2)
@@ -1394,6 +1418,64 @@ get_semipadd2pop_linreg_data <- function(n1,n2)
 
   return(output)
 
+}
+
+
+#' Generate a data set for semiparametric additive modeling with continuous responses
+#'
+#' @param n the sample size
+#' @return a list containing the data
+#' @export
+get_semipadd_linreg_data <- function(n,extrafuns=0)
+{
+  
+  p <- 6
+  q <- 4 + extrafuns
+  zeta1 <- 3/20
+  zeta2 <- 10/20
+  W <- cbind(corrBern(n,probs=c(1:p)/(2*p),Rho = zeta1^abs(outer(1:p,1:p,"-"))))
+  X <- (corrUnif(n,Rho = zeta2^abs(outer(1:q,1:q,"-")))-.5)*5
+  
+  XX <- cbind(1,W[,c(1,2)],X[,c(1,2)],W[,-c(1,2)],X[,-c(1,2)])
+  nonparm <- c(0,rep(0,2),rep(1,2),rep(0,p - 2),rep(1,q - 2))
+  pp <- ncol(XX)
+  
+  # set up the true functions
+  f <- vector("list",11)
+  f[[1]] <- function(x){0} # intercept
+  f[[2]] <- function(x){x*2}
+  f[[3]] <- function(x){x*0}
+  f[[4]] <- function(x){-2*sin(x*2)}
+  f[[5]] <- function(x){-x}
+  f[[6]] <- function(x){x*2}
+  f[[7]] <- function(x){x*0}
+  f[[8]] <- function(x){0*x}
+  f[[9]] <- function(x){0*x}
+  f[[10]] <- function(x){0*x}
+  f[[11]] <- function(x){(exp(-x)-2/5*sinh(5/2))/2}
+  
+  # record coefficients for covariates to be fit parametrically
+  beta <- c(0,2,0,NA,NA,2,0,0,0,NA,NA)
+  
+  f.design <- matrix(0,n,11)
+  for(j in 1:11){
+    if(nonparm[j]==1){
+      f.design[,j] <- f[[j]](XX[,j]) - mean(f[[j]](XX[,j]))
+    } else {
+      f.design[,j] <- f[[j]](XX[,j])
+    }
+  }
+  
+  Y <- apply(f.design,1,sum) + rnorm(n,0,1)
+  
+  output <- list(X = XX,
+                 nonparm = nonparm,
+                 f = f,
+                 beta = beta,
+                 Y = Y)
+  
+  return(output)
+  
 }
 
 
@@ -1760,7 +1842,7 @@ get_grouplassogt2pop_data <- function(n1,n2){
 #' @param n2 the sample size for the second data set
 #' @return a list containing the data
 #' @export
-get_semipaddgt2pop_data <- function(n1,n2)
+get_semipadd2pop_gt_data <- function(n1,n2,model = 1)
 {
   p1 <- 6
   q1 <- 4
@@ -1779,13 +1861,26 @@ get_semipaddgt2pop_data <- function(n1,n2)
   f1[[2]] <- function(x){x*2}
   f1[[3]] <- function(x){x*0}
   f1[[4]] <- function(x){-2*sin(x*2)}
-  f1[[5]] <- function(x){-x}
+  
+  if(model == 1){
+    
+    f1[[5]] <- function(x){ x }
+     
+  } else if(model == 2){
+    
+    f1[[5]] <- function(x){ - x }
+    
+  }
+  
   f1[[6]] <- function(x){x*2}
   f1[[7]] <- function(x){x*0}
   f1[[8]] <- function(x){0*x}
   f1[[9]] <- function(x){0*x}
   f1[[10]] <- function(x){0*x}
   f1[[11]] <- function(x){(exp(-x)-2/5*sinh(5/2))/2}
+  
+  # record coefficients for covariates to be fit parametrically
+  beta1 <- c(-5,2,0,NA,NA,2,0,0,0,NA,NA)
 
   f1.design <- matrix(0,n1,pp1)
   for(j in 1:pp1){
@@ -1797,7 +1892,8 @@ get_semipaddgt2pop_data <- function(n1,n2)
   }
 
   # generate true response values
-  Y1.true <- rbinom(n1,1,logit(apply(f1.design,1,sum)))
+  P1 <- logit(apply(f1.design,1,sum))
+  Y1.true <- rbinom(n1,1,P1)
 
   # generate dorfman testing outcomes
   Se1 <- c(.98,.96)
@@ -1828,10 +1924,13 @@ get_semipaddgt2pop_data <- function(n1,n2)
   f2[[4]] <- function(x){ -2*sin(x*2) }
   f2[[5]] <- function(x){ x }
   f2[[6]] <- function(x){ -1 * x }
-  f2[[7]] <- function(x){x^2 - 25/12}
+  f2[[7]] <- function(x){ x^2 - 25/12 }
   f2[[8]] <- function(x){ 0 * x }
   f2[[9]] <- function(x){ 0 * x }
 
+  # record coefficients for covariates to be fit parametrically
+  beta2 <- c(-4,2,0,NA,NA,-1,NA,NA,NA)
+  
   f2.design <- matrix(0,n2,pp2)
   for(j in 1:pp2){
     if(nonparm2[j]==1){
@@ -1842,7 +1941,8 @@ get_semipaddgt2pop_data <- function(n1,n2)
   }
 
   # generate true response values
-  Y2.true <- rbinom(n2,1,logit(apply(f2.design,1,sum)))
+  P2 <- logit(apply(f2.design,1,sum))
+  Y2.true <- rbinom(n2,1,P2)
 
   # generate individual testing outcomes
   Se2 <- .96
@@ -1869,7 +1969,12 @@ get_semipaddgt2pop_data <- function(n1,n2)
                  Sp1 = Sp1,
                  Se2 = Se2,
                  Sp2 = Sp2,
-                 nCom = nCom)
+                 nCom = nCom,
+                 beta1 = beta1,
+                 beta2 = beta2,
+                 P1 = P1,
+                 P2 = P2,
+                 model = model)
 
   return(output)
 
@@ -1891,14 +1996,8 @@ get_semipaddgt2pop_data <- function(n1,n2)
 #'
 #' @examples
 #' # generate individual covariate values and disease statuses
-#' N <- 100
-#' data <- model1(N)
-#' X <- data$X
-#' Y.true <- data$Yi
-#' Se <- .95 # set assay sensitivity
-#' Sp <- .97 # set assay specificity
-#' # subject individuals to individual testing
-#' assay.data <- individual.assay.gen(Y.true,Se,Sp,cj=1)
+#' Y.true <- rbinom(100,1,p=.05)
+#' assay.data <- individual.assay.gen(Y.true,Se=.96,Sp=.98)
 #' @export
 individual.assay.gen <-function(Y.true,Se,Sp,cj=1){
   if(cj!=1 || max(length(Se),length(Sp))>1)
@@ -1941,16 +2040,8 @@ individual.assay.gen <-function(Y.true,Se,Sp,cj=1){
 #' see McMahan et al. (2017).
 #'
 #' @examples
-#' # generate individual covariate values and disease statuses
-#' N <- 100
-#' data <- model1(N)
-#' X <- data$X
-#' Y.true <- data$Yi
-#' Se <- .95 # set master pool assay sensitivity
-#' Sp <- .97 # set master poot assay specificity
-#' cj <- 4 # set size of master pools
-#' # subject individuals to master pool testing
-#' assay.data <- masterpool.assay.gen(Y.true,Se,Sp,cj)
+#' Y.true <- rbinom(100,1,p=.05)
+#' assay.data <- masterpool.assay.gen(Y.true,Se=.96,Sp=.98,cj=4)
 #' @export
 masterpool.assay.gen <-function(Y.true,Se,Sp,cj){
 
@@ -2010,16 +2101,8 @@ masterpool.assay.gen <-function(Y.true,Se,Sp,cj){
 #' see McMahan et al. (2017).
 #'
 #' @examples
-#' # generate individual covariate values and disease statuses
-#' N <- 100
-#' data <- model1(N)
-#' X <- data$X
-#' Y.true <- data$Yi
-#' Se <- c(.95,.92) # set master pool and individual assay sensitivity
-#' Sp <- c(.97,.98) # set master pool and individual assay specificity
-#' cj <- 4 # set size of master pools
-#' # subject individuals to Dorfman testing
-#' assay.data <- dorfman.assay.gen(Y.true,Se,Sp,cj)
+#' Y.true <- rbinom(100,1,p=.05)
+#' assay.data <- dorfman.assay.gen(Y.true,Se=c(.95,.92),Sp=c(.97,.98),cj=4)
 #' @export
 dorfman.assay.gen <-function(Y.true,Se,Sp,cj){
   N<-length(Y.true)
@@ -2082,16 +2165,8 @@ dorfman.assay.gen <-function(Y.true,Se,Sp,cj){
 #' see McMahan et al. (2017).
 #'
 #' @examples
-#' # generate individual covariate values and disease statuses
-#' N <- 100
-#' data <- model1(N)
-#' X <- data$X
-#' Y.true <- data$Yi
-#' Se <- c(.95,.92) # set row/col and individual assay sensitivity
-#' Sp <- c(.97,.98) # set row/col and individual assay specificity
-#' cj <- 4 # set dimension of arrays
-#' # subject individuals to array testing
-#' assay.data <- array.assay.gen(Y.true,Se,Sp,cj)
+#' Y.true <- rbinom(100,1,p=.05)
+#' assay.data <- array.assay.gen(Y.true,Se=c(.95,.92),Sp=c(.97,.98),cj=5)
 #' @export
 array.assay.gen <- function(Y.true, Se, Sp, cj){
   N<-length(Y.true) 					# get number of individuals
@@ -2227,19 +2302,14 @@ array.assay.gen <- function(Y.true, Se, Sp, cj){
 #'
 #' @examples
 #' # generate individual covariate values and disease statuses
-#' N <- 100
-#' data <- model1(N)
-#' X <- data$X
-#' Y.true <- data$Yi
-#' Se <- c(.95,.92) # set master pool and individual assay sensitivity
-#' Sp <- c(.97,.98) # set master pool and individual assay specificity
-#' cj <- 4 # set size of master pools
-#' # subject individuals to array testing
-#' assay.data <- array.assay.gen(Y.true,Se,Sp,cj)
-#' Z <- assay.data$Z
-#' Y <- assay.data$Y
-#' b <- data$b
-#' EY <- EY.approx(Z,Y,X,b,Se,Sp,GI=5000)
+#' grouplasso_gt_data <- get_grouplasso_gt_data(100)
+#' EY <- EYapprox(Z = grouplasso_gt_data$Z,
+#'                Y = grouplasso_gt_data$Y,
+#'                X = grouplasso_gt_data$X,
+#'                b = grouplasso_gt_data$beta,
+#'                Se = grouplasso_gt_data$Se,
+#'                Sp = grouplasso_gt_data$Sp,
+#'                GI = 10000)
 #' @export
 EYapprox <- function(Z,Y,X,b,Se,Sp,GI=5000){
   n <- dim(Y)[1]

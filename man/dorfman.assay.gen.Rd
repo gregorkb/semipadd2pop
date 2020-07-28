@@ -34,14 +34,6 @@ see McMahan et al. (2017).
 Generates Dorfman testing data.
 }
 \examples{
-# generate individual covariate values and disease statuses
-N <- 100
-data <- model1(N)
-X <- data$X
-Y.true <- data$Yi
-Se <- c(.95,.92) # set master pool and individual assay sensitivity
-Sp <- c(.97,.98) # set master pool and individual assay specificity
-cj <- 4 # set size of master pools
-# subject individuals to Dorfman testing
-assay.data <- dorfman.assay.gen(Y.true,Se,Sp,cj)
+Y.true <- rbinom(100,1,p=.05)
+assay.data <- dorfman.assay.gen(Y.true,Se=c(.95,.92),Sp=c(.97,.98),cj=4)
 }

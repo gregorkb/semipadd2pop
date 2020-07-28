@@ -16,6 +16,7 @@ grouplasso2pop_logreg_grid(
   n.lambda,
   n.eta,
   lambda.min.ratio,
+  lambda.max.ratio = 1,
   w1,
   w2,
   w,
@@ -49,6 +50,8 @@ grouplasso2pop_logreg_grid(
 \item{n.eta}{the number of eta values desired}
 
 \item{lambda.min.ratio}{ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model}
+
+\item{lambda.max.ratio}{ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model}
 
 \item{w1}{group-specific weights for different penalization across groups in data set 1}
 

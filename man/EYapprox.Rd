@@ -35,17 +35,12 @@ Approximates the conditional expectations of individual disease statuses with Gi
 }
 \examples{
 # generate individual covariate values and disease statuses
-N <- 100
-data <- model1(N)
-X <- data$X
-Y.true <- data$Yi
-Se <- c(.95,.92) # set master pool and individual assay sensitivity
-Sp <- c(.97,.98) # set master pool and individual assay specificity
-cj <- 4 # set size of master pools
-# subject individuals to array testing
-assay.data <- array.assay.gen(Y.true,Se,Sp,cj)
-Z <- assay.data$Z
-Y <- assay.data$Y
-b <- data$b
-EY <- EY.approx(Z,Y,X,b,Se,Sp,GI=5000)
+grouplasso_gt_data <- get_grouplasso_gt_data(100)
+EY <- EYapprox(Z = grouplasso_gt_data$Z,
+               Y = grouplasso_gt_data$Y,
+               X = grouplasso_gt_data$X,
+               b = grouplasso_gt_data$beta,
+               Se = grouplasso_gt_data$Se,
+               Sp = grouplasso_gt_data$Sp,
+               GI = 10000)
 }
