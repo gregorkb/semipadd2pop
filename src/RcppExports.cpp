@@ -33,6 +33,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// grouplasso_linreg
+List grouplasso_linreg(NumericVector rY, NumericMatrix rX, IntegerVector groups, float lambda, NumericVector w, float tol, int maxiter, NumericVector beta_init);
+RcppExport SEXP _semipaddgt2pop_grouplasso_linreg(SEXP rYSEXP, SEXP rXSEXP, SEXP groupsSEXP, SEXP lambdaSEXP, SEXP wSEXP, SEXP tolSEXP, SEXP maxiterSEXP, SEXP beta_initSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type rY(rYSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type rX(rXSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type groups(groupsSEXP);
+    Rcpp::traits::input_parameter< float >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< float >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type beta_init(beta_initSEXP);
+    rcpp_result_gen = Rcpp::wrap(grouplasso_linreg(rY, rX, groups, lambda, w, tol, maxiter, beta_init));
+    return rcpp_result_gen;
+END_RCPP
+}
 // grouplasso_logreg
 List grouplasso_logreg(NumericVector rY, NumericMatrix rX, IntegerVector groups, float lambda, NumericVector w, float tol, int maxiter, NumericVector beta_init);
 RcppExport SEXP _semipaddgt2pop_grouplasso_logreg(SEXP rYSEXP, SEXP rXSEXP, SEXP groupsSEXP, SEXP lambdaSEXP, SEXP wSEXP, SEXP tolSEXP, SEXP maxiterSEXP, SEXP beta_initSEXP) {
@@ -130,6 +148,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_semipaddgt2pop_SoftThresh_scalar", (DL_FUNC) &_semipaddgt2pop_SoftThresh_scalar, 2},
     {"_semipaddgt2pop_FoygelDrton_Armadillo", (DL_FUNC) &_semipaddgt2pop_FoygelDrton_Armadillo, 5},
+    {"_semipaddgt2pop_grouplasso_linreg", (DL_FUNC) &_semipaddgt2pop_grouplasso_linreg, 8},
     {"_semipaddgt2pop_grouplasso_logreg", (DL_FUNC) &_semipaddgt2pop_grouplasso_logreg, 8},
     {"_semipaddgt2pop_grouplasso2pop_logreg", (DL_FUNC) &_semipaddgt2pop_grouplasso2pop_logreg, 20},
     {"_semipaddgt2pop_all_binary_sequences", (DL_FUNC) &_semipaddgt2pop_all_binary_sequences, 1},

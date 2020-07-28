@@ -23,6 +23,7 @@ semipadd2pop_logreg_cv(
   n.lambda = 5,
   n.eta = 5,
   lambda.min.ratio = 0.01,
+  lambda.max.ratio = 1,
   n.folds = 5,
   lambda.beta = 1,
   lambda.f = 1,
@@ -69,6 +70,8 @@ semipadd2pop_logreg_cv(
 \item{n.eta}{the number of eta values with which to make the grid}
 
 \item{lambda.min.ratio}{ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model}
+
+\item{lambda.max.ratio}{ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model}
 
 \item{n.folds}{the number of crossvalidation folds}
 

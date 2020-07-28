@@ -61,7 +61,7 @@ float SoftThresh_scalar(float z, float a){
 //' evecs <- t(eigen.out$vectors)
 //'
 //' # find minimizer
-//' FoygelDrton(h,L,lambda,evals,evecs)
+//' FoygelDrton_Armadillo(h,L,lambda,evals,evecs)
 //'
 //' # compare to using optim() to minimize the same function
 //' obj <- function(beta,L,h,lambda){
@@ -94,6 +94,200 @@ arma::colvec FoygelDrton_Armadillo(arma::colvec h, arma::mat L, double lambda, a
   return beta;
   
 }
+
+
+//' Minimize the objective function of the group lasso problem with a continuous response
+//'
+//' @param Y the response vector
+//' @param X matrix containing the design matrices
+//' @param groups a vector of integers indicating to which group each covariate belongs
+//' @param lambda the level of sparsity penalization
+//' @param w vector of group-specific weights for different penalization of groups
+//' @param eigen a list of eigen info on groups
+//' @param tol a convergence criterion
+//' @param max.iter the maximum allowed number of iterations
+//' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
+//' @param beta_init optional starting value for beta
+//' @return Returns the minimizer of the group lasso objective function
+//'
+//' @examples
+//' grouplasso_linreg_data <- get_grouplasso_linreg_data(n = 500)
+//' 
+//' grouplasso_linreg.out <- grouplasso_linreg(rY = grouplasso_linreg_data$Y,
+//'                                            rX = grouplasso_linreg_data$X,
+//'                                            groups = grouplasso_linreg_data$groups,
+//'                                            lambda = 10,
+//'                                            w = grouplasso_linreg_data$w,
+//'                                            tol = 1e-4,                               
+//'                                            maxiter = 500)
+// [[Rcpp::export]]
+List grouplasso_linreg(NumericVector rY,
+                       NumericMatrix rX,
+                       IntegerVector groups,
+                       float lambda,
+                       NumericVector w,
+                       float tol,
+                       int maxiter,
+                       NumericVector beta_init = NumericVector::create()){
+  
+  // get dimensions
+  int n = rY.size();
+  int q = rX.ncol();
+  
+  int i,j,k,l,i2,k2;
+  
+  int g = max(groups);
+  
+  LogicalVector got_eigen(g);
+  
+  IntegerVector d(g);
+  
+  IntegerVector is_grp_singleton(g);
+  IntegerVector grp_begin_ind(g);
+  
+  
+  // identify singleton and non-singleton groups
+  j = 1;
+  for(i = 0; i < q; i++){
+    
+    if(groups[i] != j){
+      
+      if( d[j-1] == 1){
+        
+        is_grp_singleton[j-1] = 1;
+        
+      }
+      
+      j++;
+      
+    }
+    
+    d[j-1]++;
+    
+  }
+  
+  grp_begin_ind[0] = 0;
+  for(j = 1; j < g;j++){
+    
+    grp_begin_ind[j] = sum(d[Range(0,j-1)]);
+    
+  }
+  
+  // make Armadillo matrices/vectors
+  arma::colvec Y(rY.begin(),n,false);
+  arma::colvec Yj(n);
+  arma::colvec rj(n);
+  arma::mat X(rX.begin(),n,q,false);
+  arma::colvec b = arma::zeros(q);
+  
+  // Set up initial values if provided
+  if( beta_init.size() == q ){
+    
+    arma::colvec b_silly_copy(beta_init.begin(),q,false);
+    b = b_silly_copy;
+    
+  }
+  
+  arma::colvec b_0 = b;
+  
+  arma::colvec Zj_tilde(n);
+  arma::colvec h(n);
+  arma::mat LtL1(max(d),max(d));
+  
+  
+  arma::field<arma::vec> eigval(g);
+  arma::field<arma::mat> eigvec(g);
+  arma::field<arma::mat> cholLtL(g);
+  
+  // define other floats
+  float sxj, xjrj_scalar, xjrj_norm;
+  
+  // algorithmic control
+  bool conv = false;
+  int iter = 0;
+  NumericVector obj_val(maxiter);
+  
+  // begin looping!
+  while( (conv == false) & (iter < maxiter)){
+    
+    b_0 = b;
+    
+    // go through groups
+    for( j = 0; j < g ; j++){
+      
+      // first and last columns of X belonging to group
+      i = grp_begin_ind[j];
+      k = i + d[j] - 1;
+    
+      // get predicted values of Y without effects of current covariate
+      Yj = arma::zeros(n);
+      for( l = 0 ; l < g ; l++)
+      {
+        
+        if(l == j) continue;
+        
+        i2 = grp_begin_ind[l];
+        k2 = i2 + d[l] - 1;
+        
+        Yj = Yj + X.cols(i2,k2) * b.rows(i2,k2);
+        
+      }
+    
+      // get the residuals
+      rj = Y - Yj;
+      
+      if(d[j] == 1){
+        
+        sxj = arma::as_scalar(X.cols(i,i).t() * X.cols(i,i));
+        xjrj_scalar = arma::as_scalar(X.cols(i,i).t() * rj);
+        b(i) = SoftThresh_scalar(xjrj_scalar,lambda * w[j] / 2) / sxj;
+      
+      } else {
+        
+        xjrj_norm = sqrt(arma::accu(pow(trans(X.cols(i,k)) * rj,2)));
+        
+        if( xjrj_norm < lambda * w[j]/2){
+          
+          b.rows(i,k) = arma::zeros(k-i+1);
+          
+        } else {
+          
+          if(got_eigen[j] == false){
+            
+            arma::eig_sym(eigval(j),eigvec(j),X.cols(i,k).t() * X.cols(i,k));
+            got_eigen[j] = true;
+            
+          } 
+          
+          b.rows(i,k) = FoygelDrton_Armadillo(rj, X.cols(i,k), lambda * w[j], eigval(j), eigvec(j).t());
+          
+        }
+        
+      }
+      
+    }
+    
+    if(any(abs(b - b_0) > tol)){
+      
+      conv = false;
+      
+    } else {
+      
+      conv = true;
+    }
+    
+    iter++;
+    
+  }
+  // close while statement
+  
+  return Rcpp::List::create(Named("beta.hat") = b,
+                            Named("iter") = iter,
+                            Named("conv") = conv);
+  
+}
+
+
 
 
 //' Minimize the objective function of the group lasso problem with a binary response
@@ -250,7 +444,7 @@ List grouplasso_logreg(NumericVector rY,
           
           if(got_eigen[j] == false){
             
-            eig_sym(eigval(j),eigvec(j),X.cols(i,k).t() * X.cols(i,k) / 4);
+            arma::eig_sym(eigval(j),eigvec(j),X.cols(i,k).t() * X.cols(i,k) / 4);
             got_eigen[j] = true;
             
           } 
@@ -575,7 +769,7 @@ List grouplasso2pop_logreg(NumericVector rY1,
             if(got_eigen1[j] == false){
               
               LtL1.submat(0,0,d1[j]-1,d1[j]-1) = X1.cols(i,k).t() * X1.cols(i,k) / 4 + eta1 * w[j] * AA1(j).t() * AA1(j);
-              eig_sym(eigval1(j),eigvec1(j),LtL1.submat(0,0,d1[j]-1,d1[j]-1));
+              arma::eig_sym(eigval1(j),eigvec1(j),LtL1.submat(0,0,d1[j]-1,d1[j]-1));
               cholLtL1(j) = chol(LtL1.submat(0,0,d1[j]-1,d1[j]-1));
               got_eigen1[j] = true;
               
@@ -612,7 +806,7 @@ List grouplasso2pop_logreg(NumericVector rY1,
             
             if(got_eigen1[j] == false){
               
-              eig_sym(eigval1(j),eigvec1(j),X1.cols(i,k).t() * X1.cols(i,k) / 4);
+              arma::eig_sym(eigval1(j),eigvec1(j),X1.cols(i,k).t() * X1.cols(i,k) / 4);
               got_eigen1[j] = true;
               
             } 
@@ -676,7 +870,7 @@ List grouplasso2pop_logreg(NumericVector rY1,
             if(got_eigen2[j] == false){
               
               LtL2.submat(0,0,d2[j]-1,d2[j]-1) = X2.cols(i,k).t() * X2.cols(i,k) / 4 + eta2 * w[j] * AA2(j).t() * AA2(j);
-              eig_sym(eigval2(j),eigvec2(j),LtL2.submat(0,0,d2[j]-1,d2[j]-1));
+              arma::eig_sym(eigval2(j),eigvec2(j),LtL2.submat(0,0,d2[j]-1,d2[j]-1));
               cholLtL2(j) = chol(LtL2.submat(0,0,d2[j]-1,d2[j]-1));
               got_eigen2[j] = true;
               
@@ -712,7 +906,7 @@ List grouplasso2pop_logreg(NumericVector rY1,
             
             if(got_eigen2[j] == false){
               
-              eig_sym(eigval2(j),eigvec2(j),X2.cols(i,k).t() * X2.cols(i,k) / 4);
+              arma::eig_sym(eigval2(j),eigvec2(j),X2.cols(i,k).t() * X2.cols(i,k) / 4);
               got_eigen2[j] = true;
               
             } 

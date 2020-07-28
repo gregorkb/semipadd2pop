@@ -30,7 +30,7 @@ semipadd2pop_logreg_cv_adapt_fixedgrid(
   eta.f = 1,
   tol = 0.001,
   max.iter = 1000,
-  report.prog = TRUE
+  report.prog = FALSE
 )
 }
 \arguments{

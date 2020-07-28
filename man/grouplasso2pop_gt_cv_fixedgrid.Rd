@@ -32,7 +32,8 @@ grouplasso2pop_gt_cv_fixedgrid(
   Com,
   E.approx = FALSE,
   tol = 0.001,
-  max.iter = 500
+  max.iter = 500,
+  report.prog = TRUE
 )
 }
 \arguments{

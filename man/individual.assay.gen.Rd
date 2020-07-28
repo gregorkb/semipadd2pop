@@ -29,12 +29,6 @@ Generates individual testing data.
 }
 \examples{
 # generate individual covariate values and disease statuses
-N <- 100
-data <- model1(N)
-X <- data$X
-Y.true <- data$Yi
-Se <- .95 # set assay sensitivity
-Sp <- .97 # set assay specificity
-# subject individuals to individual testing
-assay.data <- individual.assay.gen(Y.true,Se,Sp,cj=1)
+Y.true <- rbinom(100,1,p=.05)
+assay.data <- individual.assay.gen(Y.true,Se=.96,Sp=.98)
 }
