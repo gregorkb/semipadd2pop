@@ -190,12 +190,12 @@ grouplasso2pop_linreg <- function(Y1,X1,groups1,Y2,X2,groups2,lambda,eta,w1,w2,w
         ind2 <- which(groups2 == j)
         x1r1j.AAb2 <- t(X1[,ind1]) %*% r1j + eta*w[j]*t(AA1[[j]]) %*% AA2[[j]] %*% beta2.hat1[ind2]
 
-        beta1.hat1[ind1] <- SoftThresh(x1r1j.AAb2,lambda*w1[j])/(sx1j + eta*w[j]*t(AA1[[j]]) %*% AA1[[j]])
+        beta1.hat1[ind1] <- SoftThresh_R(x1r1j.AAb2,lambda*w1[j])/(sx1j + eta*w[j]*t(AA1[[j]]) %*% AA1[[j]])
 
       } else {
 
         x1j.r1j <- t(X1[,ind1]) %*% r1j
-        beta1.hat1[ind1] <- SoftThresh(x1j.r1j,lambda*w1[j])/sx1j
+        beta1.hat1[ind1] <- SoftThresh_R(x1j.r1j,lambda*w1[j])/sx1j
 
       }
 
@@ -236,7 +236,7 @@ grouplasso2pop_linreg <- function(Y1,X1,groups1,Y2,X2,groups2,lambda,eta,w1,w2,w
           L <- chol( t(X1[,ind1]) %*% X1[,ind1] + eta * w[j] * t(AA1[[j]])%*% AA1[[j]] )
           h <- solve(t(L)) %*% x1r1j.AAb2
 
-          beta1.hat1[ind1] <- FoygelDrton(h,L,lambda*w1[j],eigen1[[j]]$values,t(eigen1[[j]]$vectors))
+          beta1.hat1[ind1] <- FoygelDrton_Armadillo(h,L,lambda*w1[j],eigen1[[j]]$values,t(eigen1[[j]]$vectors))
 
         }
 
@@ -264,7 +264,7 @@ grouplasso2pop_linreg <- function(Y1,X1,groups1,Y2,X2,groups2,lambda,eta,w1,w2,w
           h <- r1j
           L <- X1[,ind1]
 
-          beta1.hat1[ind1] <- FoygelDrton(h,L,lambda*w1[j],eigen1[[j]]$values,t(eigen1[[j]]$vectors))
+          beta1.hat1[ind1] <- FoygelDrton_Armadillo(h,L,lambda*w1[j],eigen1[[j]]$values,t(eigen1[[j]]$vectors))
 
         }
 
@@ -289,12 +289,12 @@ grouplasso2pop_linreg <- function(Y1,X1,groups1,Y2,X2,groups2,lambda,eta,w1,w2,w
         ind1 <- which(groups1 == j)
         x2r2j.AAb1 <- t(X2[,ind2]) %*% r2j + eta*w[j]*t(AA2[[j]]) %*% AA1[[j]] * beta1.hat1[ind1]
 
-        beta2.hat1[ind2] <- SoftThresh(x2r2j.AAb1,lambda2*w2[j])/(sx2j + eta*w[j]*t(AA2[[j]]) %*% AA2[[j]])
+        beta2.hat1[ind2] <- SoftThresh_R(x2r2j.AAb1,lambda2*w2[j])/(sx2j + eta*w[j]*t(AA2[[j]]) %*% AA2[[j]])
 
       } else {
 
         x2j.r2j <- t(X2[,ind2]) %*% r2j
-        beta2.hat1[ind2] <- SoftThresh(x2j.r2j,lambda2*w2[j])/sx2j
+        beta2.hat1[ind2] <- SoftThresh_R(x2j.r2j,lambda2*w2[j])/sx2j
 
       }
 
@@ -335,7 +335,7 @@ grouplasso2pop_linreg <- function(Y1,X1,groups1,Y2,X2,groups2,lambda,eta,w1,w2,w
           L <- chol(t(X2[,ind2]) %*% X2[,ind2] + eta * w[j] * t(AA2[[j]])%*% AA2[[j]] )
           h <- solve(t(L)) %*% x2r2j.AAb1
 
-          beta2.hat1[ind2] <- FoygelDrton(h,L,lambda2*w2[j],eigen2[[j]]$values,t(eigen2[[j]]$vectors))
+          beta2.hat1[ind2] <- FoygelDrton_Armadillo(h,L,lambda2*w2[j],eigen2[[j]]$values,t(eigen2[[j]]$vectors))
 
         }
 
@@ -363,7 +363,7 @@ grouplasso2pop_linreg <- function(Y1,X1,groups1,Y2,X2,groups2,lambda,eta,w1,w2,w
           h <- r2j
           L <- X2[,ind2]
 
-          beta2.hat1[ind2] <- FoygelDrton(h,L,lambda2*w2[j],eigen2[[j]]$values,t(eigen2[[j]]$vectors))
+          beta2.hat1[ind2] <- FoygelDrton_Armadillo(h,L,lambda2*w2[j],eigen2[[j]]$values,t(eigen2[[j]]$vectors))
 
         }
 

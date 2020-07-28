@@ -501,7 +501,7 @@ grouplasso2pop_logreg_grid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.l
   smallest.lambda <- lambda.min.ratio * lambda.max
   lambda.seq <- sort(c(exp(log(smallest.lambda) + ((n.lambda+1):1)/(n.lambda+1) * ((log(largest.lambda) - log(smallest.lambda)))))[-1])
 
-  if(n.lambda == 1) lambda.seq <- lambda.min
+  if(n.lambda == 1) lambda.seq <- smallest.lambda
 
   # make the eta sequence after fitting the model for the smallest value of lambda
   eta.seq <- numeric(n.eta)
@@ -2332,30 +2332,6 @@ semipadd2pop_logreg_cv_adapt_fixedgrid <- function(Y1,X1,nonparm1,Y2,X2,nonparm2
   which.lambda.cv <- grouplasso2pop_logreg_cv_adapt_fixedgrid.out$which.lambda.cv
   which.eta.cv <- grouplasso2pop_logreg_cv_adapt_fixedgrid.out$which.eta.cv
   
-  # semipaddgt2pop_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
-  #                                                         nonparm1 = nonparm1,
-  #                                                         groups1 = grouplasso2pop_inputs$groups1,
-  #                                                         knots.list1 = grouplasso2pop_inputs$knots.list1,
-  #                                                         emp.cent1 = grouplasso2pop_inputs$emp.cent1,
-  #                                                         QQ1.inv = grouplasso2pop_inputs$QQ1.inv,
-  #                                                         b1 = grouplasso2pop_logreg_cv_adapt_fixedgrid.out$b1.arr[,which.lambda.cv,which.eta.cv],
-  #                                                         X2 = X2,
-  #                                                         nonparm2,
-  #                                                         groups2 = grouplasso2pop_inputs$groups2,
-  #                                                         knots.list2 = grouplasso2pop_inputs$knots.list2,
-  #                                                         emp.cent2 = grouplasso2pop_inputs$emp.cent2,
-  #                                                         QQ2.inv = grouplasso2pop_inputs$QQ2.inv,
-  #                                                         b2 = grouplasso2pop_logreg_cv_adapt_fixedgrid.out$b2.arr[,which.lambda.cv,which.eta.cv])
-  # 
-  # f1.hat <- semipaddgt2pop_fitted$f1.hat
-  # f2.hat <- semipaddgt2pop_fitted$f2.hat
-  # 
-  # f1.hat.design <- semipaddgt2pop_fitted$f1.hat.design
-  # f2.hat.design <- semipaddgt2pop_fitted$f2.hat.design
-  # 
-  # beta1.hat <- semipaddgt2pop_fitted$beta1.hat
-  # beta2.hat <- semipaddgt2pop_fitted$beta2.hat
-
   # get matrices of the fitted functions evaluated at the design points
 
   n.lambda <- length(lambda.seq)

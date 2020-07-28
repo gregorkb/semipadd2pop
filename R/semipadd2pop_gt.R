@@ -38,35 +38,35 @@
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the semiparametric additive model with group testing data
 #' @examples 
-#' grouplassogt2pop_data <- get_grouplassogt2pop_data( n1 = 1000, n2 = 1200)
+#' grouplasso2pop_gt_data <- get_grouplasso2pop_gt_data( n1 = 1000, n2 = 1200)
 #' 
-#' grouplassogr2pop.out <- grouplassogt2pop(Y1 = grouplassogt2pop_data$Y1,
-#'                                          Z1 = grouplassogt2pop_data$Z1,
-#'                                          Se1 = grouplassogt2pop_data$Se1,
-#'                                          Sp1 = grouplassogt2pop_data$Sp1,
-#'                                          X1 = grouplassogt2pop_data$X1,
-#'                                          groups1 = grouplassogt2pop_data$groups1,
-#'                                          Y2 = grouplassogt2pop_data$Y2,
-#'                                          Z2 = grouplassogt2pop_data$Z2,
-#'                                          Se2 = grouplassogt2pop_data$Se2,
-#'                                          Sp2 = grouplassogt2pop_data$Sp2,
-#'                                          X2 = grouplassogt2pop_data$X2,
-#'                                          groups2  = grouplassogt2pop_data$groups2,
+#' grouplassogr2pop.out <- grouplasso2pop_gt(Y1 = grouplasso2pop_gt_data$Y1,
+#'                                          Z1 = grouplasso2pop_gt_data$Z1,
+#'                                          Se1 = grouplasso2pop_gt_data$Se1,
+#'                                          Sp1 = grouplasso2pop_gt_data$Sp1,
+#'                                          X1 = grouplasso2pop_gt_data$X1,
+#'                                          groups1 = grouplasso2pop_gt_data$groups1,
+#'                                          Y2 = grouplasso2pop_gt_data$Y2,
+#'                                          Z2 = grouplasso2pop_gt_data$Z2,
+#'                                          Se2 = grouplasso2pop_gt_data$Se2,
+#'                                          Sp2 = grouplasso2pop_gt_data$Sp2,
+#'                                          X2 = grouplasso2pop_gt_data$X2,
+#'                                          groups2  = grouplasso2pop_gt_data$groups2,
 #'                                          rho1 = 2,
 #'                                          rho2 = 1,
 #'                                          lambda = 1,
 #'                                          eta = 1,
-#'                                          w1  = grouplassogt2pop_data$w1,
-#'                                          w2  = grouplassogt2pop_data$w2,
-#'                                          w  = grouplassogt2pop_data$w,
-#'                                          AA1  = grouplassogt2pop_data$AA1,
-#'                                          AA2  = grouplassogt2pop_data$AA2,
-#'                                          Com  = grouplassogt2pop_data$Com,
+#'                                          w1  = grouplasso2pop_gt_data$w1,
+#'                                          w2  = grouplasso2pop_gt_data$w2,
+#'                                          w  = grouplasso2pop_gt_data$w,
+#'                                          AA1  = grouplasso2pop_gt_data$AA1,
+#'                                          AA2  = grouplasso2pop_gt_data$AA2,
+#'                                          Com  = grouplasso2pop_gt_data$Com,
 #'                                          tol = 1e-3,
 #'                                          max.iter = 500,
 #'                                          report.prog = TRUE)
 #' @export
-grouplassogt2pop <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,lambda,eta,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,init=NULL,report.prog=TRUE)
+grouplasso2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,lambda,eta,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,init=NULL,report.prog=TRUE)
 {
 
   # set function to get conditional expectations
@@ -181,7 +181,7 @@ grouplassogt2pop <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,r
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the parametric model with group testing data
 #' @export
-grouplassogt2pop_grid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,report.prog=TRUE)
+grouplasso2pop_gt_grid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,report.prog=TRUE)
 {
   # pull the individual diagnoses to be treated as true disease statuses to find the sequence of lambda values.
   # later on think about how to do this without individual diagnoses, e.g. under master pool testing.
@@ -219,16 +219,20 @@ grouplassogt2pop_grid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,grou
   lambda.max <- 2 * max(norms1,norms2)
 
   # make a lambda sequence
-  lambda.min <- lambda.min.ratio * lambda.max
-  lambda.seq <- sort(c(exp(log(lambda.min) + ((n.lambda+1):1)/(n.lambda+1) * ((log(lambda.max) - log(lambda.min)))))[-1])
-
-  if(n.lambda == 1) lambda.seq <- lambda.min
+  largest.lambda <- lambda.max.ratio * lambda.max
+  smallest.lambda <- lambda.min.ratio * lambda.max
+  lambda.seq <- sort(c(exp(log(smallest.lambda) + ((n.lambda+1):1)/(n.lambda+1) * ((log(largest.lambda) - log(smallest.lambda)))))[-1])
+  
+  if(n.lambda == 1) lambda.seq <- smallest.lambda
 
   # make the eta sequence after fitting the model for the smallest value of lambda
   eta.seq <- numeric(n.eta)
 
   b1.arr <- array(0,dim=c(ncol(X1),n.lambda,n.eta))
   b2.arr <- array(0,dim=c(ncol(X2),n.lambda,n.eta))
+  
+  P1.arr <- array(0,dim=c(nrow(X1),n.lambda,n.eta))
+  P2.arr <- array(0,dim=c(nrow(X2),n.lambda,n.eta))
 
   iterations <- matrix(0,n.lambda*n.eta,3)
   colnames(iterations) <- c("lambda","eta","EM-steps")
@@ -237,7 +241,7 @@ grouplassogt2pop_grid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,grou
   for(l in 1:n.lambda){
     for(k in 1:n.eta){
 
-      grouplassogt2pop.out <- grouplassogt2pop(Y1 = Y1,
+      grouplasso2pop_gt.out <- grouplasso2pop_gt(Y1 = Y1,
                                                Z1 = Z1,
                                                Se1 = Se1,
                                                Sp1 = Sp1,
@@ -265,8 +269,8 @@ grouplassogt2pop_grid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,grou
                                                init = init,
                                                report.prog = FALSE)
 
-      b1 <- grouplassogt2pop.out$beta1.hat
-      b2 <- grouplassogt2pop.out$beta2.hat
+      b1 <- grouplasso2pop_gt.out$beta1.hat
+      b2 <- grouplasso2pop_gt.out$beta2.hat
 
       if(l == 1 & k == 1){# define the eta sequence
 
@@ -296,13 +300,16 @@ grouplassogt2pop_grid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,grou
 
       b1.arr[,l,k] <- b1
       b2.arr[,l,k] <- b2
+    
+      P1.arr[,l,k] <- logit(X1 %*% b1)
+      P2.arr[,l,k] <- logit(X2 %*% b2)
 
       steps <- steps + 1
-      iterations[steps,] <- c(lambda.seq[l],eta.seq[k],length(grouplassogt2pop.out$inner.iter))
+      iterations[steps,] <- c(lambda.seq[l],eta.seq[k],length(grouplasso2pop_gt.out$inner.iter))
 
       if(report.prog == TRUE){
 
-        print(c(l,k,length(grouplassogt2pop.out$inner.iter)))
+        print(c(l,k,length(grouplasso2pop_gt.out$inner.iter)))
 
       }
 
@@ -312,6 +319,8 @@ grouplassogt2pop_grid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,grou
 
   output <- list( b1.arr = b1.arr,
                   b2.arr = b2.arr,
+                  P1.arr = P1.arr,
+                  P2.arr = P2.arr,
                   lambda.seq = lambda.seq,
                   eta.seq = eta.seq,
                   iterations = iterations)
@@ -356,7 +365,7 @@ grouplassogt2pop_grid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,grou
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the parametric model with group testing data
 #' @export
-grouplassogt2pop_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,report.prog=TRUE)
+grouplasso2pop_gt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,report.prog=TRUE)
 {
 
   n.lambda <- length(lambda.seq)
@@ -364,7 +373,10 @@ grouplassogt2pop_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2
 
   b1.arr <- array(0,dim=c(ncol(X1),n.lambda,n.eta))
   b2.arr <- array(0,dim=c(ncol(X2),n.lambda,n.eta))
-
+  
+  P1.arr <- array(0,dim=c(nrow(X1),n.lambda,n.eta))
+  P2.arr <- array(0,dim=c(nrow(X2),n.lambda,n.eta))
+  
   iterations <- matrix(0,n.lambda*n.eta,3)
   colnames(iterations) <- c("lambda","eta","EM-steps")
   steps <- 0
@@ -372,7 +384,7 @@ grouplassogt2pop_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2
   for(l in 1:n.lambda){
     for(k in 1:n.eta){
 
-      grouplassogt2pop.out <- grouplassogt2pop(Y1 = Y1,
+      grouplasso2pop_gt.out <- grouplasso2pop_gt(Y1 = Y1,
                                                Z1 = Z1,
                                                Se1 = Se1,
                                                Sp1 = Sp1,
@@ -400,21 +412,24 @@ grouplassogt2pop_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2
                                                init = init,
                                                report.prog = FALSE)
 
-      b1 <- grouplassogt2pop.out$beta1.hat
-      b2 <- grouplassogt2pop.out$beta2.hat
+      b1 <- grouplasso2pop_gt.out$beta1.hat
+      b2 <- grouplasso2pop_gt.out$beta2.hat
 
       init <- list( beta1 = b1,
                     beta2 = b2)
 
       b1.arr[,l,k] <- b1
       b2.arr[,l,k] <- b2
+      
+      P1.arr[,l,k] <- logit(X1 %*% b1)
+      P2.arr[,l,k] <- logit(X2 %*% b2)
 
       steps <- steps + 1
-      iterations[steps,] <- c(lambda.seq[l],eta.seq[k],length(grouplassogt2pop.out$inner.iter))
+      iterations[steps,] <- c(lambda.seq[l],eta.seq[k],length(grouplasso2pop_gt.out$inner.iter))
 
       if(report.prog == TRUE){
 
-        print(c(l,k,length(grouplassogt2pop.out$inner.iter)))
+        print(c(l,k,length(grouplasso2pop_gt.out$inner.iter)))
 
       }
 
@@ -424,12 +439,14 @@ grouplassogt2pop_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2
 
   output <- list( b1.arr = b1.arr,
                   b2.arr = b2.arr,
+                  P1.arr = P1.arr,
+                  P2.arr = P2.arr,
                   lambda.seq = lambda.seq,
                   eta.seq = eta.seq,
                   iterations = iterations)
 }
 
-#' Choose tuning parameters by crossvalidation for grouplassogt2pop when given a fixed grid of lambda and eta values
+#' Choose tuning parameters by crossvalidation for grouplasso2pop_gt when given a fixed grid of lambda and eta values
 #'
 #' @param Y1 Group testing output for data set 1 in the format as output by one of the functions \code{individual.assay.gen}, \code{masterpool.assay.gen}, \code{dorfman.assay.gen}, or \code{array.assay.gen}.
 #' @param Z1 Group testing output for data set 1 in the format as output by one of the functions \code{individual.assay.gen}, \code{masterpool.assay.gen}, \code{dorfman.assay.gen}, or \code{array.assay.gen}.
@@ -470,64 +487,64 @@ grouplassogt2pop_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2
 #' @return a list containing the fits over a grid of lambda and eta values as well as the vector of lambda values and the vector of eta values
 #'
 #' @examples
-#' grouplassogt2pop_data <- get_grouplassogt2pop_data(n1=400,n2=600)
+#' grouplasso2pop_gt_data <- get_grouplasso2pop_gt_data(n1=400,n2=600)
 #'
-#' grouplassogt2pop_grid.out <- grouplassogt2pop_grid(Y1 = grouplassogt2pop_data$Y1,
-#'                                                    Z1 = grouplassogt2pop_data$Z1,
-#'                                                    Se1 = grouplassogt2pop_data$Se1,
-#'                                                    Sp1 = grouplassogt2pop_data$Sp1,
-#'                                                    X1 = grouplassogt2pop_data$X1,
-#'                                                    groups1 = grouplassogt2pop_data$groups1,
-#'                                                    Y2 = grouplassogt2pop_data$Y2,
-#'                                                    Z2 = grouplassogt2pop_data$Z2,
-#'                                                    Se2 = grouplassogt2pop_data$Se2,
-#'                                                    Sp2 = grouplassogt2pop_data$Sp2,
-#'                                                    X2 = grouplassogt2pop_data$X2,
-#'                                                    groups2 = grouplassogt2pop_data$groups2,
+#' grouplasso2pop_gt_grid.out <- grouplasso2pop_gt_grid(Y1 = grouplasso2pop_gt_data$Y1,
+#'                                                    Z1 = grouplasso2pop_gt_data$Z1,
+#'                                                    Se1 = grouplasso2pop_gt_data$Se1,
+#'                                                    Sp1 = grouplasso2pop_gt_data$Sp1,
+#'                                                    X1 = grouplasso2pop_gt_data$X1,
+#'                                                    groups1 = grouplasso2pop_gt_data$groups1,
+#'                                                    Y2 = grouplasso2pop_gt_data$Y2,
+#'                                                    Z2 = grouplasso2pop_gt_data$Z2,
+#'                                                    Se2 = grouplasso2pop_gt_data$Se2,
+#'                                                    Sp2 = grouplasso2pop_gt_data$Sp2,
+#'                                                    X2 = grouplasso2pop_gt_data$X2,
+#'                                                    groups2 = grouplasso2pop_gt_data$groups2,
 #'                                                    rho1 = 2,
 #'                                                    rho1 = 1,
 #'                                                    n.lambda = 5,
 #'                                                    n.eta = 5,
 #'                                                    lambda.min.ratio = 0.01,
-#'                                                    w1 = grouplassogt2pop_data$w1,
-#'                                                    w2 = grouplassogt2pop_data$w2,
-#'                                                    w = grouplassogt2pop_data$w,
-#'                                                    AA1 = grouplassogt2pop_data$AA1,
-#'                                                    AA2 = grouplassogt2pop_data$AA2,
-#'                                                    Com = grouplassogt2pop_data$Com,
+#'                                                    w1 = grouplasso2pop_gt_data$w1,
+#'                                                    w2 = grouplasso2pop_gt_data$w2,
+#'                                                    w = grouplasso2pop_gt_data$w,
+#'                                                    AA1 = grouplasso2pop_gt_data$AA1,
+#'                                                    AA2 = grouplasso2pop_gt_data$AA2,
+#'                                                    Com = grouplasso2pop_gt_data$Com,
 #'                                                    tol = 1e-2,
 #'                                                    max.iter = 500,
 #'                                                    report.prog = TRUE)
 #'
-#' grouplassogt2pop_cv_fixedgrid.out <- grouplassogt2pop_cv_fixedgrid(Y1 = grouplassogt2pop_data$Y1,
-#'                                                                    Z1 = grouplassogt2pop_data$Z1,
-#'                                                                    Se1 = grouplassogt2pop_data$Se1,
-#'                                                                    Sp1 = grouplassogt2pop_data$Sp1,
-#'                                                                    X1 = grouplassogt2pop_data$X1,
-#'                                                                    groups1 = grouplassogt2pop_data$groups1,
-#'                                                                    Y2 = grouplassogt2pop_data$Y2,
-#'                                                                    Z2 = grouplassogt2pop_data$Z2,
-#'                                                                    Se2 = grouplassogt2pop_data$Se2,
-#'                                                                    Sp2 = grouplassogt2pop_data$Sp2,
-#'                                                                    X2 = grouplassogt2pop_data$X2,
-#'                                                                    groups2 = grouplassogt2pop_data$groups2,
+#' grouplasso2pop_gt_cv_fixedgrid.out <- grouplasso2pop_gt_cv_fixedgrid(Y1 = grouplasso2pop_gt_data$Y1,
+#'                                                                    Z1 = grouplasso2pop_gt_data$Z1,
+#'                                                                    Se1 = grouplasso2pop_gt_data$Se1,
+#'                                                                    Sp1 = grouplasso2pop_gt_data$Sp1,
+#'                                                                    X1 = grouplasso2pop_gt_data$X1,
+#'                                                                    groups1 = grouplasso2pop_gt_data$groups1,
+#'                                                                    Y2 = grouplasso2pop_gt_data$Y2,
+#'                                                                    Z2 = grouplasso2pop_gt_data$Z2,
+#'                                                                    Se2 = grouplasso2pop_gt_data$Se2,
+#'                                                                    Sp2 = grouplasso2pop_gt_data$Sp2,
+#'                                                                    X2 = grouplasso2pop_gt_data$X2,
+#'                                                                    groups2 = grouplasso2pop_gt_data$groups2,
 #'                                                                    rho1 = 2,
 #'                                                                    rho2 = 1,
-#'                                                                    lambda.seq = grouplassogt2pop_grid.out$lambda.seq,
-#'                                                                    eta.seq = grouplassogt2pop_grid.out$eta.seq,
+#'                                                                    lambda.seq = grouplasso2pop_gt_grid.out$lambda.seq,
+#'                                                                    eta.seq = grouplasso2pop_gt_grid.out$eta.seq,
 #'                                                                    n.folds = 5,
-#'                                                                    b1.init.arr = grouplassogt2pop_grid.out$b1.arr,
-#'                                                                    b2.init.arr = grouplassogt2pop_grid.out$b2.arr,
-#'                                                                    w1 = grouplassogt2pop_data$w1,
-#'                                                                    w2 = grouplassogt2pop_data$w2,
-#'                                                                    w = grouplassogt2pop_data$w,
-#'                                                                    AA1 = grouplassogt2pop_data$AA1,
-#'                                                                    AA2 = grouplassogt2pop_data$AA2,
-#'                                                                    Com = grouplassogt2pop_data$Com,
+#'                                                                    b1.init.arr = grouplasso2pop_gt_grid.out$b1.arr,
+#'                                                                    b2.init.arr = grouplasso2pop_gt_grid.out$b2.arr,
+#'                                                                    w1 = grouplasso2pop_gt_data$w1,
+#'                                                                    w2 = grouplasso2pop_gt_data$w2,
+#'                                                                    w = grouplasso2pop_gt_data$w,
+#'                                                                    AA1 = grouplasso2pop_gt_data$AA1,
+#'                                                                    AA2 = grouplasso2pop_gt_data$AA2,
+#'                                                                    Com = grouplasso2pop_gt_data$Com,
 #'                                                                    tol = 1e-2,
 #'                                                                    max.iter = 500)
 #' @export
-grouplassogt2pop_cv_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,n.folds,b1.init.arr,b2.init.arr,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=500)
+grouplasso2pop_gt_cv_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,n.folds,b1.init.arr,b2.init.arr,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=500,report.prog = TRUE)
 {
 
   # for now just use the diagnoses as the true responses and use the logreg fits on these
@@ -582,7 +599,7 @@ grouplassogt2pop_cv_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2
         fold2 <- folds2[[fold]]
 
         # later on consider a "real" crossvalidation, where the folds consist of some master pools, as in aenetgt
-        # grouplassogt2pop.out <- grouplassogt2pop(Y1,
+        # grouplasso2pop_gt.out <- grouplasso2pop_gt(Y1,
         #                                          Z1,
         #                                          Se1 = Se1,
         #                                          Sp1 = Sp1,
@@ -648,8 +665,13 @@ grouplassogt2pop_cv_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2
 
       }
 
-      print(c(l,k))
       step <- step + 1
+      
+      if( report.prog == TRUE){
+        
+        print(c(l,k))
+        
+      }
 
     }
 
@@ -720,41 +742,41 @@ grouplassogt2pop_cv_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2
 #' 
 #' 
 #' @examples
-#' grouplassogt2pop_data <- get_grouplassogt2pop_data(n1=400,n2=600)
+#' grouplasso2pop_gt_data <- get_grouplasso2pop_gt_data(n1=400,n2=600)
 #' 
-#' grouplassogt2pop_cv.out <- grouplassogt2pop_cv(Y1 = grouplassogt2pop_data$Y1,
-#'                                                Z1 = grouplassogt2pop_data$Z1,
-#'                                                Se1 = grouplassogt2pop_data$Se1,
-#'                                                Sp1 = grouplassogt2pop_data$Sp1,
-#'                                                X1 = grouplassogt2pop_data$X1,
-#'                                                groups1 = grouplassogt2pop_data$groups1,
-#'                                                Y2 = grouplassogt2pop_data$Y2,
-#'                                                Z2 = grouplassogt2pop_data$Z2,
-#'                                                Se2 = grouplassogt2pop_data$Se2,
-#'                                                Sp2 = grouplassogt2pop_data$Sp2,
-#'                                                X2 = grouplassogt2pop_data$X2,
-#'                                                groups2 = grouplassogt2pop_data$groups2,
+#' grouplasso2pop_gt_cv.out <- grouplasso2pop_gt_cv(Y1 = grouplasso2pop_gt_data$Y1,
+#'                                                Z1 = grouplasso2pop_gt_data$Z1,
+#'                                                Se1 = grouplasso2pop_gt_data$Se1,
+#'                                                Sp1 = grouplasso2pop_gt_data$Sp1,
+#'                                                X1 = grouplasso2pop_gt_data$X1,
+#'                                                groups1 = grouplasso2pop_gt_data$groups1,
+#'                                                Y2 = grouplasso2pop_gt_data$Y2,
+#'                                                Z2 = grouplasso2pop_gt_data$Z2,
+#'                                                Se2 = grouplasso2pop_gt_data$Se2,
+#'                                                Sp2 = grouplasso2pop_gt_data$Sp2,
+#'                                                X2 = grouplasso2pop_gt_data$X2,
+#'                                                groups2 = grouplasso2pop_gt_data$groups2,
 #'                                                rho1 = 2,
 #'                                                rho2 = 1,
 #'                                                n.lambda = 5,
 #'                                                n.eta = 5,
 #'                                                lambda.min.ratio = 0.01,
 #'                                                n.folds = 5,
-#'                                                w1 = grouplassogt2pop_data$w1,
-#'                                                w2 = grouplassogt2pop_data$w2,
-#'                                                w = grouplassogt2pop_data$w,
-#'                                                AA1 = grouplassogt2pop_data$AA1,
-#'                                                AA2 = grouplassogt2pop_data$AA2,
-#'                                                Com = grouplassogt2pop_data$Com,
+#'                                                w1 = grouplasso2pop_gt_data$w1,
+#'                                                w2 = grouplasso2pop_gt_data$w2,
+#'                                                w = grouplasso2pop_gt_data$w,
+#'                                                AA1 = grouplasso2pop_gt_data$AA1,
+#'                                                AA2 = grouplasso2pop_gt_data$AA2,
+#'                                                Com = grouplasso2pop_gt_data$Com,
 #'                                                tol = 1e-2,
 #'                                                max.iter = 500,
 #'                                                report.prog = TRUE)
 #' @export
-grouplassogt2pop_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,n.folds,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,report.prog=TRUE){
+grouplasso2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio,n.folds,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,report.prog=TRUE){
 
   # obtain lambda.seq and eta.seq from the grid function, as well as the fits on the entire data set,
   # which will be used as initial values for the crossvalidation training fits.
-  grouplassogt2pop_grid.out <- grouplassogt2pop_grid(Y1 = Y1,
+  grouplasso2pop_gt_grid.out <- grouplasso2pop_gt_grid(Y1 = Y1,
                                                      Z1 = Z1,
                                                      Se1 = Se1,
                                                      Sp1 = Sp1,
@@ -771,6 +793,7 @@ grouplassogt2pop_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups
                                                      n.lambda = n.lambda,
                                                      n.eta = n.eta,
                                                      lambda.min.ratio = lambda.min.ratio,
+                                                     lambda.max.ratio = lambda.max.ratio,
                                                      w1 = w1,
                                                      w2 = w2,
                                                      w = w,
@@ -782,13 +805,13 @@ grouplassogt2pop_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups
                                                      max.iter = max.iter,
                                                      report.prog = report.prog)
 
-  lambda.seq <- grouplassogt2pop_grid.out$lambda.seq
-  eta.seq <- grouplassogt2pop_grid.out$eta.seq
-  b1.arr <- grouplassogt2pop_grid.out$b1.arr
-  b2.arr <- grouplassogt2pop_grid.out$b2.arr
+  lambda.seq <- grouplasso2pop_gt_grid.out$lambda.seq
+  eta.seq <- grouplasso2pop_gt_grid.out$eta.seq
+  b1.arr <- grouplasso2pop_gt_grid.out$b1.arr
+  b2.arr <- grouplasso2pop_gt_grid.out$b2.arr
 
   # do the crossvalidation
-  grouplassogt2pop_cv_fixedgrid.out <- grouplassogt2pop_cv_fixedgrid(Y1 = Y1,
+  grouplasso2pop_gt_cv_fixedgrid.out <- grouplasso2pop_gt_cv_fixedgrid(Y1 = Y1,
                                                                      Z1 = Z1,
                                                                      Se1 = Se1,
                                                                      Sp1 = Sp1,
@@ -802,11 +825,11 @@ grouplassogt2pop_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups
                                                                      groups2 = groups2,
                                                                      rho1 = rho1,
                                                                      rho2 = rho2,
-                                                                     lambda.seq = grouplassogt2pop_grid.out$lambda.seq,
-                                                                     eta.seq = grouplassogt2pop_grid.out$eta.seq,
+                                                                     lambda.seq = grouplasso2pop_gt_grid.out$lambda.seq,
+                                                                     eta.seq = grouplasso2pop_gt_grid.out$eta.seq,
                                                                      n.folds = n.folds,
-                                                                     b1.init.arr = grouplassogt2pop_grid.out$b1.arr,
-                                                                     b2.init.arr = grouplassogt2pop_grid.out$b2.arr,
+                                                                     b1.init.arr = grouplasso2pop_gt_grid.out$b1.arr,
+                                                                     b2.init.arr = grouplasso2pop_gt_grid.out$b2.arr,
                                                                      w1 = w1,
                                                                      w2 = w2,
                                                                      w = w,
@@ -819,15 +842,15 @@ grouplassogt2pop_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups
 
   output <- list( b1.arr = b1.arr,
                   b2.arr = b2.arr,
-                  b1.folds.arr = grouplassogt2pop_cv_fixedgrid.out$b1.folds.arr,
-                  b2.folds.arr = grouplassogt2pop_cv_fixedgrid.out$b2.folds.arr,
-                  minus2ll.arr = grouplassogt2pop_cv_fixedgrid.out$minus2ll.arr,
-                  which.lambda.cv = grouplassogt2pop_cv_fixedgrid.out$which.lambda.cv,
-                  which.eta.cv = grouplassogt2pop_cv_fixedgrid.out$which.eta.cv,
-                  which.lambda.cv.under.zero.eta = grouplassogt2pop_cv_fixedgrid.out$which.lambda.cv.under.zero.eta,
+                  b1.folds.arr = grouplasso2pop_gt_cv_fixedgrid.out$b1.folds.arr,
+                  b2.folds.arr = grouplasso2pop_gt_cv_fixedgrid.out$b2.folds.arr,
+                  minus2ll.arr = grouplasso2pop_gt_cv_fixedgrid.out$minus2ll.arr,
+                  which.lambda.cv = grouplasso2pop_gt_cv_fixedgrid.out$which.lambda.cv,
+                  which.eta.cv = grouplasso2pop_gt_cv_fixedgrid.out$which.eta.cv,
+                  which.lambda.cv.under.zero.eta = grouplasso2pop_gt_cv_fixedgrid.out$which.lambda.cv.under.zero.eta,
                   lambda.seq = lambda.seq,
                   eta.seq = eta.seq,
-                  iterations = grouplassogt2pop_cv_fixedgrid.out$iterations)
+                  iterations = grouplasso2pop_gt_cv_fixedgrid.out$iterations)
 
   return(output)
 
@@ -875,38 +898,38 @@ grouplassogt2pop_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups
 #' @return Returns the estimator of the parametric model with group testing data
 #'
 #' @examples
-#' grouplassogt2pop_data <- get_grouplassogt2pop_data(n1 = 1000, n2 = 1200)
+#' grouplasso2pop_gt_data <- get_grouplasso2pop_gt_data(n1 = 1000, n2 = 1200)
 #'
-#' grouplassogt2pop_cv_adapt.out <- grouplassogt2pop_cv_adapt(Y1 = grouplassogt2pop_data$Y1,
-#'                                                            Z1 = grouplassogt2pop_data$Z1,
-#'                                                            Se1 = grouplassogt2pop_data$Se1,
-#'                                                            Sp1 = grouplassogt2pop_data$Sp1,
-#'                                                            X1 = grouplassogt2pop_data$X1,
-#'                                                            groups1 = grouplassogt2pop_data$groups1,
-#'                                                            Y2 = grouplassogt2pop_data$Y2,
-#'                                                            Z2 = grouplassogt2pop_data$Z2,
-#'                                                            Se2 = grouplassogt2pop_data$Se2,
-#'                                                            Sp2 = grouplassogt2pop_data$Sp2,
-#'                                                            X2 = grouplassogt2pop_data$X2,
-#'                                                            groups2 = grouplassogt2pop_data$groups2,
+#' grouplasso2pop_gt_cv_adapt.out <- grouplasso2pop_gt_cv_adapt(Y1 = grouplasso2pop_gt_data$Y1,
+#'                                                            Z1 = grouplasso2pop_gt_data$Z1,
+#'                                                            Se1 = grouplasso2pop_gt_data$Se1,
+#'                                                            Sp1 = grouplasso2pop_gt_data$Sp1,
+#'                                                            X1 = grouplasso2pop_gt_data$X1,
+#'                                                            groups1 = grouplasso2pop_gt_data$groups1,
+#'                                                            Y2 = grouplasso2pop_gt_data$Y2,
+#'                                                            Z2 = grouplasso2pop_gt_data$Z2,
+#'                                                            Se2 = grouplasso2pop_gt_data$Se2,
+#'                                                            Sp2 = grouplasso2pop_gt_data$Sp2,
+#'                                                            X2 = grouplasso2pop_gt_data$X2,
+#'                                                            groups2 = grouplasso2pop_gt_data$groups2,
 #'                                                            rho1 = 2,
 #'                                                            rho2 = 1,
 #'                                                            n.lambda = 5,
 #'                                                            n.eta = 5,
 #'                                                            lambda.min.ratio = 0.01,
 #'                                                            n.folds = 5,
-#'                                                            w1 = grouplassogt2pop_data$w1,
-#'                                                            w2 = grouplassogt2pop_data$w2,
-#'                                                            w = grouplassogt2pop_data$w,
-#'                                                            AA1 = grouplassogt2pop_data$AA1,
-#'                                                            AA2 = grouplassogt2pop_data$AA2,
-#'                                                            Com = grouplassogt2pop_data$Com,
+#'                                                            w1 = grouplasso2pop_gt_data$w1,
+#'                                                            w2 = grouplasso2pop_gt_data$w2,
+#'                                                            w = grouplasso2pop_gt_data$w,
+#'                                                            AA1 = grouplasso2pop_gt_data$AA1,
+#'                                                            AA2 = grouplasso2pop_gt_data$AA2,
+#'                                                            Com = grouplasso2pop_gt_data$Com,
 #'                                                            tol = 1e-2,
 #'                                                            max.iter = 500,
 #'                                                            report.prog = TRUE)
 #' @export
-grouplassogt2pop_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,n.folds,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,report.prog=TRUE){
-
+grouplasso2pop_gt_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio,n.folds,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,report.prog=TRUE)
+{
 
   # pull the individual diagnoses to be treated as true disease statuses to find the sequence of lambda values.
   Y1.diag <- pull.diagnoses(Z1,Y1)
@@ -945,7 +968,7 @@ grouplassogt2pop_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,
   lambda.initial.fit <- lambda.min.ratio * lambda.max
 
   # fit a grouplasso2pop with eta = 0 and lambda as lambda.min.ratio*lambda.max.
-  grouplassogt2pop.out <- grouplassogt2pop(Y1 = Y1,
+  grouplasso2pop_gt.out <- grouplasso2pop_gt(Y1 = Y1,
                                            Z1 = Z1,
                                            Se1 = Se1,
                                            Sp1 = Sp1,
@@ -976,22 +999,22 @@ grouplassogt2pop_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,
   for(j in 1:q1)
   {
     ind <- which(groups1 == j)
-    w1[j] <- min(w1[j]/sqrt( sum( grouplassogt2pop.out$beta1.hat[ind]^2 )),1e10) #replace Inf with 1e10
+    w1[j] <- min(w1[j]/sqrt( sum( grouplasso2pop_gt.out$beta1.hat[ind]^2 )),1e10) #replace Inf with 1e10
   }
   for(j in 1:q2)
   {
     ind <- which(groups2 == j)
-    w2[j] <- min(w2[j]/sqrt( sum( grouplassogt2pop.out$beta2.hat[ind]^2 )),1e10)
+    w2[j] <- min(w2[j]/sqrt( sum( grouplasso2pop_gt.out$beta2.hat[ind]^2 )),1e10)
   }
   for( j in Com)
   {
     ind1 <- which(groups1 == j)
     ind2 <- which(groups2 == j)
-    w[j] <- min(w[j]/sum( (AA1[[j]] %*% grouplassogt2pop.out$beta1.hat[ind1] - AA2[[j]] %*% grouplassogt2pop.out$beta2.hat[ind2] )^2),1e10)
+    w[j] <- min(w[j]/sum( (AA1[[j]] %*% grouplasso2pop_gt.out$beta1.hat[ind1] - AA2[[j]] %*% grouplasso2pop_gt.out$beta2.hat[ind2] )^2),1e10)
   }
 
   # obtain lambda.seq and eta.seq from the grid function, as well as the fits on the entire data set, which will be used as initial values for the crossvalidation training fits.
-  grouplassogt2pop_grid.out <- grouplassogt2pop_grid(Y1 = Y1,
+  grouplasso2pop_gt_grid.out <- grouplasso2pop_gt_grid(Y1 = Y1,
                                                      Z1 = Z1,
                                                      Se1 = Se1,
                                                      Sp1 = Sp1,
@@ -1008,6 +1031,7 @@ grouplassogt2pop_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,
                                                      n.lambda = n.lambda,
                                                      n.eta = n.eta,
                                                      lambda.min.ratio = lambda.min.ratio,
+                                                     lambda.max.ratio = lambda.max.ratio,
                                                      w1 = w1,
                                                      w2 = w2,
                                                      w = w,
@@ -1017,12 +1041,12 @@ grouplassogt2pop_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,
                                                      E.approx = E.approx,
                                                      tol = tol,
                                                      max.iter = max.iter,
-                                                     report.prog = TRUE)
+                                                     report.prog = report.prog)
 
 
 
   # do the crossvalidation
-  grouplassogt2pop_cv_fixedgrid.out <- grouplassogt2pop_cv_fixedgrid(Y1 = Y1,
+  grouplasso2pop_gt_cv_fixedgrid.out <- grouplasso2pop_gt_cv_fixedgrid(Y1 = Y1,
                                                                      Z1 = Z1,
                                                                      Se1 = Se1,
                                                                      Sp1 = Sp1,
@@ -1036,11 +1060,11 @@ grouplassogt2pop_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,
                                                                      groups2 = groups2,
                                                                      rho1 = rho1,
                                                                      rho2 = rho2,
-                                                                     lambda.seq = grouplassogt2pop_grid.out$lambda.seq,
-                                                                     eta.seq = grouplassogt2pop_grid.out$eta.seq,
+                                                                     lambda.seq = grouplasso2pop_gt_grid.out$lambda.seq,
+                                                                     eta.seq = grouplasso2pop_gt_grid.out$eta.seq,
                                                                      n.folds = n.folds,
-                                                                     b1.init.arr = grouplassogt2pop_grid.out$b1.arr,
-                                                                     b2.init.arr = grouplassogt2pop_grid.out$b2.arr,
+                                                                     b1.init.arr = grouplasso2pop_gt_grid.out$b1.arr,
+                                                                     b2.init.arr = grouplasso2pop_gt_grid.out$b2.arr,
                                                                      w1 = w1,
                                                                      w2 = w2,
                                                                      w = w,
@@ -1049,23 +1073,26 @@ grouplassogt2pop_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,
                                                                      Com = Com,
                                                                      E.approx = E.approx,
                                                                      tol = tol,
-                                                                     max.iter = max.iter)
+                                                                     max.iter = max.iter,
+                                                                     report.prog = report.prog)
 
-  output <- list( b1.arr = grouplassogt2pop_grid.out$b1.arr,
-                  b2.arr = grouplassogt2pop_grid.out$b2.arr,
-                  b1.folds.arr = grouplassogt2pop_cv_fixedgrid.out$b1.folds.arr,
-                  b2.folds.arr = grouplassogt2pop_cv_fixedgrid.out$b2.folds.arr,
-                  minus2ll.arr = grouplassogt2pop_cv_fixedgrid.out$minus2ll.arr,
-                  which.lambda.cv = grouplassogt2pop_cv_fixedgrid.out$which.lambda.cv,
-                  which.eta.cv = grouplassogt2pop_cv_fixedgrid.out$which.eta.cv,
-                  which.lambda.cv.under.zero.eta = grouplassogt2pop_cv_fixedgrid.out$which.lambda.cv.under.zero.eta,
-                  lambda.seq = grouplassogt2pop_grid.out$lambda.seq,
-                  eta.seq = grouplassogt2pop_grid.out$eta.seq,
+  output <- list( b1.arr = grouplasso2pop_gt_grid.out$b1.arr,
+                  b2.arr = grouplasso2pop_gt_grid.out$b2.arr,
+                  P1.arr = grouplasso2pop_gt_grid.out$P1.arr,
+                  P2.arr = grouplasso2pop_gt_grid.out$P2.arr,
+                  b1.folds.arr = grouplasso2pop_gt_cv_fixedgrid.out$b1.folds.arr,
+                  b2.folds.arr = grouplasso2pop_gt_cv_fixedgrid.out$b2.folds.arr,
+                  minus2ll.arr = grouplasso2pop_gt_cv_fixedgrid.out$minus2ll.arr,
+                  which.lambda.cv = grouplasso2pop_gt_cv_fixedgrid.out$which.lambda.cv,
+                  which.eta.cv = grouplasso2pop_gt_cv_fixedgrid.out$which.eta.cv,
+                  which.lambda.cv.under.zero.eta = grouplasso2pop_gt_cv_fixedgrid.out$which.lambda.cv.under.zero.eta,
+                  lambda.seq = grouplasso2pop_gt_grid.out$lambda.seq,
+                  eta.seq = grouplasso2pop_gt_grid.out$eta.seq,
                   lambda.initial.fit = lambda.initial.fit,
                   w1 = w1,
                   w2 = w2,
                   w = w,
-                  iterations = grouplassogt2pop_cv_fixedgrid.out$iterations)
+                  iterations = grouplasso2pop_gt_cv_fixedgrid.out$iterations)
 
   return(output)
 
@@ -1111,13 +1138,11 @@ grouplassogt2pop_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the parametric model with group testing data
 #'
-#' @examples
-#'
 #' @export
-grouplassogt2pop_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,lambda.initial.fit,n.folds,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,report.prog=TRUE){
+grouplasso2pop_gt_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,lambda.initial.fit,n.folds,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,report.prog=TRUE){
 
   # fit a grouplasso2pop with eta = 0 and lambda as lambda.min.ratio*lambda.max.
-  grouplassogt2pop.out <- grouplassogt2pop(Y1 = Y1,
+  grouplasso2pop_gt.out <- grouplasso2pop_gt(Y1 = Y1,
                                            Z1 = Z1,
                                            Se1 = Se1,
                                            Sp1 = Sp1,
@@ -1152,22 +1177,22 @@ grouplassogt2pop_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,S
   for(j in 1:q1)
   {
     ind <- which(groups1 == j)
-    w1[j] <- min(w1[j]/sqrt( sum( grouplassogt2pop.out$beta1.hat[ind]^2 )),1e10) #replace Inf with 1e10
+    w1[j] <- min(w1[j]/sqrt( sum( grouplasso2pop_gt.out$beta1.hat[ind]^2 )),1e10) #replace Inf with 1e10
   }
   for(j in 1:q2)
   {
     ind <- which(groups2 == j)
-    w2[j] <- min(w2[j]/sqrt( sum( grouplassogt2pop.out$beta2.hat[ind]^2 )),1e10)
+    w2[j] <- min(w2[j]/sqrt( sum( grouplasso2pop_gt.out$beta2.hat[ind]^2 )),1e10)
   }
   for( j in Com)
   {
     ind1 <- which(groups1 == j)
     ind2 <- which(groups2 == j)
-    w[j] <- min(w[j]/sum( (AA1[[j]] %*% grouplassogt2pop.out$beta1.hat[ind1] - AA2[[j]] %*% grouplassogt2pop.out$beta2.hat[ind2] )^2),1e10)
+    w[j] <- min(w[j]/sum( (AA1[[j]] %*% grouplasso2pop_gt.out$beta1.hat[ind1] - AA2[[j]] %*% grouplasso2pop_gt.out$beta2.hat[ind2] )^2),1e10)
   }
 
   # obtain lambda.seq and eta.seq from the grid function, as well as the fits on the entire data set, which will be used as initial values for the crossvalidation training fits.
-  grouplassogt2pop_fixedgrid.out <- grouplassogt2pop_fixedgrid(Y1 = Y1,
+  grouplasso2pop_gt_fixedgrid.out <- grouplasso2pop_gt_fixedgrid(Y1 = Y1,
                                                                Z1 = Z1,
                                                                Se1 = Se1,
                                                                Sp1 = Sp1,
@@ -1192,10 +1217,10 @@ grouplassogt2pop_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,S
                                                                E.approx = E.approx,
                                                                tol = tol,
                                                                max.iter = max.iter,
-                                                               report.prog = TRUE)
+                                                               report.prog = report.prog)
 
   # do the crossvalidation
-  grouplassogt2pop_cv_fixedgrid.out <- grouplassogt2pop_cv_fixedgrid(Y1 = Y1,
+  grouplasso2pop_gt_cv_fixedgrid.out <- grouplasso2pop_gt_cv_fixedgrid(Y1 = Y1,
                                                                      Z1 = Z1,
                                                                      Se1 = Se1,
                                                                      Sp1 = Sp1,
@@ -1212,8 +1237,8 @@ grouplassogt2pop_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,S
                                                                      lambda.seq = lambda.seq,
                                                                      eta.seq = eta.seq,
                                                                      n.folds = n.folds,
-                                                                     b1.init.arr = grouplassogt2pop_fixedgrid.out$b1.arr,
-                                                                     b2.init.arr = grouplassogt2pop_fixedgrid.out$b2.arr,
+                                                                     b1.init.arr = grouplasso2pop_gt_fixedgrid.out$b1.arr,
+                                                                     b2.init.arr = grouplasso2pop_gt_fixedgrid.out$b2.arr,
                                                                      w1 = w1,
                                                                      w2 = w2,
                                                                      w = w,
@@ -1222,24 +1247,27 @@ grouplassogt2pop_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,S
                                                                      Com = Com,
                                                                      E.approx = E.approx,
                                                                      tol = tol,
-                                                                     max.iter = max.iter)
+                                                                     max.iter = max.iter,
+                                                                     report.prog = report.prog)
 
   # collect output
-  output <- list( b1.arr = grouplassogt2pop_fixedgrid.out$b1.arr,
-                  b2.arr = grouplassogt2pop_fixedgrid.out$b2.arr,
-                  b1.folds.arr = grouplassogt2pop_cv_fixedgrid.out$b1.folds.arr,
-                  b2.folds.arr = grouplassogt2pop_cv_fixedgrid.out$b2.folds.arr,
-                  minus2ll.arr = grouplassogt2pop_cv_fixedgrid.out$minus2ll.arr,
-                  which.lambda.cv = grouplassogt2pop_cv_fixedgrid.out$which.lambda.cv,
-                  which.eta.cv = grouplassogt2pop_cv_fixedgrid.out$which.eta.cv,
-                  which.lambda.cv.under.zero.eta = grouplassogt2pop_cv_fixedgrid.out$which.lambda.cv.under.zero.eta,
+  output <- list( b1.arr = grouplasso2pop_gt_fixedgrid.out$b1.arr,
+                  b2.arr = grouplasso2pop_gt_fixedgrid.out$b2.arr,
+                  P1.arr = grouplasso2pop_gt_fixedgrid.out$P1.arr,
+                  P2.arr = grouplasso2pop_gt_fixedgrid.out$P2.arr,
+                  b1.folds.arr = grouplasso2pop_gt_cv_fixedgrid.out$b1.folds.arr,
+                  b2.folds.arr = grouplasso2pop_gt_cv_fixedgrid.out$b2.folds.arr,
+                  minus2ll.arr = grouplasso2pop_gt_cv_fixedgrid.out$minus2ll.arr,
+                  which.lambda.cv = grouplasso2pop_gt_cv_fixedgrid.out$which.lambda.cv,
+                  which.eta.cv = grouplasso2pop_gt_cv_fixedgrid.out$which.eta.cv,
+                  which.lambda.cv.under.zero.eta = grouplasso2pop_gt_cv_fixedgrid.out$which.lambda.cv.under.zero.eta,
                   lambda.seq = lambda.seq,
                   eta.seq = eta.seq,
                   lambda.initial.fit = lambda.initial.fit,
                   w1 = w1,
                   w2 = w2,
                   w = w,
-                  iterations = grouplassogt2pop_cv_fixedgrid.out$iterations)
+                  iterations = grouplasso2pop_gt_cv_fixedgrid.out$iterations)
 
   return(output)
 
@@ -1288,28 +1316,28 @@ grouplassogt2pop_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,S
 #' @return Returns the estimator of the semiparametric additive model with group testing data
 #'
 #' @examples
-#' semipaddgt2pop_data <- get_semipaddgt2pop_data(n1 = 500, n2 = 604)
+#' semipadd2pop_gt_data <- get_semipadd2pop_gt_data(n1 = 500, n2 = 604)
 #'
-#' semipaddgt2pop.out <- semipaddgt2pop(Y1 = semipaddgt2pop_data$Y1,
-#'                                      Z1 = semipaddgt2pop_data$Z1,
-#'                                      Se1 = semipaddgt2pop_data$Se1,
-#'                                      Sp1 = semipaddgt2pop_data$Sp1,
-#'                                      X1 = semipaddgt2pop_data$X1,
-#'                                      nonparm1 = semipaddgt2pop_data$nonparm1,
-#'                                      Y2 = semipaddgt2pop_data$Y2,
-#'                                      Z2 = semipaddgt2pop_data$Z2,
-#'                                      Se2 = semipaddgt2pop_data$Se2,
-#'                                      Sp2 = semipaddgt2pop_data$Sp2,
-#'                                      X2 = semipaddgt2pop_data$X2,
-#'                                      nonparm2 = semipaddgt2pop_data$nonparm2,
+#' semipadd2pop_gt.out <- semipadd2pop_gt(Y1 = semipadd2pop_gt_data$Y1,
+#'                                      Z1 = semipadd2pop_gt_data$Z1,
+#'                                      Se1 = semipadd2pop_gt_data$Se1,
+#'                                      Sp1 = semipadd2pop_gt_data$Sp1,
+#'                                      X1 = semipadd2pop_gt_data$X1,
+#'                                      nonparm1 = semipadd2pop_gt_data$nonparm1,
+#'                                      Y2 = semipadd2pop_gt_data$Y2,
+#'                                      Z2 = semipadd2pop_gt_data$Z2,
+#'                                      Se2 = semipadd2pop_gt_data$Se2,
+#'                                      Sp2 = semipadd2pop_gt_data$Sp2,
+#'                                      X2 = semipadd2pop_gt_data$X2,
+#'                                      nonparm2 = semipadd2pop_gt_data$nonparm2,
 #'                                      rho1 = 2,
 #'                                      rho2 = 1,
 #'                                      w1 = 1,
 #'                                      w2 = 1,
 #'                                      w = 1,
 #'                                      nCom = 4,
-#'                                      d1 = semipaddgt2pop_data$nonparm1 * 15,
-#'                                      d2 = semipaddgt2pop_data$nonparm2 * 10,
+#'                                      d1 = semipadd2pop_gt_data$nonparm1 * 15,
+#'                                      d2 = semipadd2pop_gt_data$nonparm2 * 10,
 #'                                      xi = 1,
 #'                                      lambda.beta = 1,
 #'                                      lambda.f = 1,
@@ -1319,17 +1347,17 @@ grouplassogt2pop_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,S
 #'                                      max.iter = 500,
 #'                                      report.prog = TRUE)
 #'
-#' plot_semipaddgt2pop(semipaddgt2pop.out,
-#'                     true.functions=list(f1 = semipaddgt2pop_data$f1,
-#'                                         f2 = semipaddgt2pop_data$f2,
-#'                                         X1 = semipaddgt2pop_data$X1,
-#'                                         X2 = semipaddgt2pop_data$X2)
+#' plot_semipadd2pop_gt(semipadd2pop_gt.out,
+#'                     true.functions=list(f1 = semipadd2pop_gt_data$f1,
+#'                                         f2 = semipadd2pop_gt_data$f2,
+#'                                         X1 = semipadd2pop_gt_data$X1,
+#'                                         X2 = semipadd2pop_gt_data$X2)
 #' )
 #' @export
-semipaddgt2pop <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,lambda.beta,lambda.f,eta.beta,eta.f,E.approx = FALSE,tol=1e-3,max.iter=500,report.prog=FALSE)
+semipadd2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,lambda.beta,lambda.f,eta.beta,eta.f,E.approx = FALSE,tol=1e-3,max.iter=500,report.prog=FALSE)
 {
 
-  # prepare input for grouplassogt2pop function
+  # prepare input for grouplasso2pop_gt function
   grouplasso2pop_inputs <- semipadd2pop_to_grouplasso2pop(X1 = X1,
                                                           nonparm1 = nonparm1,
                                                           X2 = X2,
@@ -1347,7 +1375,7 @@ semipaddgt2pop <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,r
                                                           eta.f = eta.f)
 
   # get group lasso estimates using the EM-algorithm
-  grouplassogt2pop.out <- grouplassogt2pop(Y1 = Y1,
+  grouplasso2pop_gt.out <- grouplasso2pop_gt(Y1 = Y1,
                                            Z1 = Z1,
                                            Se1 = Se1,
                                            Sp1 = Sp1,
@@ -1376,27 +1404,27 @@ semipaddgt2pop <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,r
                                            report.prog = report.prog)
 
   # construct fitted functions from grouplasso2pop output
-  semipaddgt2pop_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
+  semipadd2pop_gt_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
                                                           nonparm1 = nonparm1,
                                                           groups1 = grouplasso2pop_inputs$groups1,
                                                           knots.list1 = grouplasso2pop_inputs$knots.list1,
                                                           emp.cent1 = grouplasso2pop_inputs$emp.cent1,
                                                           QQ1.inv = grouplasso2pop_inputs$QQ1.inv,
-                                                          b1 = grouplassogt2pop.out$beta1.hat,
+                                                          b1 = grouplasso2pop_gt.out$beta1.hat,
                                                           X2 = X2,
                                                           nonparm2 = nonparm2,
                                                           groups2 = grouplasso2pop_inputs$groups2,
                                                           knots.list2 = grouplasso2pop_inputs$knots.list2,
                                                           emp.cent2 = grouplasso2pop_inputs$emp.cent2,
                                                           QQ2.inv = grouplasso2pop_inputs$QQ2.inv,
-                                                          b2 = grouplassogt2pop.out$beta2.hat)
+                                                          b2 = grouplasso2pop_gt.out$beta2.hat)
 
 
   # collect output
-  output <- list( f1.hat = semipaddgt2pop_fitted$f1.hat,
-                  f2.hat = semipaddgt2pop_fitted$f2.hat,
-                  f1.hat.design = semipaddgt2pop_fitted$f1.hat.design,
-                  f2.hat.design = semipaddgt2pop_fitted$f2.hat.design,
+  output <- list( f1.hat = semipadd2pop_gt_fitted$f1.hat,
+                  f2.hat = semipadd2pop_gt_fitted$f2.hat,
+                  f1.hat.design = semipadd2pop_gt_fitted$f1.hat.design,
+                  f2.hat.design = semipadd2pop_gt_fitted$f2.hat.design,
                   rho1 = rho1,
                   rho2 = rho2,
                   nonparm1 = nonparm1,
@@ -1411,7 +1439,7 @@ semipaddgt2pop <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,r
                   eta.beta = eta.beta,
                   eta.f = eta.f,
                   Com = grouplasso2pop_inputs$Com,
-                  inner.iter = grouplassogt2pop.out$inner.iter)
+                  inner.iter = grouplasso2pop_gt.out$inner.iter)
 
   return(output)
 
@@ -1464,28 +1492,28 @@ semipaddgt2pop <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,r
 #' @return Returns the estimator of the semiparametric additive model with group testing data
 #'
 #' @examples
-#' semipaddgt2pop_data <- get_semipaddgt2pop_data(n1 = 500, n2 = 604)
+#' semipadd2pop_gt_data <- get_semipadd2pop_gt_data(n1 = 500, n2 = 604)
 #'
-#' semipaddgt2pop_grid.out <- semipaddgt2pop_grid(Y1 = semipaddgt2pop_data$Y1,
-#'                                                Z1 = semipaddgt2pop_data$Z1,
-#'                                                Se1 = semipaddgt2pop_data$Se1,
-#'                                                Sp1 = semipaddgt2pop_data$Sp1,
-#'                                                X1 = semipaddgt2pop_data$X1,
-#'                                                nonparm1 = semipaddgt2pop_data$nonparm1,
-#'                                                Y2 = semipaddgt2pop_data$Y2,
-#'                                                Z2 = semipaddgt2pop_data$Z2,
-#'                                                Se2 = semipaddgt2pop_data$Se2,
-#'                                                Sp2 = semipaddgt2pop_data$Sp2,
-#'                                                X2 = semipaddgt2pop_data$X2,
-#'                                                nonparm2 = semipaddgt2pop_data$nonparm2,
+#' semipadd2pop_gt_grid.out <- semipadd2pop_gt_grid(Y1 = semipadd2pop_gt_data$Y1,
+#'                                                Z1 = semipadd2pop_gt_data$Z1,
+#'                                                Se1 = semipadd2pop_gt_data$Se1,
+#'                                                Sp1 = semipadd2pop_gt_data$Sp1,
+#'                                                X1 = semipadd2pop_gt_data$X1,
+#'                                                nonparm1 = semipadd2pop_gt_data$nonparm1,
+#'                                                Y2 = semipadd2pop_gt_data$Y2,
+#'                                                Z2 = semipadd2pop_gt_data$Z2,
+#'                                                Se2 = semipadd2pop_gt_data$Se2,
+#'                                                Sp2 = semipadd2pop_gt_data$Sp2,
+#'                                                X2 = semipadd2pop_gt_data$X2,
+#'                                                nonparm2 = semipadd2pop_gt_data$nonparm2,
 #'                                                rho1 = 2,
 #'                                                rho2 = 1,
 #'                                                w1 = 1,
 #'                                                w2 = 1,
 #'                                                w = 1,
 #'                                                nCom = 4,
-#'                                                d1 = semipaddgt2pop_data$nonparm1 * 15,
-#'                                                d2 = semipaddgt2pop_data$nonparm2 * 10,
+#'                                                d1 = semipadd2pop_gt_data$nonparm1 * 15,
+#'                                                d2 = semipadd2pop_gt_data$nonparm2 * 10,
 #'                                                xi = 1,
 #'                                                n.lambda = 3,
 #'                                                n.eta = 3,
@@ -1498,14 +1526,14 @@ semipaddgt2pop <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,r
 #'                                                max.iter = 500,
 #'                                                report.prog = TRUE)
 #'
-#' plot_semipaddgt2pop_grid(semipaddgt2pop_grid.out,
-#'                          true.functions = list(f1 = semipaddgt2pop_data$f1,
-#'                                                f2 = semipaddgt2pop_data$f2,
-#'                                                X1 = semipaddgt2pop_data$X1,
-#'                                                X2 = semipaddgt2pop_data$X2)
+#' plot_semipadd2pop_gt_grid(semipadd2pop_gt_grid.out,
+#'                          true.functions = list(f1 = semipadd2pop_gt_data$f1,
+#'                                                f2 = semipadd2pop_gt_data$f2,
+#'                                                X1 = semipadd2pop_gt_data$X1,
+#'                                                X2 = semipadd2pop_gt_data$X2)
 #' )
 #' @export
-semipaddgt2pop_grid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,E.approx = FALSE,tol=1e-3,max.iter = 1000,report.prog = FALSE)
+semipadd2pop_gt_grid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,E.approx = FALSE,tol=1e-3,max.iter = 1000,report.prog = FALSE)
 {
 
   # prepare input for grouplasso2pop function
@@ -1526,7 +1554,7 @@ semipaddgt2pop_grid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonpa
                                                           eta.f = eta.f)
 
   # get group lasso estimators over a grid of lambda and eta values
-  grouplassogt2pop_grid.out <- grouplassogt2pop_grid(Y1 = Y1,
+  grouplasso2pop_gt_grid.out <- grouplasso2pop_gt_grid(Y1 = Y1,
                                                      Z1 = Z1,
                                                      Se1 = Se1,
                                                      Sp1 = Sp1,
@@ -1543,6 +1571,7 @@ semipaddgt2pop_grid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonpa
                                                      n.lambda = n.lambda,
                                                      n.eta = n.eta,
                                                      lambda.min.ratio = lambda.min.ratio,
+                                                     lambda.max.ratio = lambda.max.ratio,
                                                      w1 = grouplasso2pop_inputs$w1,
                                                      w2 = grouplasso2pop_inputs$w2,
                                                      w = grouplasso2pop_inputs$w,
@@ -1570,32 +1599,34 @@ semipaddgt2pop_grid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonpa
     for(k in 1:n.eta)
     {
 
-      semipaddgt2pop_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
+      semipadd2pop_gt_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
                                                               nonparm1 = nonparm1,
                                                               groups1 = grouplasso2pop_inputs$groups1,
                                                               knots.list1 = grouplasso2pop_inputs$knots.list1,
                                                               emp.cent1 = grouplasso2pop_inputs$emp.cent1,
                                                               QQ1.inv = grouplasso2pop_inputs$QQ1.inv,
-                                                              b1 = grouplassogt2pop_grid.out$b1.arr[,l,k],
+                                                              b1 = grouplasso2pop_gt_grid.out$b1.arr[,l,k],
                                                               X2 = X2,
                                                               nonparm2 = nonparm2,
                                                               groups2 = grouplasso2pop_inputs$groups2,
                                                               knots.list2 = grouplasso2pop_inputs$knots.list2,
                                                               emp.cent2 = grouplasso2pop_inputs$emp.cent2,
                                                               QQ2.inv = grouplasso2pop_inputs$QQ2.inv,
-                                                              b2 = grouplassogt2pop_grid.out$b2.arr[,l,k])
+                                                              b2 = grouplasso2pop_gt_grid.out$b2.arr[,l,k])
 
-      f1.hat[[l]][[k]] <- semipaddgt2pop_fitted$f1.hat
-      f2.hat[[l]][[k]] <- semipaddgt2pop_fitted$f2.hat
+      f1.hat[[l]][[k]] <- semipadd2pop_gt_fitted$f1.hat
+      f2.hat[[l]][[k]] <- semipadd2pop_gt_fitted$f2.hat
 
-      f1.hat.design[,,l,k] <- semipaddgt2pop_fitted$f1.hat.design
-      f2.hat.design[,,l,k] <- semipaddgt2pop_fitted$f2.hat.design
+      f1.hat.design[,,l,k] <- semipadd2pop_gt_fitted$f1.hat.design
+      f2.hat.design[,,l,k] <- semipadd2pop_gt_fitted$f2.hat.design
 
     }
 
   # prepare output
   output <- list( f1.hat = f1.hat,
                   f2.hat = f2.hat,
+                  P1.hat = grouplasso2pop_gt_grid.out$P1.arr,
+                  P2.hat = grouplasso2pop_gt_grid.out$P2.arr,
                   f1.hat.design = f1.hat.design,
                   f2.hat.design = f2.hat.design,
                   rho1 = rho1,
@@ -1614,9 +1645,9 @@ semipaddgt2pop_grid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonpa
                   Com = grouplasso2pop_inputs$Com,
                   n.lambda = n.lambda,
                   n.eta = n.eta,
-                  lambda.seq = grouplassogt2pop_grid.out$lambda.seq,
-                  eta.seq = grouplassogt2pop_grid.out$eta.seq,
-                  iterations = grouplassogt2pop_grid.out$iterations)
+                  lambda.seq = grouplasso2pop_gt_grid.out$lambda.seq,
+                  eta.seq = grouplasso2pop_gt_grid.out$eta.seq,
+                  iterations = grouplasso2pop_gt_grid.out$iterations)
 
   return(output)
 
@@ -1667,28 +1698,28 @@ semipaddgt2pop_grid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonpa
 #' @return Returns the estimator of the semiparametric additive model with group testing data
 #'
 #' @examples
-#' semipaddgt2pop_data <- get_semipaddgt2pop_data(n1 = 500, n2 = 604)
+#' semipadd2pop_gt_data <- get_semipadd2pop_gt_data(n1 = 500, n2 = 604)
 #'
-#' semipaddgt2pop_cv.out <- semipaddgt2pop_cv(Y1 = semipaddgt2pop_data$Y1,
-#'                                            Z1 = semipaddgt2pop_data$Z1,
-#'                                            Se1 = semipaddgt2pop_data$Se1,
-#'                                            Sp1 = semipaddgt2pop_data$Sp1,
-#'                                            X1 = semipaddgt2pop_data$X1,
-#'                                            nonparm1 = semipaddgt2pop_data$nonparm1,
-#'                                            Y2 = semipaddgt2pop_data$Y2,
-#'                                            Z2 = semipaddgt2pop_data$Z2,
-#'                                            Se2 = semipaddgt2pop_data$Se2,
-#'                                            Sp2 = semipaddgt2pop_data$Sp2,
-#'                                            X2 = semipaddgt2pop_data$X2,
-#'                                            nonparm2 = semipaddgt2pop_data$nonparm2,
+#' semipadd2pop_gt_cv.out <- semipadd2pop_gt_cv(Y1 = semipadd2pop_gt_data$Y1,
+#'                                            Z1 = semipadd2pop_gt_data$Z1,
+#'                                            Se1 = semipadd2pop_gt_data$Se1,
+#'                                            Sp1 = semipadd2pop_gt_data$Sp1,
+#'                                            X1 = semipadd2pop_gt_data$X1,
+#'                                            nonparm1 = semipadd2pop_gt_data$nonparm1,
+#'                                            Y2 = semipadd2pop_gt_data$Y2,
+#'                                            Z2 = semipadd2pop_gt_data$Z2,
+#'                                            Se2 = semipadd2pop_gt_data$Se2,
+#'                                            Sp2 = semipadd2pop_gt_data$Sp2,
+#'                                            X2 = semipadd2pop_gt_data$X2,
+#'                                            nonparm2 = semipadd2pop_gt_data$nonparm2,
 #'                                            rho1 = 2,
 #'                                            rho2 = 1,
 #'                                            w1 = 1,
 #'                                            w2 = 1,
 #'                                            w = 1,
 #'                                            nCom = 4,
-#'                                            d1 = semipaddgt2pop_data$nonparm1 * 15,
-#'                                            d2 = semipaddgt2pop_data$nonparm2 * 10,
+#'                                            d1 = semipadd2pop_gt_data$nonparm1 * 15,
+#'                                            d2 = semipadd2pop_gt_data$nonparm2 * 10,
 #'                                            xi = 1,
 #'                                            n.lambda = 3,
 #'                                            n.eta = 3,
@@ -1701,17 +1732,17 @@ semipaddgt2pop_grid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonpa
 #'                                            max.iter = 500,
 #'                                            report.prog = TRUE)
 #'
-#' plot_semipaddgt2pop_cv(semipaddgt2pop_cv.out,
-#'                        true.functions = list(f1 = semipaddgt2pop_data$f1,
-#'                                              f2 = semipaddgt2pop_data$f2,
-#'                                              X1 = semipaddgt2pop_data$X1,
-#'                                              X2 = semipaddgt2pop_data$X2)
+#' plot_semipadd2pop_gt_cv(semipadd2pop_gt_cv.out,
+#'                        true.functions = list(f1 = semipadd2pop_gt_data$f1,
+#'                                              f2 = semipadd2pop_gt_data$f2,
+#'                                              X1 = semipadd2pop_gt_data$X1,
+#'                                              X2 = semipadd2pop_gt_data$X2)
 #' )
 #' @export
-semipaddgt2pop_cv <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,n.folds = 5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,E.approx = FALSE,tol=1e-3,max.iter = 1000,report.prog = FALSE)
+semipadd2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,n.folds = 5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,E.approx = FALSE,tol=1e-3,max.iter = 1000,report.prog = FALSE)
 {
 
-  # prepare input for grouplassogt2pop function
+  # prepare input for grouplasso2pop_gt function
   grouplasso2pop_inputs <- semipadd2pop_to_grouplasso2pop(X1 = X1,
                                                           nonparm1 = nonparm1,
                                                           X2 = X2,
@@ -1729,7 +1760,7 @@ semipaddgt2pop_cv <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm
                                                           eta.f = eta.f)
 
   # get group lasso estimators over a grid of lambda and eta values on the full data and CV folds
-  grouplassogt2pop_cv.out <- grouplassogt2pop_cv(Y1 = Y1,
+  grouplasso2pop_gt_cv.out <- grouplasso2pop_gt_cv(Y1 = Y1,
                                                  Z1 = Z1,
                                                  Se1 = Se1,
                                                  Sp1 = Sp1,
@@ -1746,6 +1777,7 @@ semipaddgt2pop_cv <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm
                                                  n.lambda = n.lambda,
                                                  n.eta = n.eta,
                                                  lambda.min.ratio = lambda.min.ratio,
+                                                 lambda.max.ratio = lambda.max.ratio,
                                                  n.folds = n.folds,
                                                  w1 = grouplasso2pop_inputs$w1,
                                                  w2 = grouplasso2pop_inputs$w2,
@@ -1793,50 +1825,50 @@ semipaddgt2pop_cv <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm
     for(k in 1:n.eta)
     {
 
-      semipaddgt2pop_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
+      semipadd2pop_gt_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
                                                               nonparm1 = nonparm1,
                                                               groups1 = grouplasso2pop_inputs$groups1,
                                                               knots.list1 = grouplasso2pop_inputs$knots.list1,
                                                               emp.cent1 = grouplasso2pop_inputs$emp.cent1,
                                                               QQ1.inv = grouplasso2pop_inputs$QQ1.inv,
-                                                              b1 = grouplassogt2pop_cv.out$b1.arr[,l,k],
+                                                              b1 = grouplasso2pop_gt_cv.out$b1.arr[,l,k],
                                                               X2 = X2,
                                                               nonparm2 = nonparm2,
                                                               groups2 = grouplasso2pop_inputs$groups2,
                                                               knots.list2 = grouplasso2pop_inputs$knots.list2,
                                                               emp.cent2 = grouplasso2pop_inputs$emp.cent2,
                                                               QQ2.inv = grouplasso2pop_inputs$QQ2.inv,
-                                                              b2 = grouplassogt2pop_cv.out$b2.arr[,l,k])
+                                                              b2 = grouplasso2pop_gt_cv.out$b2.arr[,l,k])
 
-      f1.hat[[l]][[k]] <- semipaddgt2pop_fitted$f1.hat
-      f2.hat[[l]][[k]] <- semipaddgt2pop_fitted$f2.hat
+      f1.hat[[l]][[k]] <- semipadd2pop_gt_fitted$f1.hat
+      f2.hat[[l]][[k]] <- semipadd2pop_gt_fitted$f2.hat
 
-      f1.hat.design[,,l,k] <- semipaddgt2pop_fitted$f1.hat.design
-      f2.hat.design[,,l,k] <- semipaddgt2pop_fitted$f2.hat.design
+      f1.hat.design[,,l,k] <- semipadd2pop_gt_fitted$f1.hat.design
+      f2.hat.design[,,l,k] <- semipadd2pop_gt_fitted$f2.hat.design
 
-      beta1.hat[,l,k] <- semipaddgt2pop_fitted$beta1.hat
-      beta2.hat[,l,k] <- semipaddgt2pop_fitted$beta2.hat
+      beta1.hat[,l,k] <- semipadd2pop_gt_fitted$beta1.hat
+      beta2.hat[,l,k] <- semipadd2pop_gt_fitted$beta2.hat
 
       for( fold in 1:n.folds)
       {
 
-        semipaddgt2pop_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
+        semipadd2pop_gt_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
                                                                 nonparm1 = nonparm1,
                                                                 groups1 = grouplasso2pop_inputs$groups1,
                                                                 knots.list1 = grouplasso2pop_inputs$knots.list1,
                                                                 emp.cent1 = grouplasso2pop_inputs$emp.cent1,
                                                                 QQ1.inv = grouplasso2pop_inputs$QQ1.inv,
-                                                                b1 = grouplassogt2pop_cv.out$b1.folds.arr[,l,k,fold],
+                                                                b1 = grouplasso2pop_gt_cv.out$b1.folds.arr[,l,k,fold],
                                                                 X2 = X2,
                                                                 nonparm2 = nonparm2,
                                                                 groups2 = grouplasso2pop_inputs$groups2,
                                                                 knots.list2 = grouplasso2pop_inputs$knots.list2,
                                                                 emp.cent2 = grouplasso2pop_inputs$emp.cent2,
                                                                 QQ2.inv = grouplasso2pop_inputs$QQ2.inv,
-                                                                b2 = grouplassogt2pop_cv.out$b2.folds.arr[,l,k,fold])
+                                                                b2 = grouplasso2pop_gt_cv.out$b2.folds.arr[,l,k,fold])
 
-        f1.hat.folds[[l]][[k]][[fold]] <- semipaddgt2pop_fitted$f1.hat
-        f2.hat.folds[[l]][[k]][[fold]] <- semipaddgt2pop_fitted$f2.hat
+        f1.hat.folds[[l]][[k]][[fold]] <- semipadd2pop_gt_fitted$f1.hat
+        f2.hat.folds[[l]][[k]][[fold]] <- semipadd2pop_gt_fitted$f2.hat
 
       }
 
@@ -1868,14 +1900,14 @@ semipaddgt2pop_cv <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm
                   n.lambda = n.lambda,
                   n.eta = n.eta,
                   n.folds = n.folds,
-                  lambda.seq = grouplassogt2pop_cv.out$lambda.seq,
-                  eta.seq = grouplassogt2pop_cv.out$eta.seq,
-                  which.lambda.cv = grouplassogt2pop_cv.out$which.lambda.cv,
-                  which.eta.cv = grouplassogt2pop_cv.out$which.eta.cv,
-                  which.lambda.cv.under.zero.eta = grouplassogt2pop_cv.out$which.lambda.cv.under.zero.eta,
-                  iterations = grouplassogt2pop_cv.out$iterations)
+                  lambda.seq = grouplasso2pop_gt_cv.out$lambda.seq,
+                  eta.seq = grouplasso2pop_gt_cv.out$eta.seq,
+                  which.lambda.cv = grouplasso2pop_gt_cv.out$which.lambda.cv,
+                  which.eta.cv = grouplasso2pop_gt_cv.out$which.eta.cv,
+                  which.lambda.cv.under.zero.eta = grouplasso2pop_gt_cv.out$which.lambda.cv.under.zero.eta,
+                  iterations = grouplasso2pop_gt_cv.out$iterations)
 
-  class(output) <- "semipaddgt2pop_cv"
+  class(output) <- "semipadd2pop_gt_cv"
 
   return(output)
 
@@ -1928,28 +1960,28 @@ semipaddgt2pop_cv <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm
 #' @return Returns the estimator of the semiparametric additive model with group testing data
 #'
 #' @examples
-#' semipaddgt2pop_data <- get_semipaddgt2pop_data(n1 = 500, n2 = 604)
+#' semipadd2pop_gt_data <- get_semipadd2pop_gt_data(n1 = 500, n2 = 604)
 #'
-#' semipaddgt2pop_cv.out <- semipaddgt2pop_cv(Y1 = semipaddgt2pop_data$Y1,
-#'                                            Z1 = semipaddgt2pop_data$Z1,
-#'                                            Se1 = semipaddgt2pop_data$Se1,
-#'                                            Sp1 = semipaddgt2pop_data$Sp1,
-#'                                            X1 = semipaddgt2pop_data$X1,
-#'                                            nonparm1 = semipaddgt2pop_data$nonparm1,
-#'                                            Y2 = semipaddgt2pop_data$Y2,
-#'                                            Z2 = semipaddgt2pop_data$Z2,
-#'                                            Se2 = semipaddgt2pop_data$Se2,
-#'                                            Sp2 = semipaddgt2pop_data$Sp2,
-#'                                            X2 = semipaddgt2pop_data$X2,
-#'                                            nonparm2 = semipaddgt2pop_data$nonparm2,
+#' semipadd2pop_gt_cv.out <- semipadd2pop_gt_cv(Y1 = semipadd2pop_gt_data$Y1,
+#'                                            Z1 = semipadd2pop_gt_data$Z1,
+#'                                            Se1 = semipadd2pop_gt_data$Se1,
+#'                                            Sp1 = semipadd2pop_gt_data$Sp1,
+#'                                            X1 = semipadd2pop_gt_data$X1,
+#'                                            nonparm1 = semipadd2pop_gt_data$nonparm1,
+#'                                            Y2 = semipadd2pop_gt_data$Y2,
+#'                                            Z2 = semipadd2pop_gt_data$Z2,
+#'                                            Se2 = semipadd2pop_gt_data$Se2,
+#'                                            Sp2 = semipadd2pop_gt_data$Sp2,
+#'                                            X2 = semipadd2pop_gt_data$X2,
+#'                                            nonparm2 = semipadd2pop_gt_data$nonparm2,
 #'                                            rho1 = 2,
 #'                                            rho2 = 1,
 #'                                            w1 = 1,
 #'                                            w2 = 1,
 #'                                            w = 1,
 #'                                            nCom = 4,
-#'                                            d1 = semipaddgt2pop_data$nonparm1 * 15,
-#'                                            d2 = semipaddgt2pop_data$nonparm2 * 10,
+#'                                            d1 = semipadd2pop_gt_data$nonparm1 * 15,
+#'                                            d2 = semipadd2pop_gt_data$nonparm2 * 10,
 #'                                            xi = 1,
 #'                                            n.lambda = 3,
 #'                                            n.eta = 3,
@@ -1962,17 +1994,17 @@ semipaddgt2pop_cv <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm
 #'                                            max.iter = 500,
 #'                                            report.prog = TRUE)
 #'
-#' plot_semipaddgt2pop_cv(semipaddgt2pop_cv.out,
-#'                        true.functions = list(f1 = semipaddgt2pop_data$f1,
-#'                                              f2 = semipaddgt2pop_data$f2,
-#'                                              X1 = semipaddgt2pop_data$X1,
-#'                                              X2 = semipaddgt2pop_data$X2)
+#' plot_semipadd2pop_gt_cv(semipadd2pop_gt_cv.out,
+#'                        true.functions = list(f1 = semipadd2pop_gt_data$f1,
+#'                                              f2 = semipadd2pop_gt_data$f2,
+#'                                              X1 = semipadd2pop_gt_data$X1,
+#'                                              X2 = semipadd2pop_gt_data$X2)
 #' )
 #' @export
-semipaddgt2pop_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,n.folds = 5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,E.approx = FALSE,tol=1e-3,max.iter = 1000,report.prog = FALSE)
+semipadd2pop_gt_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,n.folds = 5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,E.approx = FALSE,tol=1e-3,max.iter = 1000,report.prog = FALSE)
 {
 
-  # prepare input for grouplassogt2pop function
+  # prepare input for grouplasso2pop_gt function
   grouplasso2pop_inputs <- semipadd2pop_to_grouplasso2pop(X1 = X1,
                                                           nonparm1 = nonparm1,
                                                           X2 = X2,
@@ -1990,7 +2022,7 @@ semipaddgt2pop_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,n
                                                           eta.f = eta.f)
 
   # get group lasso estimators over a grid of lambda and eta values on the full data and CV folds
-  grouplassogt2pop_cv_adapt.out <- grouplassogt2pop_cv_adapt(Y1 = Y1,
+  grouplasso2pop_gt_cv_adapt.out <- grouplasso2pop_gt_cv_adapt(Y1 = Y1,
                                                              Z1 = Z1,
                                                              Se1 = Se1,
                                                              Sp1 = Sp1,
@@ -2007,6 +2039,7 @@ semipaddgt2pop_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,n
                                                              n.lambda = n.lambda,
                                                              n.eta = n.eta,
                                                              lambda.min.ratio = lambda.min.ratio,
+                                                             lambda.max.ratio = lambda.max.ratio,
                                                              n.folds = n.folds,
                                                              w1 = grouplasso2pop_inputs$w1,
                                                              w2 = grouplasso2pop_inputs$w2,
@@ -2054,52 +2087,52 @@ semipaddgt2pop_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,n
     for(k in 1:n.eta)
     {
 
-      semipaddgt2pop_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
+      semipadd2pop_gt_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
                                                               nonparm1 = nonparm1,
                                                               groups1 = grouplasso2pop_inputs$groups1,
                                                               knots.list1 = grouplasso2pop_inputs$knots.list1,
                                                               emp.cent1 = grouplasso2pop_inputs$emp.cent1,
                                                               QQ1.inv = grouplasso2pop_inputs$QQ1.inv,
-                                                              b1 = grouplassogt2pop_cv_adapt.out$b1.arr[,l,k],
+                                                              b1 = grouplasso2pop_gt_cv_adapt.out$b1.arr[,l,k],
                                                               X2 = X2,
                                                               nonparm2 = nonparm2,
                                                               groups2 = grouplasso2pop_inputs$groups2,
                                                               knots.list2 = grouplasso2pop_inputs$knots.list2,
                                                               emp.cent2 = grouplasso2pop_inputs$emp.cent2,
                                                               QQ2.inv = grouplasso2pop_inputs$QQ2.inv,
-                                                              b2 = grouplassogt2pop_cv_adapt.out$b2.arr[,l,k])
+                                                              b2 = grouplasso2pop_gt_cv_adapt.out$b2.arr[,l,k])
 
-      f1.hat[[l]][[k]] <- semipaddgt2pop_fitted$f1.hat
-      f2.hat[[l]][[k]] <- semipaddgt2pop_fitted$f2.hat
+      f1.hat[[l]][[k]] <- semipadd2pop_gt_fitted$f1.hat
+      f2.hat[[l]][[k]] <- semipadd2pop_gt_fitted$f2.hat
 
-      f1.hat.design[,,l,k] <- semipaddgt2pop_fitted$f1.hat.design
-      f2.hat.design[,,l,k] <- semipaddgt2pop_fitted$f2.hat.design
+      f1.hat.design[,,l,k] <- semipadd2pop_gt_fitted$f1.hat.design
+      f2.hat.design[,,l,k] <- semipadd2pop_gt_fitted$f2.hat.design
 
-      beta1.hat[,l,k] <- semipaddgt2pop_fitted$beta1.hat
-      beta2.hat[,l,k] <- semipaddgt2pop_fitted$beta2.hat
+      beta1.hat[,l,k] <- semipadd2pop_gt_fitted$beta1.hat
+      beta2.hat[,l,k] <- semipadd2pop_gt_fitted$beta2.hat
 
-      for( fold in 1:n.folds)
-      {
-
-        semipaddgt2pop_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
-                                                                nonparm1 = nonparm1,
-                                                                groups1 = grouplasso2pop_inputs$groups1,
-                                                                knots.list1 = grouplasso2pop_inputs$knots.list1,
-                                                                emp.cent1 = grouplasso2pop_inputs$emp.cent1,
-                                                                QQ1.inv = grouplasso2pop_inputs$QQ1.inv,
-                                                                b1 = grouplassogt2pop_cv_adapt.out$b1.folds.arr[,l,k,fold],
-                                                                X2 = X2,
-                                                                nonparm2 = nonparm2,
-                                                                groups2 = grouplasso2pop_inputs$groups2,
-                                                                knots.list2 = grouplasso2pop_inputs$knots.list2,
-                                                                emp.cent2 = grouplasso2pop_inputs$emp.cent2,
-                                                                QQ2.inv = grouplasso2pop_inputs$QQ2.inv,
-                                                                b2 = grouplassogt2pop_cv_adapt.out$b2.folds.arr[,l,k,fold])
-
-        f1.hat.folds[[l]][[k]][[fold]] <- semipaddgt2pop_fitted$f1.hat
-        f2.hat.folds[[l]][[k]][[fold]] <- semipaddgt2pop_fitted$f2.hat
-
-      }
+      # for( fold in 1:n.folds)
+      # {
+      # 
+      #   semipadd2pop_gt_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
+      #                                                           nonparm1 = nonparm1,
+      #                                                           groups1 = grouplasso2pop_inputs$groups1,
+      #                                                           knots.list1 = grouplasso2pop_inputs$knots.list1,
+      #                                                           emp.cent1 = grouplasso2pop_inputs$emp.cent1,
+      #                                                           QQ1.inv = grouplasso2pop_inputs$QQ1.inv,
+      #                                                           b1 = grouplasso2pop_gt_cv_adapt.out$b1.folds.arr[,l,k,fold],
+      #                                                           X2 = X2,
+      #                                                           nonparm2 = nonparm2,
+      #                                                           groups2 = grouplasso2pop_inputs$groups2,
+      #                                                           knots.list2 = grouplasso2pop_inputs$knots.list2,
+      #                                                           emp.cent2 = grouplasso2pop_inputs$emp.cent2,
+      #                                                           QQ2.inv = grouplasso2pop_inputs$QQ2.inv,
+      #                                                           b2 = grouplasso2pop_gt_cv_adapt.out$b2.folds.arr[,l,k,fold])
+      # 
+      #   f1.hat.folds[[l]][[k]][[fold]] <- semipadd2pop_gt_fitted$f1.hat
+      #   f2.hat.folds[[l]][[k]][[fold]] <- semipadd2pop_gt_fitted$f2.hat
+      # 
+      # }
 
     }
 
@@ -2110,6 +2143,8 @@ semipaddgt2pop_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,n
                   f2.hat.folds = f2.hat.folds,
                   f1.hat.design = f1.hat.design,
                   f2.hat.design = f2.hat.design,
+                  P1.hat = grouplasso2pop_gt_cv_adapt.out$P1.arr,
+                  P2.hat = grouplasso2pop_gt_cv_adapt.out$P2.arr,
                   beta1.hat = beta1.hat,
                   beta2.hat = beta2.hat,
                   rho1 = rho1,
@@ -2129,18 +2164,18 @@ semipaddgt2pop_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,n
                   n.lambda = n.lambda,
                   n.eta = n.eta,
                   n.folds = n.folds,
-                  lambda.seq = grouplassogt2pop_cv_adapt.out$lambda.seq,
-                  eta.seq = grouplassogt2pop_cv_adapt.out$eta.seq,
-                  lambda.initial.fit = grouplassogt2pop_cv_adapt.out$lambda.initial.fit,
-                  which.lambda.cv = grouplassogt2pop_cv_adapt.out$which.lambda.cv,
-                  which.eta.cv = grouplassogt2pop_cv_adapt.out$which.eta.cv,
-                  which.lambda.cv.under.zero.eta = grouplassogt2pop_cv_adapt.out$which.lambda.cv.under.zero.eta,
-                  w1 = grouplassogt2pop_cv_adapt.out$w1,
-                  w2 = grouplassogt2pop_cv_adapt.out$w2,
-                  w = grouplassogt2pop_cv_adapt.out$w,
-                  iterations = grouplassogt2pop_cv_adapt.out$iterations)
+                  lambda.seq = grouplasso2pop_gt_cv_adapt.out$lambda.seq,
+                  eta.seq = grouplasso2pop_gt_cv_adapt.out$eta.seq,
+                  lambda.initial.fit = grouplasso2pop_gt_cv_adapt.out$lambda.initial.fit,
+                  which.lambda.cv = grouplasso2pop_gt_cv_adapt.out$which.lambda.cv,
+                  which.eta.cv = grouplasso2pop_gt_cv_adapt.out$which.eta.cv,
+                  which.lambda.cv.under.zero.eta = grouplasso2pop_gt_cv_adapt.out$which.lambda.cv.under.zero.eta,
+                  w1 = grouplasso2pop_gt_cv_adapt.out$w1,
+                  w2 = grouplasso2pop_gt_cv_adapt.out$w2,
+                  w = grouplasso2pop_gt_cv_adapt.out$w,
+                  iterations = grouplasso2pop_gt_cv_adapt.out$iterations)
 
-  class(output) <- "semipaddgt2pop_cv"
+  class(output) <- "semipadd2pop_gt_cv"
 
   return(output)
 
@@ -2191,14 +2226,11 @@ semipaddgt2pop_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,n
 #' @param max.iter the maximum allowed number of iterations (EM steps)
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the semiparametric additive model with group testing data
-#'
-#' @examples
-#'
 #' @export
-semipaddgt2pop_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,lambda.seq,eta.seq,lambda.initial.fit,n.folds = 5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,E.approx = FALSE,tol=1e-3,max.iter = 1000,report.prog = FALSE)
+semipadd2pop_gt_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,lambda.seq,eta.seq,lambda.initial.fit,n.folds = 5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,E.approx = FALSE,tol=1e-3,max.iter = 1000,report.prog = FALSE)
 {
 
-  # prepare input for grouplassogt2pop function
+  # prepare input for grouplasso2pop_gt function
   grouplasso2pop_inputs <- semipadd2pop_to_grouplasso2pop(X1 = X1,
                                                           nonparm1 = nonparm1,
                                                           X2 = X2,
@@ -2216,7 +2248,7 @@ semipaddgt2pop_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se
                                                           eta.f = eta.f)
 
   # get group lasso estimators over a grid of lambda and eta values on the full data and CV folds
-  grouplassogt2pop_cv_adapt_fixedgrid.out <- grouplassogt2pop_cv_adapt_fixedgrid(Y1 = Y1,
+  grouplasso2pop_gt_cv_adapt_fixedgrid.out <- grouplasso2pop_gt_cv_adapt_fixedgrid(Y1 = Y1,
                                                                                  Z1 = Z1,
                                                                                  Se1 = Se1,
                                                                                  Sp1 = Sp1,
@@ -2259,24 +2291,11 @@ semipaddgt2pop_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se
   f1.hat <- vector("list",n.lambda)
   f2.hat <- vector("list",n.lambda)
 
-  f1.hat.folds <- vector("list",n.lambda)
-  f2.hat.folds <- vector("list",n.lambda)
-
   for(l in 1:n.lambda)
   {
+    
     f1.hat[[l]] <- vector("list",n.eta)
     f2.hat[[l]] <- vector("list",n.eta)
-
-    f1.hat.folds[[l]] <- vector("list",n.eta)
-    f2.hat.folds[[l]] <- vector("list",n.eta)
-
-    for( k in 1:n.eta)
-    {
-
-      f1.hat.folds[[l]][[k]] <- vector("list",n.folds)
-      f2.hat.folds[[l]][[k]] <- vector("list",n.folds)
-
-    }
 
   }
 
@@ -2284,62 +2303,40 @@ semipaddgt2pop_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se
     for(k in 1:n.eta)
     {
 
-      semipaddgt2pop_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
+      semipadd2pop_gt_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
                                                               nonparm1 = nonparm1,
                                                               groups1 = grouplasso2pop_inputs$groups1,
                                                               knots.list1 = grouplasso2pop_inputs$knots.list1,
                                                               emp.cent1 = grouplasso2pop_inputs$emp.cent1,
                                                               QQ1.inv = grouplasso2pop_inputs$QQ1.inv,
-                                                              b1 = grouplassogt2pop_cv_adapt_fixedgrid.out$b1.arr[,l,k],
+                                                              b1 = grouplasso2pop_gt_cv_adapt_fixedgrid.out$b1.arr[,l,k],
                                                               X2 = X2,
                                                               nonparm2 = nonparm2,
                                                               groups2 = grouplasso2pop_inputs$groups2,
                                                               knots.list2 = grouplasso2pop_inputs$knots.list2,
                                                               emp.cent2 = grouplasso2pop_inputs$emp.cent2,
                                                               QQ2.inv = grouplasso2pop_inputs$QQ2.inv,
-                                                              b2 = grouplassogt2pop_cv_adapt_fixedgrid.out$b2.arr[,l,k])
+                                                              b2 = grouplasso2pop_gt_cv_adapt_fixedgrid.out$b2.arr[,l,k])
 
-      f1.hat[[l]][[k]] <- semipaddgt2pop_fitted$f1.hat
-      f2.hat[[l]][[k]] <- semipaddgt2pop_fitted$f2.hat
+      f1.hat[[l]][[k]] <- semipadd2pop_gt_fitted$f1.hat
+      f2.hat[[l]][[k]] <- semipadd2pop_gt_fitted$f2.hat
 
-      f1.hat.design[,,l,k] <- semipaddgt2pop_fitted$f1.hat.design
-      f2.hat.design[,,l,k] <- semipaddgt2pop_fitted$f2.hat.design
+      f1.hat.design[,,l,k] <- semipadd2pop_gt_fitted$f1.hat.design
+      f2.hat.design[,,l,k] <- semipadd2pop_gt_fitted$f2.hat.design
 
-      beta1.hat[,l,k] <- semipaddgt2pop_fitted$beta1.hat
-      beta2.hat[,l,k] <- semipaddgt2pop_fitted$beta2.hat
+      beta1.hat[,l,k] <- semipadd2pop_gt_fitted$beta1.hat
+      beta2.hat[,l,k] <- semipadd2pop_gt_fitted$beta2.hat
 
-      for( fold in 1:n.folds)
-      {
-
-        semipaddgt2pop_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
-                                                                nonparm1 = nonparm1,
-                                                                groups1 = grouplasso2pop_inputs$groups1,
-                                                                knots.list1 = grouplasso2pop_inputs$knots.list1,
-                                                                emp.cent1 = grouplasso2pop_inputs$emp.cent1,
-                                                                QQ1.inv = grouplasso2pop_inputs$QQ1.inv,
-                                                                b1 = grouplassogt2pop_cv_adapt_fixedgrid.out$b1.folds.arr[,l,k,fold],
-                                                                X2 = X2,
-                                                                nonparm2 = nonparm2,
-                                                                groups2 = grouplasso2pop_inputs$groups2,
-                                                                knots.list2 = grouplasso2pop_inputs$knots.list2,
-                                                                emp.cent2 = grouplasso2pop_inputs$emp.cent2,
-                                                                QQ2.inv = grouplasso2pop_inputs$QQ2.inv,
-                                                                b2 = grouplassogt2pop_cv_adapt_fixedgrid.out$b2.folds.arr[,l,k,fold])
-
-        f1.hat.folds[[l]][[k]][[fold]] <- semipaddgt2pop_fitted$f1.hat
-        f2.hat.folds[[l]][[k]][[fold]] <- semipaddgt2pop_fitted$f2.hat
-
-      }
-
+      
     }
 
   # prepare output
   output <- list( f1.hat = f1.hat,
                   f2.hat = f2.hat,
-                  f1.hat.folds = f1.hat.folds,
-                  f2.hat.folds = f2.hat.folds,
                   f1.hat.design = f1.hat.design,
                   f2.hat.design = f2.hat.design,
+                  P1.hat = grouplasso2pop_gt_cv_adapt_fixedgrid.out$P1.arr,
+                  P2.hat = grouplasso2pop_gt_cv_adapt_fixedgrid.out$P2.arr,
                   beta1.hat = beta1.hat,
                   beta2.hat = beta2.hat,
                   rho1 = rho1,
@@ -2362,15 +2359,15 @@ semipaddgt2pop_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se
                   lambda.seq = lambda.seq,
                   eta.seq = eta.seq,
                   lambda.initial.fit = lambda.initial.fit,
-                  which.lambda.cv = grouplassogt2pop_cv_adapt_fixedgrid.out$which.lambda.cv,
-                  which.eta.cv = grouplassogt2pop_cv_adapt_fixedgrid.out$which.eta.cv,
-                  which.lambda.cv.under.zero.eta = grouplassogt2pop_cv_adapt_fixedgrid.out$which.lambda.cv.under.zero.eta,
-                  w1 = grouplassogt2pop_cv_adapt_fixedgrid.out$w1,
-                  w2 = grouplassogt2pop_cv_adapt_fixedgrid.out$w2,
-                  w = grouplassogt2pop_cv_adapt_fixedgrid.out$w,
-                  iterations = grouplassogt2pop_cv_adapt_fixedgrid.out$iterations)
+                  which.lambda.cv = grouplasso2pop_gt_cv_adapt_fixedgrid.out$which.lambda.cv,
+                  which.eta.cv = grouplasso2pop_gt_cv_adapt_fixedgrid.out$which.eta.cv,
+                  which.lambda.cv.under.zero.eta = grouplasso2pop_gt_cv_adapt_fixedgrid.out$which.lambda.cv.under.zero.eta,
+                  w1 = grouplasso2pop_gt_cv_adapt_fixedgrid.out$w1,
+                  w2 = grouplasso2pop_gt_cv_adapt_fixedgrid.out$w2,
+                  w = grouplasso2pop_gt_cv_adapt_fixedgrid.out$w,
+                  iterations = grouplasso2pop_gt_cv_adapt_fixedgrid.out$iterations)
 
-  class(output) <- "semipaddgt2pop_cv"
+  class(output) <- "semipadd2pop_gt_cv"
 
   return(output)
 

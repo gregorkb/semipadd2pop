@@ -39,7 +39,7 @@ SoftThresh_scalar <- function(z, a) {
 #' evecs <- t(eigen.out$vectors)
 #'
 #' # find minimizer
-#' FoygelDrton(h,L,lambda,evals,evecs)
+#' FoygelDrton_Armadillo(h,L,lambda,evals,evecs)
 #'
 #' # compare to using optim() to minimize the same function
 #' obj <- function(beta,L,h,lambda){
@@ -49,6 +49,34 @@ SoftThresh_scalar <- function(z, a) {
 #' optim(par=rep(0,d),obj,L = L, h = h, lambda = lambda)$par
 FoygelDrton_Armadillo <- function(h, L, lambda, evals, evecs) {
     .Call(`_semipaddgt2pop_FoygelDrton_Armadillo`, h, L, lambda, evals, evecs)
+}
+
+#' Minimize the objective function of the group lasso problem with a continuous response
+#'
+#' @param Y the response vector
+#' @param X matrix containing the design matrices
+#' @param groups a vector of integers indicating to which group each covariate belongs
+#' @param lambda the level of sparsity penalization
+#' @param w vector of group-specific weights for different penalization of groups
+#' @param eigen a list of eigen info on groups
+#' @param tol a convergence criterion
+#' @param max.iter the maximum allowed number of iterations
+#' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
+#' @param beta_init optional starting value for beta
+#' @return Returns the minimizer of the group lasso objective function
+#'
+#' @examples
+#' grouplasso_linreg_data <- get_grouplasso_linreg_data(n = 500)
+#' 
+#' grouplasso_linreg.out <- grouplasso_linreg(rY = grouplasso_linreg_data$Y,
+#'                                            rX = grouplasso_linreg_data$X,
+#'                                            groups = grouplasso_linreg_data$groups,
+#'                                            lambda = 10,
+#'                                            w = grouplasso_linreg_data$w,
+#'                                            tol = 1e-4,                               
+#'                                            maxiter = 500)
+grouplasso_linreg <- function(rY, rX, groups, lambda, w, tol, maxiter, beta_init = as.numeric( c())) {
+    .Call(`_semipaddgt2pop_grouplasso_linreg`, rY, rX, groups, lambda, w, tol, maxiter, beta_init)
 }
 
 #' Minimize the objective function of the group lasso problem with a binary response

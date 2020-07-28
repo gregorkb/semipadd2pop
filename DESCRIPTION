@@ -1,11 +1,11 @@
 Package: semipaddgt2pop
 Type: Package
-Title: What the Package Does in One 'Title Case' Line
+Title: Fit semiparametric additive models to group testing data
 Version: 1.0
 Date: 2020-04-24
-Author: Your Name
-Maintainer: Your Name <your@email.com>
-Description: One paragraph description of what the package does as one or more full sentences.
+Author: Karl Gregory
+Maintainer: Karl Gregory <gregorkb@stat.sc.edu>
+Description: Fit semiparametric additive models for logistic regression with group testing data using sparsity and smoothness penalization. Allows for combining two data sets which share some common covariates in the fitted of the common effects.
 License: GPL (>= 2)
 Depends: splines
 Imports: Rcpp (>= 1.0.4)
