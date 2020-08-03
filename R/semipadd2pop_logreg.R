@@ -90,7 +90,7 @@ grouplasso2pop_logreg_obj <- function(beta1,beta2,Y1,X1,groups1,Y2,X2,groups2,rh
 #' @param eigen2 a list of eigen info on groups from data set 2
 #' @param Com the indices of the covariate groups which are common in the two datasets
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations
+#' @param maxiter the maximum allowed number of iterations
 #' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
 #' @param init a list with vectors \code{beta1} and \code{beta2} to serve as initial values for the parameters
 #' @return Returns the minimizers of the 2-population group lasso objective function for the two data sets.
@@ -118,10 +118,10 @@ grouplasso2pop_logreg_obj <- function(beta1,beta2,Y1,X1,groups1,Y2,X2,groups2,rh
 #'                                                    AA2 = grouplasso2pop_logreg_data$AA2,
 #'                                                    Com = grouplasso2pop_logreg_data$Com,
 #'                                                    tol = 1e-4,
-#'                                                    max.iter = 500,
+#'                                                    maxiter = 500,
 #'                                                    plot_obj = TRUE)
 #' @export
-grouplasso2pop_logreg_R <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,lambda,eta,w1,w2,w,AA1,AA2,Com,tol=1e-4,max.iter=500,plot_obj=FALSE,init = NULL)
+grouplasso2pop_logreg_R <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,lambda,eta,w1,w2,w,AA1,AA2,Com,tol=1e-4,maxiter=500,plot_obj=FALSE,init = NULL)
 {
   
   # initialize estimators and convergence criteria
@@ -166,7 +166,7 @@ grouplasso2pop_logreg_R <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,lambda
   lambda2 <- lambda * n2 / rho1 # because it should be rho2/rho1 * lambda * n2 / rho2.
   eta2 <- eta * n2 / rho2
   
-  while( conv > tol & iter < max.iter)
+  while( conv > tol & iter < maxiter)
   {
     
     beta1.hat0 <- beta1.hat1
@@ -462,10 +462,10 @@ grouplasso2pop_logreg_R <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,lambda
 #'                                                              AA2 = grouplasso2pop_logreg_data$AA2,
 #'                                                              Com = grouplasso2pop_logreg_data$Com,
 #'                                                              tol = 1e-3,
-#'                                                              max.iter = 500,
+#'                                                              maxiter = 500,
 #'                                                              report.prog = TRUE)
 #' @export
-grouplasso2pop_logreg_grid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio = 1,w1,w2,w,AA1,AA2,Com,tol=1e-4,max.iter=500,report.prog=FALSE)
+grouplasso2pop_logreg_grid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio = 1,w1,w2,w,AA1,AA2,Com,tol=1e-4,maxiter=500,report.prog=FALSE)
 {
 
   # find lambda.max
@@ -537,7 +537,7 @@ grouplasso2pop_logreg_grid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.l
                                                          rAA2 = AA2,
                                                          rCom = Com,
                                                          tol = tol,
-                                                         maxiter = max.iter,
+                                                         maxiter = maxiter,
                                                          beta1_init = init$beta1,
                                                          beta2_init = init$beta2)
 
@@ -622,7 +622,7 @@ grouplasso2pop_logreg_grid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.l
 #' @param Com the indices of the covariate groups which are common in the two datasets
 #' @return a list containing the fits over a grid of lambda and eta values as well as the vector of lambda values and the vector of eta values
 #' @export
-grouplasso2pop_logreg_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,w1,w2,w,AA1,AA2,Com,tol=1e-4,max.iter=500,report.prog=FALSE)
+grouplasso2pop_logreg_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,w1,w2,w,AA1,AA2,Com,tol=1e-4,maxiter=500,report.prog=FALSE)
 {
 
   n.lambda <- length(lambda.seq)
@@ -661,7 +661,7 @@ grouplasso2pop_logreg_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho
                                                          rAA2 = AA2,
                                                          rCom = Com,
                                                          tol = tol,
-                                                         maxiter = max.iter,
+                                                         maxiter = maxiter,
                                                          beta1_init = init$beta1,
                                                          beta2_init = init$beta2)
 
@@ -726,7 +726,7 @@ grouplasso2pop_logreg_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho
 #' @param AA1 a list of the matrices A2j
 #' @param Com the indices of the covariate groups which are common in the two datasets
 #' @param tol the convergence tolerance
-#' @param max.iter the maximum number of iterations allowed for each fit
+#' @param maxiter the maximum number of iterations allowed for each fit
 #' @return a list containing the fits over a grid of lambda and eta values as well as the vector of lambda values and the vector of eta values
 #' @examples
 #' grouplasso2pop_logreg_data <- get_grouplasso2pop_logreg_data(n1 = 400,n2 = 600)
@@ -749,7 +749,7 @@ grouplasso2pop_logreg_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho
 #'                                                              AA2 = grouplasso2pop_logreg_data$AA2,
 #'                                                              Com = grouplasso2pop_logreg_data$Com,
 #'                                                              tol = 1e-3,
-#'                                                              max.iter = 500,
+#'                                                              maxiter = 500,
 #'                                                              report.prog = TRUE)
 #' 
 #' lambda.seq <- grouplasso2pop_logreg_grid.out$lambda.seq
@@ -777,9 +777,9 @@ grouplasso2pop_logreg_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho
 #'                                                                              AA2 = grouplasso2pop_logreg_data$AA2,
 #'                                                                              Com = grouplasso2pop_logreg_data$Com,
 #'                                                                              tol = 1e-3,
-#'                                                                              max.iter = 500)
+#'                                                                              maxiter = 500)
 #' @export
-grouplasso2pop_logreg_cv_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,n.folds,b1.init.arr,b2.init.arr,w1,w2,w,AA1,AA2,Com,tol=1e-3,max.iter=500)
+grouplasso2pop_logreg_cv_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,n.folds,b1.init.arr,b2.init.arr,w1,w2,w,AA1,AA2,Com,tol=1e-3,maxiter=500)
 {
 
   # create list of sets of indices indicating which observations are in each fold
@@ -847,7 +847,7 @@ grouplasso2pop_logreg_cv_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,
                                                            rAA2 = AA2,
                                                            rCom = Com,
                                                            tol = tol,
-                                                           maxiter = max.iter,
+                                                           maxiter = maxiter,
                                                            beta1_init = b1.init.arr[,l,k],
                                                            beta2_init = b2.init.arr[,l,k])
 
@@ -943,10 +943,10 @@ grouplasso2pop_logreg_cv_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,
 #'                                                          AA2 = grouplasso2pop_logreg_data$AA2,
 #'                                                          Com = grouplasso2pop_logreg_data$Com,
 #'                                                          tol = 1e-3,
-#'                                                          max.iter = 500,
+#'                                                          maxiter = 500,
 #'                                                          report.prog = TRUE)
 #' @export
-grouplasso2pop_logreg_cv <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-4,max.iter=500,report.prog = TRUE){
+grouplasso2pop_logreg_cv <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-4,maxiter=500,report.prog = TRUE){
 
   # obtain lambda.seq and eta.seq from the grid function, as well as the fits on the entire data set,
   # which will be used as initial values for the crossvalidation training fits.
@@ -969,7 +969,7 @@ grouplasso2pop_logreg_cv <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lam
                                                                AA2 = AA2,
                                                                Com = Com,
                                                                tol = tol,
-                                                               max.iter = max.iter,
+                                                               maxiter = maxiter,
                                                                report.prog = report.prog)
 
   lambda.seq <- grouplasso2pop_logreg_grid.out$lambda.seq
@@ -998,7 +998,7 @@ grouplasso2pop_logreg_cv <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lam
                                                                                AA2 = AA2,
                                                                                Com = Com,
                                                                                tol = tol,
-                                                                               max.iter = 500)
+                                                                               maxiter = 500)
 
   output <- list( b1.arr = b1.arr,
                   b2.arr = b2.arr,
@@ -1062,10 +1062,10 @@ grouplasso2pop_logreg_cv <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lam
 #'                                                                      AA2 = grouplasso2pop_logreg_data$AA2,
 #'                                                                      Com = grouplasso2pop_logreg_data$Com,
 #'                                                                      tol = 1e-2,
-#'                                                                      max.iter = 500,
+#'                                                                      maxiter = 500,
 #'                                                                      report.prog = TRUE)
 #' @export
-grouplasso2pop_logreg_cv_adapt <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-3,max.iter=500,report.prog = TRUE){
+grouplasso2pop_logreg_cv_adapt <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-3,maxiter=500,report.prog = TRUE){
 
   # find lambda.max and lambda.min
   q1 <- length(unique(groups1))
@@ -1118,7 +1118,7 @@ grouplasso2pop_logreg_cv_adapt <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2
                                                      rAA2 = AA2,
                                                      rCom = Com,
                                                      tol = tol,
-                                                     maxiter = max.iter)
+                                                     maxiter = maxiter)
 
   # now make new values of w1, w2, and w based on these.
 
@@ -1159,7 +1159,7 @@ grouplasso2pop_logreg_cv_adapt <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2
                                                                AA2 = AA2,
                                                                Com = Com,
                                                                tol = tol,
-                                                               max.iter = max.iter,
+                                                               maxiter = maxiter,
                                                                report.prog = TRUE)
 
   lambda.seq <- grouplasso2pop_logreg_grid.out$lambda.seq
@@ -1188,7 +1188,7 @@ grouplasso2pop_logreg_cv_adapt <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2
                                                                                AA2 = AA2,
                                                                                Com = Com,
                                                                                tol = tol,
-                                                                               max.iter = max.iter)
+                                                                               maxiter = maxiter)
 
   output <- list( b1.arr = b1.arr,
                   b2.arr = b2.arr,
@@ -1252,7 +1252,7 @@ grouplasso2pop_logreg_cv_adapt <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2
 #'                                                              AA2 = grouplasso2pop_logreg_data$AA2,
 #'                                                              Com = grouplasso2pop_logreg_data$Com,
 #'                                                              tol = 1e-3,
-#'                                                              max.iter = 500,
+#'                                                              maxiter = 500,
 #'                                                              report.prog = TRUE)
 #' 
 #' grouplasso2pop_logreg_cv_adapt_fixedgrid.out <- grouplasso2pop_logreg_cv_adapt_fixedgrid(Y1 = grouplasso2pop_logreg_data$Y1,
@@ -1272,7 +1272,7 @@ grouplasso2pop_logreg_cv_adapt <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2
 #'                                                                                          AA2 = grouplasso2pop_logreg_data$AA2,
 #'                                                                                          Com = grouplasso2pop_logreg_data$Com)
 #' @export
-grouplasso2pop_logreg_cv_adapt_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,lambda.initial.fit,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-3,max.iter=500,report.prog = TRUE)
+grouplasso2pop_logreg_cv_adapt_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,lambda.initial.fit,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-3,maxiter=500,report.prog = TRUE)
 {
 
   # get initial fit at small value of lambda and eta = 0
@@ -1294,7 +1294,7 @@ grouplasso2pop_logreg_cv_adapt_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2
                                                      rAA2 = AA2,
                                                      rCom = Com,
                                                      tol = tol,
-                                                     maxiter = max.iter)
+                                                     maxiter = maxiter)
 
   # now make new values of w1, w2, and w based on these.
 
@@ -1336,7 +1336,7 @@ grouplasso2pop_logreg_cv_adapt_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2
                                                                          AA2 = AA2,
                                                                          Com = Com,
                                                                          tol = tol,
-                                                                         max.iter = max.iter,
+                                                                         maxiter = maxiter,
                                                                          report.prog = report.prog)
                                                                     
 
@@ -1361,7 +1361,7 @@ grouplasso2pop_logreg_cv_adapt_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2
                                                                                AA2 = AA2,
                                                                                Com = Com,
                                                                                tol = tol,
-                                                                               max.iter = max.iter)
+                                                                               maxiter = maxiter)
   # collect output
   output <- list( b1.arr = grouplasso2pop_logreg_fixedgrid.out$b1.arr,
                   b2.arr = grouplasso2pop_logreg_fixedgrid.out$b2.arr,
@@ -1407,7 +1407,7 @@ grouplasso2pop_logreg_cv_adapt_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2
 #' @param eta.beta the level of penalization towards model similarity for parametric effects indicated to be common
 #' @param eta.f the level of penalization towards model similarity for nonparametric effects indicated to be common
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations
+#' @param maxiter the maximum allowed number of iterations
 #' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
 #' @return Returns the estimator of the semiparametric additive model
 #'
@@ -1435,7 +1435,7 @@ grouplasso2pop_logreg_cv_adapt_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2
 #'                                                eta.beta = .01,
 #'                                                eta.f = .01,
 #'                                                tol = 1e-3,
-#'                                                max.iter = 500,
+#'                                                maxiter = 500,
 #'                                                plot_obj = FALSE)
 #'
 #' plot_semipaddgt2pop(semipadd2pop_logreg.out,
@@ -1445,7 +1445,7 @@ grouplasso2pop_logreg_cv_adapt_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2
 #'                                         X2 = semipadd2pop_logreg_data$X2)
 #' )
 #' @export
-semipadd2pop_logreg <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,lambda.beta,lambda.f,eta.beta,eta.f,tol=1e-4,max.iter=500,plot_obj=FALSE)
+semipadd2pop_logreg <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,lambda.beta,lambda.f,eta.beta,eta.f,tol=1e-4,maxiter=500,plot_obj=FALSE)
 {
 
   # prepare input for grouplasso2pop function
@@ -1483,7 +1483,7 @@ semipadd2pop_logreg <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,w2,w,
                                                      rAA2 = grouplasso2pop_inputs$AA2.tilde,
                                                      rCom = grouplasso2pop_inputs$Com,
                                                      tol = tol,
-                                                     maxiter = max.iter)
+                                                     maxiter = maxiter)
 
   # construct fitted functions from grouplasso2pop output
   semipadd2pop_fitted <- grouplasso2pop_to_semipadd2pop(X1 = X1,
@@ -1554,7 +1554,7 @@ semipadd2pop_logreg <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,w2,w,
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations
+#' @param maxiter the maximum allowed number of iterations
 #' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
 #' @return Returns the estimator of the semiparametric additive model
 #'
@@ -1585,7 +1585,7 @@ semipadd2pop_logreg <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,w2,w,
 #'                                                          n.eta = 5,
 #'                                                          lambda.min.ratio = .01,
 #'                                                          tol = 1e-3,
-#'                                                          max.iter = 500,
+#'                                                          maxiter = 500,
 #'                                                          report.prog = TRUE)
 #'
 #' plot_semipaddgt2pop_grid(semipadd2pop_logreg_grid.out,
@@ -1595,7 +1595,7 @@ semipadd2pop_logreg <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,w2,w,
 #'                                                X2 = semipadd2pop_logreg_data$X2)
 #' )
 #' @export
-semipadd2pop_logreg_grid <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,tol=1e-3,max.iter = 1000,report.prog = FALSE)
+semipadd2pop_logreg_grid <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,tol=1e-3,maxiter = 1000,report.prog = FALSE)
 {
 
   # prepare input for grouplassogt2pop function
@@ -1635,7 +1635,7 @@ semipadd2pop_logreg_grid <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,
                                                                AA2 = grouplasso2pop_inputs$AA2.tilde,
                                                                Com = grouplasso2pop_inputs$Com,
                                                                tol = tol,
-                                                               max.iter = max.iter,
+                                                               maxiter = maxiter,
                                                                report.prog = report.prog)
 
   # get matrices of the fitted functions evaluated at the design points
@@ -1747,7 +1747,7 @@ semipadd2pop_logreg_grid <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,
 #' @param eta.beta the level of penalization towards model similarity for parametric effects indicated to be common (relative to nonparametric effects)
 #' @param eta.f the level of penalization towards model similarity for nonparametric effects indicated to be common (relative to the parametric effects)
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations
+#' @param maxiter the maximum allowed number of iterations
 #' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
 #' @return Returns the estimator of the semiparametric additive model
 #'
@@ -1779,7 +1779,7 @@ semipadd2pop_logreg_grid <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,
 #'                                                      eta.beta = 1,
 #'                                                      eta.f = 1,
 #'                                                      tol = 1e-3,
-#'                                                      max.iter = 1000,
+#'                                                      maxiter = 1000,
 #'                                                      report.prog = FALSE)
 #'
 #' plot_semipaddgt2pop_cv(semipadd2pop_logreg_cv.out,
@@ -1789,7 +1789,7 @@ semipadd2pop_logreg_grid <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,
 #'                                              X2 = semipadd2pop_logreg_data$X2)
 #' )
 #' @export
-semipadd2pop_logreg_cv <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,n.folds=5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,tol=1e-3,max.iter = 1000,report.prog = FALSE)
+semipadd2pop_logreg_cv <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,n.folds=5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,tol=1e-3,maxiter = 1000,report.prog = FALSE)
 {
 
   # prepare input for grouplassogt2pop function
@@ -1830,7 +1830,7 @@ semipadd2pop_logreg_cv <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,w2
                                                            AA2 = grouplasso2pop_inputs$AA2.tilde,
                                                            Com = grouplasso2pop_inputs$Com,
                                                            tol = tol,
-                                                           max.iter = max.iter,
+                                                           maxiter = maxiter,
                                                            report.prog = report.prog)
 
 
@@ -1984,7 +1984,7 @@ semipadd2pop_logreg_cv <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,w2
 #' @param eta.beta the level of penalization towards model similarity for parametric effects indicated to be common (relative to nonparametric effects)
 #' @param eta.f the level of penalization towards model similarity for nonparametric effects indicated to be common (relative to the parametric effects)
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations
+#' @param maxiter the maximum allowed number of iterations
 #' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
 #' @return Returns the estimator of the semiparametric additive model
 #'
@@ -2016,7 +2016,7 @@ semipadd2pop_logreg_cv <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,w2
 #'                                                      eta.beta = 1,
 #'                                                      eta.f = 1,
 #'                                                      tol = 1e-3,
-#'                                                      max.iter = 1000,
+#'                                                      maxiter = 1000,
 #'                                                      report.prog = FALSE)
 #'
 #' plot_semipaddgt2pop_cv(semipadd2pop_logreg_cv.out,
@@ -2026,7 +2026,7 @@ semipadd2pop_logreg_cv <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1,w2
 #'                                              X2 = semipadd2pop_logreg_data$X2)
 #' )
 #' @export
-semipadd2pop_logreg_cv_adapt <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1=1,w2=1,w=1,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio = .01,lambda.max.ratio=1,n.folds = 5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,tol=1e-3,max.iter = 1000,report.prog = FALSE)
+semipadd2pop_logreg_cv_adapt <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,w1=1,w2=1,w=1,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio = .01,lambda.max.ratio=1,n.folds = 5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,tol=1e-3,maxiter = 1000,report.prog = FALSE)
 {
 
   # prepare input for grouplassogt2pop function
@@ -2067,7 +2067,7 @@ semipadd2pop_logreg_cv_adapt <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2
                                                                        AA2 = grouplasso2pop_inputs$AA2.tilde,
                                                                        Com = grouplasso2pop_inputs$Com,
                                                                        tol = tol,
-                                                                       max.iter = max.iter,
+                                                                       maxiter = maxiter,
                                                                        report.prog = report.prog)
 
   # get matrices of the fitted functions evaluated at the design points
@@ -2224,7 +2224,7 @@ semipadd2pop_logreg_cv_adapt <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2
 #' @param eta.beta the level of penalization towards model similarity for parametric effects indicated to be common (relative to nonparametric effects)
 #' @param eta.f the level of penalization towards model similarity for nonparametric effects indicated to be common (relative to the parametric effects)
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations
+#' @param maxiter the maximum allowed number of iterations
 #' @return Returns the estimator of the semiparametric additive model
 #'
 #' @examples
@@ -2252,7 +2252,7 @@ semipadd2pop_logreg_cv_adapt <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2
 #'                                                                   eta.beta = 1,
 #'                                                                   eta.f = 1,
 #'                                                                   tol = 1e-3,
-#'                                                                   max.iter = 1000,
+#'                                                                   maxiter = 1000,
 #'                                                                   report.prog = FALSE)
 #'
 #' semipadd2pop_logreg_cv_adapt_fixedgrid.out <- semipadd2pop_logreg_cv_adapt_fixedgrid(Y1 = semipadd2pop_logreg_data$Y1,
@@ -2277,7 +2277,7 @@ semipadd2pop_logreg_cv_adapt <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2
 #'                                                                                      eta.beta = 1,
 #'                                                                                      eta.f = 1,
 #'                                                                                      tol = 1e-2,
-#'                                                                                      max.iter = 500)
+#'                                                                                      maxiter = 500)
 #'
 #' plot_semipaddgt2pop_cv(semipadd2pop_logreg_cv_adapt_fixedgrid.out,
 #'                        true.functions = list(f1 = semipadd2pop_logreg_data$f1,
@@ -2286,7 +2286,7 @@ semipadd2pop_logreg_cv_adapt <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2
 #'                                              X2 = semipadd2pop_logreg_data$X2)
 #' )
 #' @export
-semipadd2pop_logreg_cv_adapt_fixedgrid <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,nCom,d1,d2,xi,w1,w2,w,lambda.seq,eta.seq,lambda.initial.fit,n.folds=5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,tol=1e-3,max.iter = 1000,report.prog = FALSE)
+semipadd2pop_logreg_cv_adapt_fixedgrid <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,rho1,rho2,nCom,d1,d2,xi,w1,w2,w,lambda.seq,eta.seq,lambda.initial.fit,n.folds=5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,tol=1e-3,maxiter = 1000,report.prog = FALSE)
 {
 
   # prepare input for grouplassogt2pop function
@@ -2326,7 +2326,7 @@ semipadd2pop_logreg_cv_adapt_fixedgrid <- function(Y1,X1,nonparm1,Y2,X2,nonparm2
                                                                                            AA2 = grouplasso2pop_inputs$AA2.tilde,
                                                                                            Com = grouplasso2pop_inputs$Com,
                                                                                            tol = tol,
-                                                                                           max.iter = max.iter,
+                                                                                           maxiter = maxiter,
                                                                                            report.prog = report.prog)
   
   which.lambda.cv <- grouplasso2pop_logreg_cv_adapt_fixedgrid.out$which.lambda.cv

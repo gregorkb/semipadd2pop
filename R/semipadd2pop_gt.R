@@ -33,7 +33,7 @@
 #' @param Com the indices of the covariate groups which are common in the two datasets
 #' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations (EM steps)
+#' @param maxiter the maximum allowed number of iterations (EM steps)
 #' @param init a list of initial values for the coefficient for each of the two data sets
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the semiparametric additive model with group testing data
@@ -63,10 +63,10 @@
 #'                                          AA2  = grouplasso2pop_gt_data$AA2,
 #'                                          Com  = grouplasso2pop_gt_data$Com,
 #'                                          tol = 1e-3,
-#'                                          max.iter = 500,
+#'                                          maxiter = 500,
 #'                                          report.prog = TRUE)
 #' @export
-grouplasso2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,lambda,eta,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,init=NULL,report.prog=TRUE)
+grouplasso2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,lambda,eta,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,maxiter=1000,init=NULL,report.prog=TRUE)
 {
 
   # set function to get conditional expectations
@@ -89,7 +89,7 @@ grouplasso2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,
   conv <- 1
   iter <- 0
   inner.iter <- numeric()
-  while( conv > tol & iter < max.iter)
+  while( conv > tol & iter < maxiter)
   {
 
     beta1.hat0 <- beta1.hat1
@@ -121,7 +121,7 @@ grouplasso2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,
                                                        rAA2 = AA2,
                                                        rCom = Com,
                                                        tol = tol,
-                                                       maxiter = max.iter,
+                                                       maxiter = maxiter,
                                                        beta1_init = init$beta1,
                                                        beta2_init = init$beta2)
 
@@ -177,11 +177,11 @@ grouplasso2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,
 #' @param Com the indices of the covariate groups which are common in the two datasets
 #' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations (EM steps)
+#' @param maxiter the maximum allowed number of iterations (EM steps)
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the parametric model with group testing data
 #' @export
-grouplasso2pop_gt_grid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,report.prog=TRUE)
+grouplasso2pop_gt_grid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,maxiter=1000,report.prog=TRUE)
 {
   # pull the individual diagnoses to be treated as true disease statuses to find the sequence of lambda values.
   # later on think about how to do this without individual diagnoses, e.g. under master pool testing.
@@ -265,7 +265,7 @@ grouplasso2pop_gt_grid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,gro
                                                Com = Com,
                                                E.approx = E.approx,
                                                tol = tol,
-                                               max.iter = max.iter,
+                                               maxiter = maxiter,
                                                init = init,
                                                report.prog = FALSE)
 
@@ -361,11 +361,11 @@ grouplasso2pop_gt_grid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,gro
 #' @param Com the indices of the covariate groups which are common in the two datasets
 #' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations (EM steps)
+#' @param maxiter the maximum allowed number of iterations (EM steps)
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the parametric model with group testing data
 #' @export
-grouplasso2pop_gt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,report.prog=TRUE)
+grouplasso2pop_gt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,maxiter=1000,report.prog=TRUE)
 {
 
   n.lambda <- length(lambda.seq)
@@ -408,7 +408,7 @@ grouplasso2pop_gt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X
                                                Com = Com,
                                                E.approx = E.approx,
                                                tol = tol,
-                                               max.iter = max.iter,
+                                               maxiter = maxiter,
                                                init = init,
                                                report.prog = FALSE)
 
@@ -483,7 +483,7 @@ grouplasso2pop_gt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X
 #' @param Com the indices of the covariate groups which are common in the two datasets
 #' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations (EM steps)
+#' @param maxiter the maximum allowed number of iterations (EM steps)
 #' @return a list containing the fits over a grid of lambda and eta values as well as the vector of lambda values and the vector of eta values
 #'
 #' @examples
@@ -513,7 +513,7 @@ grouplasso2pop_gt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X
 #'                                                    AA2 = grouplasso2pop_gt_data$AA2,
 #'                                                    Com = grouplasso2pop_gt_data$Com,
 #'                                                    tol = 1e-2,
-#'                                                    max.iter = 500,
+#'                                                    maxiter = 500,
 #'                                                    report.prog = TRUE)
 #'
 #' grouplasso2pop_gt_cv_fixedgrid.out <- grouplasso2pop_gt_cv_fixedgrid(Y1 = grouplasso2pop_gt_data$Y1,
@@ -542,9 +542,9 @@ grouplasso2pop_gt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X
 #'                                                                    AA2 = grouplasso2pop_gt_data$AA2,
 #'                                                                    Com = grouplasso2pop_gt_data$Com,
 #'                                                                    tol = 1e-2,
-#'                                                                    max.iter = 500)
+#'                                                                    maxiter = 500)
 #' @export
-grouplasso2pop_gt_cv_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,n.folds,b1.init.arr,b2.init.arr,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=500,report.prog = TRUE)
+grouplasso2pop_gt_cv_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,n.folds,b1.init.arr,b2.init.arr,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,maxiter=500,report.prog = TRUE)
 {
 
   # for now just use the diagnoses as the true responses and use the logreg fits on these
@@ -621,7 +621,7 @@ grouplasso2pop_gt_cv_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp
         #                                          Com = Com,
         #                                          E.approx = E.approx,
         #                                          tol = tol,
-        #                                          max.iter = max.iter,
+        #                                          maxiter = maxiter,
         #                                          init = list(beta1 = b1.init.arr[,l,k],
         #                                                      beta2 = b2.init.arr[,l,k]),
         #                                          report.prog=TRUE)
@@ -643,7 +643,7 @@ grouplasso2pop_gt_cv_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp
                                                            rAA2 = AA2,
                                                            rCom = Com,
                                                            tol = tol,
-                                                           maxiter = max.iter,
+                                                           maxiter = maxiter,
                                                            beta1_init = b1.init.arr[,l,k],
                                                            beta2_init = b2.init.arr[,l,k])
 
@@ -736,7 +736,7 @@ grouplasso2pop_gt_cv_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp
 #' @param Com the indices of the covariate groups which are common in the two datasets
 #' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations (EM steps)
+#' @param maxiter the maximum allowed number of iterations (EM steps)
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the parametric model with group testing data
 #' 
@@ -769,10 +769,10 @@ grouplasso2pop_gt_cv_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp
 #'                                                AA2 = grouplasso2pop_gt_data$AA2,
 #'                                                Com = grouplasso2pop_gt_data$Com,
 #'                                                tol = 1e-2,
-#'                                                max.iter = 500,
+#'                                                maxiter = 500,
 #'                                                report.prog = TRUE)
 #' @export
-grouplasso2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio,n.folds,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,report.prog=TRUE){
+grouplasso2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio,n.folds,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,maxiter=1000,report.prog=TRUE){
 
   # obtain lambda.seq and eta.seq from the grid function, as well as the fits on the entire data set,
   # which will be used as initial values for the crossvalidation training fits.
@@ -802,7 +802,7 @@ grouplasso2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,group
                                                      Com = Com,
                                                      E.approx = E.approx,
                                                      tol = tol,
-                                                     max.iter = max.iter,
+                                                     maxiter = maxiter,
                                                      report.prog = report.prog)
 
   lambda.seq <- grouplasso2pop_gt_grid.out$lambda.seq
@@ -838,7 +838,7 @@ grouplasso2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,group
                                                                      Com = Com,
                                                                      E.approx = E.approx,
                                                                      tol = tol,
-                                                                     max.iter = max.iter)
+                                                                     maxiter = maxiter)
 
   output <- list( b1.arr = b1.arr,
                   b2.arr = b2.arr,
@@ -893,7 +893,7 @@ grouplasso2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,group
 #' @param Com the indices of the covariate groups which are common in the two datasets
 #' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations (EM steps)
+#' @param maxiter the maximum allowed number of iterations (EM steps)
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the parametric model with group testing data
 #'
@@ -925,10 +925,10 @@ grouplasso2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,group
 #'                                                            AA2 = grouplasso2pop_gt_data$AA2,
 #'                                                            Com = grouplasso2pop_gt_data$Com,
 #'                                                            tol = 1e-2,
-#'                                                            max.iter = 500,
+#'                                                            maxiter = 500,
 #'                                                            report.prog = TRUE)
 #' @export
-grouplasso2pop_gt_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio,n.folds,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,report.prog=TRUE)
+grouplasso2pop_gt_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio,n.folds,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,maxiter=1000,report.prog=TRUE)
 {
 
   # pull the individual diagnoses to be treated as true disease statuses to find the sequence of lambda values.
@@ -992,7 +992,7 @@ grouplasso2pop_gt_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2
                                            Com = Com,
                                            E.approx = E.approx,
                                            tol = tol,
-                                           max.iter = max.iter,
+                                           maxiter = maxiter,
                                            report.prog = FALSE)
 
   # now make new values of w1, w2, and w based on these.
@@ -1040,7 +1040,7 @@ grouplasso2pop_gt_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2
                                                      Com = Com,
                                                      E.approx = E.approx,
                                                      tol = tol,
-                                                     max.iter = max.iter,
+                                                     maxiter = maxiter,
                                                      report.prog = report.prog)
 
 
@@ -1073,7 +1073,7 @@ grouplasso2pop_gt_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2
                                                                      Com = Com,
                                                                      E.approx = E.approx,
                                                                      tol = tol,
-                                                                     max.iter = max.iter,
+                                                                     maxiter = maxiter,
                                                                      report.prog = report.prog)
 
   output <- list( b1.arr = grouplasso2pop_gt_grid.out$b1.arr,
@@ -1134,12 +1134,12 @@ grouplasso2pop_gt_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2
 #' @param Com the indices of the covariate groups which are common in the two datasets
 #' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations (EM steps)
+#' @param maxiter the maximum allowed number of iterations (EM steps)
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the parametric model with group testing data
 #'
 #' @export
-grouplasso2pop_gt_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,lambda.initial.fit,n.folds,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,max.iter=1000,report.prog=TRUE){
+grouplasso2pop_gt_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,Se2,Sp2,X2,groups2,rho1,rho2,lambda.seq,eta.seq,lambda.initial.fit,n.folds,w1,w2,w,AA1,AA2,Com,E.approx = FALSE,tol=1e-3,maxiter=1000,report.prog=TRUE){
 
   # fit a grouplasso2pop with eta = 0 and lambda as lambda.min.ratio*lambda.max.
   grouplasso2pop_gt.out <- grouplasso2pop_gt(Y1 = Y1,
@@ -1166,7 +1166,7 @@ grouplasso2pop_gt_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,
                                            Com = Com,
                                            E.approx = E.approx,
                                            tol = tol,
-                                           max.iter = max.iter,
+                                           maxiter = maxiter,
                                            report.prog = FALSE)
 
   # now make new values of w1, w2, and w based on these.
@@ -1216,7 +1216,7 @@ grouplasso2pop_gt_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,
                                                                Com = Com,
                                                                E.approx = E.approx,
                                                                tol = tol,
-                                                               max.iter = max.iter,
+                                                               maxiter = maxiter,
                                                                report.prog = report.prog)
 
   # do the crossvalidation
@@ -1247,7 +1247,7 @@ grouplasso2pop_gt_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,
                                                                      Com = Com,
                                                                      E.approx = E.approx,
                                                                      tol = tol,
-                                                                     max.iter = max.iter,
+                                                                     maxiter = maxiter,
                                                                      report.prog = report.prog)
 
   # collect output
@@ -1311,7 +1311,7 @@ grouplasso2pop_gt_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,
 #' @param eta.f the level of penalization towards model similarity for nonparametric effects indicated to be common
 #' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations (EM steps)
+#' @param maxiter the maximum allowed number of iterations (EM steps)
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the semiparametric additive model with group testing data
 #'
@@ -1344,7 +1344,7 @@ grouplasso2pop_gt_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,
 #'                                      eta.beta = 1,
 #'                                      eta.f = 1,
 #'                                      tol = 1e-2,
-#'                                      max.iter = 500,
+#'                                      maxiter = 500,
 #'                                      report.prog = TRUE)
 #'
 #' plot_semipadd2pop_gt(semipadd2pop_gt.out,
@@ -1354,7 +1354,7 @@ grouplasso2pop_gt_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,Y2,Z2,
 #'                                         X2 = semipadd2pop_gt_data$X2)
 #' )
 #' @export
-semipadd2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,lambda.beta,lambda.f,eta.beta,eta.f,E.approx = FALSE,tol=1e-3,max.iter=500,report.prog=FALSE)
+semipadd2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,lambda.beta,lambda.f,eta.beta,eta.f,E.approx = FALSE,tol=1e-3,maxiter=500,report.prog=FALSE)
 {
 
   # prepare input for grouplasso2pop_gt function
@@ -1399,7 +1399,7 @@ semipadd2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,
                                            Com = grouplasso2pop_inputs$Com,
                                            E.approx = E.approx,
                                            tol = tol,
-                                           max.iter = max.iter,
+                                           maxiter = maxiter,
                                            init = NULL,
                                            report.prog = report.prog)
 
@@ -1487,7 +1487,7 @@ semipadd2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,
 #' @param eta.f the level of penalization towards model similarity for nonparametric effects indicated to be common (relative to the parametric effects)
 #' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations (EM steps)
+#' @param maxiter the maximum allowed number of iterations (EM steps)
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the semiparametric additive model with group testing data
 #'
@@ -1523,7 +1523,7 @@ semipadd2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,
 #'                                                eta.beta = 1,
 #'                                                eta.f = 1,
 #'                                                tol = 1e-2,
-#'                                                max.iter = 500,
+#'                                                maxiter = 500,
 #'                                                report.prog = TRUE)
 #'
 #' plot_semipadd2pop_gt_grid(semipadd2pop_gt_grid.out,
@@ -1533,7 +1533,7 @@ semipadd2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,
 #'                                                X2 = semipadd2pop_gt_data$X2)
 #' )
 #' @export
-semipadd2pop_gt_grid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,E.approx = FALSE,tol=1e-3,max.iter = 1000,report.prog = FALSE)
+semipadd2pop_gt_grid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,E.approx = FALSE,tol=1e-3,maxiter = 1000,report.prog = FALSE)
 {
 
   # prepare input for grouplasso2pop function
@@ -1580,7 +1580,7 @@ semipadd2pop_gt_grid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonp
                                                      Com = grouplasso2pop_inputs$Com,
                                                      E.approx = E.approx,
                                                      tol = tol,
-                                                     max.iter = max.iter,
+                                                     maxiter = maxiter,
                                                      report.prog = report.prog)
 
   # get matrices of the fitted functions evaluated at the design points
@@ -1693,7 +1693,7 @@ semipadd2pop_gt_grid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonp
 #' @param eta.f the level of penalization towards model similarity for nonparametric effects indicated to be common (relative to the parametric effects)
 #' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations (EM steps)
+#' @param maxiter the maximum allowed number of iterations (EM steps)
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the semiparametric additive model with group testing data
 #'
@@ -1729,7 +1729,7 @@ semipadd2pop_gt_grid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonp
 #'                                            eta.beta = 1,
 #'                                            eta.f = 1,
 #'                                            tol = 1e-2,
-#'                                            max.iter = 500,
+#'                                            maxiter = 500,
 #'                                            report.prog = TRUE)
 #'
 #' plot_semipadd2pop_gt_cv(semipadd2pop_gt_cv.out,
@@ -1739,7 +1739,7 @@ semipadd2pop_gt_grid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonp
 #'                                              X2 = semipadd2pop_gt_data$X2)
 #' )
 #' @export
-semipadd2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,n.folds = 5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,E.approx = FALSE,tol=1e-3,max.iter = 1000,report.prog = FALSE)
+semipadd2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,n.folds = 5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,E.approx = FALSE,tol=1e-3,maxiter = 1000,report.prog = FALSE)
 {
 
   # prepare input for grouplasso2pop_gt function
@@ -1787,7 +1787,7 @@ semipadd2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonpar
                                                  Com = grouplasso2pop_inputs$Com,
                                                  E.approx = E.approx,
                                                  tol = tol,
-                                                 max.iter = max.iter,
+                                                 maxiter = maxiter,
                                                  report.prog = report.prog)
 
   # get matrices of the fitted functions evaluated at the design points
@@ -1955,7 +1955,7 @@ semipadd2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonpar
 #' @param eta.f the level of penalization towards model similarity for nonparametric effects indicated to be common (relative to the parametric effects)
 #' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations (EM steps)
+#' @param maxiter the maximum allowed number of iterations (EM steps)
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the semiparametric additive model with group testing data
 #'
@@ -1991,7 +1991,7 @@ semipadd2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonpar
 #'                                            eta.beta = 1,
 #'                                            eta.f = 1,
 #'                                            tol = 1e-2,
-#'                                            max.iter = 500,
+#'                                            maxiter = 500,
 #'                                            report.prog = TRUE)
 #'
 #' plot_semipadd2pop_gt_cv(semipadd2pop_gt_cv.out,
@@ -2001,7 +2001,7 @@ semipadd2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonpar
 #'                                              X2 = semipadd2pop_gt_data$X2)
 #' )
 #' @export
-semipadd2pop_gt_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,n.folds = 5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,E.approx = FALSE,tol=1e-3,max.iter = 1000,report.prog = FALSE)
+semipadd2pop_gt_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,n.folds = 5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,E.approx = FALSE,tol=1e-3,maxiter = 1000,report.prog = FALSE)
 {
 
   # prepare input for grouplasso2pop_gt function
@@ -2049,7 +2049,7 @@ semipadd2pop_gt_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,
                                                              Com = grouplasso2pop_inputs$Com,
                                                              E.approx = E.approx,
                                                              tol = tol,
-                                                             max.iter = max.iter,
+                                                             maxiter = maxiter,
                                                              report.prog = report.prog)
 
   # get matrices of the fitted functions evaluated at the design points
@@ -2223,11 +2223,11 @@ semipadd2pop_gt_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,
 #' @param eta.f the level of penalization towards model similarity for nonparametric effects indicated to be common (relative to the parametric effects)
 #' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations (EM steps)
+#' @param maxiter the maximum allowed number of iterations (EM steps)
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the semiparametric additive model with group testing data
 #' @export
-semipadd2pop_gt_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,lambda.seq,eta.seq,lambda.initial.fit,n.folds = 5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,E.approx = FALSE,tol=1e-3,max.iter = 1000,report.prog = FALSE)
+semipadd2pop_gt_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,Se2,Sp2,X2,nonparm2,rho1,rho2,w1,w2,w,nCom,d1,d2,xi,lambda.seq,eta.seq,lambda.initial.fit,n.folds = 5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,E.approx = FALSE,tol=1e-3,maxiter = 1000,report.prog = FALSE)
 {
 
   # prepare input for grouplasso2pop_gt function
@@ -2274,7 +2274,7 @@ semipadd2pop_gt_cv_adapt_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,nonparm1,Y2,Z2,S
                                                                                  Com = grouplasso2pop_inputs$Com,
                                                                                  E.approx = E.approx,
                                                                                  tol = tol,
-                                                                                 max.iter = max.iter,
+                                                                                 maxiter = maxiter,
                                                                                  report.prog = report.prog)
 
   # get matrices of the fitted functions evaluated at the design points

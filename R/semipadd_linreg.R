@@ -39,7 +39,7 @@ grouplasso_linreg_obj <- function(beta,Y,X,groups,lambda,w)
 #' @param lambda the level of sparsity penalization
 #' @param w group-specific weights for different penalization across groups
 #' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations
+#' @param maxiter the maximum allowed number of iterations
 #' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
 #' @return Returns the minimizer of the group lasso objective function
 #'
@@ -54,10 +54,10 @@ grouplasso_linreg_obj <- function(beta,Y,X,groups,lambda,w)
 #'                                              lambda = 10,
 #'                                              w = grouplasso_linreg_data$w,
 #'                                              tol = 1e-4,
-#'                                              max.iter = 500,
+#'                                              maxiter = 500,
 #'                                              plot_obj = TRUE)
 #' @export
-grouplasso_linreg_R <- function(Y,X,groups,lambda,w,tol=1e-4,max.iter=500,plot_obj=FALSE,init = NULL)
+grouplasso_linreg_R <- function(Y,X,groups,lambda,w,tol=1e-4,maxiter=500,plot_obj=FALSE,init = NULL)
 {
 
   # initialize estimators and convergence criteria
@@ -86,7 +86,7 @@ grouplasso_linreg_R <- function(Y,X,groups,lambda,w,tol=1e-4,max.iter=500,plot_o
   nonsingleton.grps <- which(d != 1)
   obj.val <- numeric()
   
-  while( conv > tol & iter < max.iter)
+  while( conv > tol & iter < maxiter)
   {
     
     beta.hat0 <- beta.hat1
@@ -184,10 +184,10 @@ grouplasso_linreg_R <- function(Y,X,groups,lambda,w,tol=1e-4,max.iter=500,plot_o
 #'                                                      lambda.max.ratio = 0.1,
 #'                                                      w = grouplasso_linreg_data$w,
 #'                                                      tol = 1e-3,
-#'                                                      max.iter = 500,
+#'                                                      maxiter = 500,
 #'                                                      report.prog = TRUE)
 #' @export
-grouplasso_linreg_grid <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.max.ratio=1,w,tol=1e-4,max.iter=500,report.prog=FALSE)
+grouplasso_linreg_grid <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.max.ratio=1,w,tol=1e-4,maxiter=500,report.prog=FALSE)
 {
 
   # find lambda.max
@@ -231,7 +231,7 @@ grouplasso_linreg_grid <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.m
                                                  lambda = lambda.seq[l],
                                                  w = w,
                                                  tol = tol,
-                                                 maxiter = max.iter,
+                                                 maxiter = maxiter,
                                                  beta_init = init)
 
       b <- grouplasso_linreg.out$beta.hat
@@ -269,7 +269,7 @@ grouplasso_linreg_grid <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.m
 #' @param n.folds the number of crossvalidation folds
 #' @param w group-specific weights for different penalization of different groups
 #' @param tol the convergence tolerance
-#' @param max.iter the maximum number of iterations allowed for each fit
+#' @param maxiter the maximum number of iterations allowed for each fit
 #' @return a list containing the fits over a grid of lambda values as well as the vector of lambda values
 #' @examples
 #' grouplasso_linreg_data <- get_grouplasso_linreg_data(n = 100)
@@ -282,7 +282,7 @@ grouplasso_linreg_grid <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.m
 #'                                                      lambda.max.ratio = 0.1,
 #'                                                      w = grouplasso_linreg_data$w,
 #'                                                      tol = 1e-3,
-#'                                                      max.iter = 500,
+#'                                                      maxiter = 500,
 #'                                                      report.prog = FALSE)
 #' 
 #' grouplasso_linreg_cv_fixedgrid.out <- grouplasso_linreg_cv_fixedgrid(Y = grouplasso_linreg_data$Y,
@@ -293,9 +293,9 @@ grouplasso_linreg_grid <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.m
 #'                                                                      b.init.mat = grouplasso_linreg_grid.out$b.mat,
 #'                                                                      w = grouplasso_linreg_data$w,
 #'                                                                      tol = 1e-3,
-#'                                                                      max.iter = 500)
+#'                                                                      maxiter = 500)
 #' @export
-grouplasso_linreg_cv_fixedgrid <- function(Y,X,groups,lambda.seq,n.folds,b.init.mat,w,tol=1e-3,max.iter=500)
+grouplasso_linreg_cv_fixedgrid <- function(Y,X,groups,lambda.seq,n.folds,b.init.mat,w,tol=1e-3,maxiter=500)
 {
 
   # create list of sets of indices indicating which observations are in each fold
@@ -339,7 +339,7 @@ grouplasso_linreg_cv_fixedgrid <- function(Y,X,groups,lambda.seq,n.folds,b.init.
                                                    lambda = lambda.seq[l]*(n.folds - 1)/n.folds,
                                                    w = w,
                                                    tol = tol,
-                                                   maxiter = max.iter,
+                                                   maxiter = maxiter,
                                                    beta_init = b.init.mat[,l])
 
         b.fold <- grouplasso_linreg.out$beta.hat
@@ -393,10 +393,10 @@ grouplasso_linreg_cv_fixedgrid <- function(Y,X,groups,lambda.seq,n.folds,b.init.
 #'                                                  n.folds = 5,
 #'                                                  w = grouplasso_linreg_data$w,
 #'                                                  tol = 1e-3,
-#'                                                  max.iter = 500,
+#'                                                  maxiter = 500,
 #'                                                  report.prog = FALSE)
 #' @export
-grouplasso_linreg_cv <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.max.ratio=1,n.folds,w,tol=1e-4,max.iter=500,report.prog = TRUE){
+grouplasso_linreg_cv <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.max.ratio=1,n.folds,w,tol=1e-4,maxiter=500,report.prog = TRUE){
 
   # obtain lambda.seq from the grid function, as well as the fits on the entire data set,
   # which will be used as initial values for the crossvalidation training fits.
@@ -408,7 +408,7 @@ grouplasso_linreg_cv <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.max
                                                        lambda.max.ratio = lambda.max.ratio,
                                                        w = w,
                                                        tol = tol,
-                                                       max.iter = max.iter,
+                                                       maxiter = maxiter,
                                                        report.prog = report.prog)
 
   lambda.seq <- grouplasso_linreg_grid.out$lambda.seq
@@ -423,7 +423,7 @@ grouplasso_linreg_cv <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.max
                                                                        b.init.mat = b.mat,
                                                                        w = w,
                                                                        tol = tol,
-                                                                       max.iter = 500)
+                                                                       maxiter = 500)
 
   output <- list( b.mat = b.mat,
                   b.folds.arr = grouplasso_linreg_cv_fixedgrid.out$b.folds.arr,
@@ -460,10 +460,10 @@ grouplasso_linreg_cv <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.max
 #'                                                              n.folds = 5,
 #'                                                              w = grouplasso_linreg_data$w,
 #'                                                              tol = 1e-3,
-#'                                                              max.iter = 500,
+#'                                                              maxiter = 500,
 #'                                                              report.prog = FALSE)
 #' @export
-grouplasso_linreg_cv_adapt <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.max.ratio=1,n.folds,w,tol=1e-3,max.iter=500,report.prog = TRUE){
+grouplasso_linreg_cv_adapt <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.max.ratio=1,n.folds,w,tol=1e-3,maxiter=500,report.prog = TRUE){
 
 
   # find lambda.max
@@ -493,7 +493,7 @@ grouplasso_linreg_cv_adapt <- function(Y,X,groups,n.lambda,lambda.min.ratio,lamb
                                              lambda = lambda.initial.fit,
                                              w = w,
                                              tol = tol,
-                                             maxiter = max.iter)
+                                             maxiter = maxiter)
 
 
   # now make a new value of w based on this initial fit
@@ -513,7 +513,7 @@ grouplasso_linreg_cv_adapt <- function(Y,X,groups,n.lambda,lambda.min.ratio,lamb
                                                        lambda.max.ratio = lambda.max.ratio,
                                                        w = w,
                                                        tol = tol,
-                                                       max.iter = max.iter,
+                                                       maxiter = maxiter,
                                                        report.prog = report.prog)
 
   lambda.seq <- grouplasso_linreg_grid.out$lambda.seq
@@ -528,7 +528,7 @@ grouplasso_linreg_cv_adapt <- function(Y,X,groups,n.lambda,lambda.min.ratio,lamb
                                                                        b.init.mat = b.mat,
                                                                        w = w,
                                                                        tol = tol,
-                                                                       max.iter = max.iter)
+                                                                       maxiter = maxiter)
 
   output <- list( b.mat = b.mat,
                   b.folds.arr = grouplasso_linreg_cv_fixedgrid.out$b.folds.arr,
@@ -538,471 +538,6 @@ grouplasso_linreg_cv_adapt <- function(Y,X,groups,n.lambda,lambda.min.ratio,lamb
                   lambda.initial.fit = lambda.initial.fit,
                   w = w,
                   iterations = grouplasso_linreg_cv_fixedgrid.out$iterations)
-
-  return(output)
-
-}
-
-#' Fit semiparametric regression model on continuous-response data
-#'
-#' @param Y the response vector
-#' @param X the matrix with the observed covariate values (including a column of ones for the intercept)
-#' @param nonparm a vector indicating for which covariates a nonparametric function is to be estimated
-#' @param w covariate-specific weights for different penalization toward similarity for different covariates
-#' @param d vector giving the dimensions the  B-spline bases to be used when fitting the nonparametric effects. If a scalar is given, this dimension is used for all nonparametric effects.
-#' @param xi a tuning parameter governing the smoothness of the nonparametric estimates
-#' @param lambda.beta the level of sparsity penalization for the parametric effects
-#' @param lambda.f the level of sparsity penalization for the nonparametric effects
-#' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations
-#' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
-#' @return Returns the estimator of the semiparametric additive model
-#'
-#' @examples
-#' semipadd_linreg_data <- get_semipadd_linreg_data(n = 200)
-#' 
-#' semipadd_linreg.out <- semipadd_linreg(Y = semipadd_linreg_data$Y,
-#'                                        X = semipadd_linreg_data$X,
-#'                                        nonparm = semipadd_linreg_data$nonparm,
-#'                                        w = 1,
-#'                                        d = 20,
-#'                                        xi = 2,
-#'                                        lambda.beta = 1,
-#'                                        lambda.f = 1,
-#'                                        tol = 1e-3,
-#'                                        max.iter = 500,
-#'                                        plot_obj = FALSE)
-#' 
-#' plot_semipaddgt(semipadd_linreg.out,
-#'                 true.functions = list(f = semipadd_linreg_data$f,
-#'                                       X = semipadd_linreg_data$X)
-#'                 
-#' )
-#' @export
-semipadd_linreg <- function(Y,X,nonparm,w,d,xi,lambda.beta,lambda.f,tol=1e-4,max.iter=500,plot_obj=FALSE)
-{
-
-  # prepare input for grouplasso function
-  grouplasso_inputs <- semipadd_to_grouplasso(X = X,
-                                              nonparm = nonparm,
-                                              d = d,
-                                              xi = xi,
-                                              w = w,
-                                              lambda.beta = lambda.beta,
-                                              lambda.f = lambda.f)
-
-  # get group lasso estimators
-  grouplasso_linreg.out <- grouplasso_linreg(rY = Y,
-                                             rX = grouplasso_inputs$DD.tilde,
-                                             groups = grouplasso_inputs$groups,
-                                             lambda = grouplasso_inputs$lambda,
-                                             w = grouplasso_inputs$w,
-                                             tol = tol,
-                                             maxiter = max.iter)
-
-  # construct fitted functions from grouplasso output
-  semipadd_fitted <- grouplasso_to_semipadd(X = X,
-                                            nonparm = nonparm,
-                                            groups = grouplasso_inputs$groups,
-                                            knots.list = grouplasso_inputs$knots.list,
-                                            emp.cent = grouplasso_inputs$emp.cent,
-                                            QQ.inv = grouplasso_inputs$QQ.inv,
-                                            b = grouplasso_linreg.out$beta.hat)
-
-  # collect output
-  output <- list(f.hat = semipadd_fitted$f.hat,
-                 f.hat.design = semipadd_fitted$f.hat.design,
-                 beta.hat = semipadd_fitted$beta.hat,
-                 nonparm = nonparm,
-                 d = d,
-                 xi = xi,
-                 knots.list = grouplasso_inputs$knots.list,
-                 lambda.beta = lambda.beta,
-                 lambda.f = lambda.f)
-
-
-  class(output) <- "semipaddgt"
-
-  return(output)
-
-}
- 
-
-
-#' Compute semiparametric continuous-response regression model while penalizing over a grid of tuning parameter values
-#'
-#' @param Y the response vector
-#' @param X the matrix with the observed covariate values (including a column of ones for the intercept)
-#' @param nonparm a vector indicating for which covariates a nonparametric function is to be estimated
-#' @param w covariate-specific weights for different penalization for different covariates
-#' @param d vector giving the dimensions the B-spline bases to be used when fitting the nonparametric effects. If a scalar is given, this dimension is used for all nonparametric effects.
-#' @param xi a tuning parameter governing the smoothness of the nonparametric estimates
-#' @param lambda.beta the level of sparsity penalization for the parametric effects (relative to nonparametric effects)
-#' @param lambda.f the level of sparsity penalization for the nonparametric effects (relative to the parametric effects)
-#' @param n.lambda the number of lambda values with which to make the grid
-#' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
-#' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations
-#' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
-#' @return Returns the estimator of the semiparametric additive model
-#'
-#' @examples
-#' semipadd_linreg_data <- get_semipadd_linreg_data(n = 501)
-#' 
-#' semipadd_linreg_grid.out <- semipadd_linreg_grid(Y = semipadd_linreg_data$Y,
-#'                                                  X = semipadd_linreg_data$X,
-#'                                                  nonparm = semipadd_linreg_data$nonparm,
-#'                                                  d = 15,
-#'                                                  xi = 1,
-#'                                                  w = 1,
-#'                                                  lambda.beta = 1,
-#'                                                  lambda.f = 1,
-#'                                                  n.lambda = 10,
-#'                                                  lambda.min.ratio = 0.001,
-#'                                                  lambda.max.ratio = 0.5,
-#'                                                  tol = 1e-3,
-#'                                                  max.iter = 500,
-#'                                                  report.prog = TRUE)
-#' 
-#' plot_semipaddgt_grid(semipadd_linreg_grid.out,
-#'                      true.functions = list(f = semipadd_linreg_data$f,
-#'                                            X = semipadd_linreg_data$X)
-#'                      
-#' )
-#' @export
-semipadd_linreg_grid <- function(Y,X,nonparm,w,d,xi,n.lambda = 5,lambda.min.ratio=.01,lambda.max.ratio=1,lambda.beta=1,lambda.f=1,tol=1e-3,max.iter = 1000,report.prog = FALSE)
-{
-
-  # prepare input for grouplasso function
-  grouplasso_inputs <- semipadd_to_grouplasso(X = X,
-                                              nonparm = nonparm,
-                                              d = d,
-                                              xi = xi,
-                                              w = w,
-                                              lambda.beta = lambda.beta,
-                                              lambda.f = lambda.f)
-
-  # get group lasso estimators over a grid of lambda and eta values
-  grouplasso_linreg_grid.out <- grouplasso_linreg_grid(Y = Y,
-                                                       X = grouplasso_inputs$DD.tilde,
-                                                       groups = grouplasso_inputs$groups,
-                                                       n.lambda = n.lambda,
-                                                       lambda.min.ratio = lambda.min.ratio,
-                                                       lambda.max.ratio = lambda.max.ratio,
-                                                       w = grouplasso_inputs$w,
-                                                       tol = tol,
-                                                       max.iter = max.iter,
-                                                       report.prog = report.prog)
-
-  # get matrices of the fitted functions evaluated at the design points
-  f.hat.design <- array(0,dim=c(nrow(X),ncol(X),n.lambda))
-  beta.hat <- matrix(0,ncol(X),n.lambda)
-
-  f.hat <- vector("list",n.lambda)
-
-  for(l in 1:n.lambda){
-
-    semipaddgt_fitted <- grouplasso_to_semipadd(X = X,
-                                                nonparm = nonparm,
-                                                groups = grouplasso_inputs$groups,
-                                                knots.list = grouplasso_inputs$knots.list,
-                                                emp.cent = grouplasso_inputs$emp.cent,
-                                                QQ.inv = grouplasso_inputs$QQ.inv,
-                                                b = grouplasso_linreg_grid.out$b[,l])
-
-      f.hat[[l]] <- semipaddgt_fitted$f.hat
-      f.hat.design[,,l] <- semipaddgt_fitted$f.hat.design
-      beta.hat[,l] <- semipaddgt_fitted$beta.hat
-
-    }
-
-  # prepare output
-  output <- list( f.hat = f.hat,
-                  f.hat.design = f.hat.design,
-                  beta.hat = beta.hat,
-                  nonparm = nonparm,
-                  d = d,
-                  xi = xi,
-                  knots.list = grouplasso_inputs$knots.list,
-                  lambda.beta = lambda.beta,
-                  lambda.f = lambda.f,
-                  n.lambda = n.lambda,
-                  lambda.seq = grouplasso_linreg_grid.out$lambda.seq,
-                  iterations = grouplasso_linreg_grid.out$iterations)
-
-  class(output) <- "semipaddgt_grid"
-
-  return(output)
-
-}
-
-
-#' Compute semiparametric binary-response regression model while penalizing dissimilarity using CV to select tuning parameters
-#'
-#' @param Y the binary response vector
-#' @param X the matrix with the observed covariate values (including a column of ones for the intercept)
-#' @param nonparm a vector indicating for which covariates a nonparametric function is to be estimated
-#' @param w covariate-specific weights for different penalization toward similarity for different covariates
-#' @param d vector giving the dimensions the  B-spline bases to be used when fitting the nonparametric effects. If a scalar is given, this dimension is used for all nonparametric effects.
-#' @param xi a tuning parameter governing the smoothness of the nonparametric estimates
-#' @param n.lambda the number of lambda values with which to make the grid
-#' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
-#' @param n.folds the number of crossvalidation folds
-#' @param lambda.beta the level of sparsity penalization for the parametric effects (relative to nonparametric effects)
-#' @param lambda.f the level of sparsity penalization for the nonparametric effects (relative to the parametric effects)
-#' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations
-#' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
-#' @return Returns the estimator of the semiparametric additive model
-#'
-#' @examples
-#' semipadd_linreg_data <- get_semipadd_linreg_data(n = 100)
-#' 
-#' semipadd_linreg_cv.out <- semipadd_linreg_cv(Y = semipadd_linreg_data$Y,
-#'                                              X = semipadd_linreg_data$X,
-#'                                              nonparm = semipadd_linreg_data$nonparm,
-#'                                              d = 20,
-#'                                              xi = 1,
-#'                                              w = 1,
-#'                                              lambda.beta = 1,
-#'                                              lambda.f = 1,
-#'                                              n.lambda = 25,
-#'                                              lambda.min.ratio = 0.001,
-#'                                              lambda.max.ratio = 0.01,
-#'                                              tol = 1e-3,
-#'                                              max.iter = 500,
-#'                                              report.prog = TRUE)
-#' 
-#' plot_semipaddgt_cv(semipadd_linreg_cv.out,
-#'                    true.functions = list(f = semipadd_linreg_data$f,
-#'                                          X = semipadd_linreg_data$X)
-#'                    
-#' )
-#' @export
-semipadd_linreg_cv <- function(Y,X,nonparm,w,d,xi,n.lambda = 5,lambda.min.ratio=.01,lambda.max.ratio=1,n.folds=5,lambda.beta=1,lambda.f=1,tol=1e-3,max.iter = 1000,report.prog = FALSE)
-{
-
-  # prepare input for grouplasso function
-  grouplasso_inputs <- semipadd_to_grouplasso(X = X,
-                                              nonparm = nonparm,
-                                              d = d,
-                                              xi = xi,
-                                              w = w,
-                                              lambda.beta = lambda.beta,
-                                              lambda.f = lambda.f)
-
-  # get group lasso estimators over a grid of lambda and eta values
-  grouplasso_linreg_cv.out <- grouplasso_linreg_cv(Y = Y,
-                                                   X = grouplasso_inputs$DD.tilde,
-                                                   groups = grouplasso_inputs$groups,
-                                                   n.lambda = n.lambda,
-                                                   lambda.min.ratio = lambda.min.ratio,
-                                                   lambda.max.ratio = lambda.max.ratio,
-                                                   n.folds = n.folds,
-                                                   w = grouplasso_inputs$w,
-                                                   tol = tol,
-                                                   max.iter = max.iter,
-                                                   report.prog = report.prog)
-
-  # get matrices of the fitted functions evaluated at the design points
-  f.hat.design <- array(0,dim=c(nrow(X),ncol(X),n.lambda))
-  beta.hat <- matrix(0,ncol(X),n.lambda)
-
-  f.hat <- vector("list",n.lambda)
-  f.hat.folds <- vector("list",n.lambda)
-
-  for(l in 1:n.lambda){
-
-    f.hat[[l]] <- vector("list",n.folds)
-    f.hat.folds[[l]] <- vector("list",n.folds)
-
-  }
-
-  for(l in 1:n.lambda){
-
-      semipaddgt_fitted <- grouplasso_to_semipadd(X = X,
-                                                  nonparm = nonparm,
-                                                  groups = grouplasso_inputs$groups,
-                                                  knots.list = grouplasso_inputs$knots.list,
-                                                  emp.cent = grouplasso_inputs$emp.cent,
-                                                  QQ.inv = grouplasso_inputs$QQ.inv,
-                                                  b = grouplasso_linreg_cv.out$b.mat[,l])
-
-      f.hat[[l]] <- semipaddgt_fitted$f.hat
-      f.hat.design[,,l] <- semipaddgt_fitted$f.hat.design
-      beta.hat[,l] <- semipaddgt_fitted$beta.hat
-
-      for( fold in 1:n.folds){
-
-        semipaddgt_fitted <- grouplasso_to_semipadd(X = X,
-                                                    nonparm = nonparm,
-                                                    groups = grouplasso_inputs$groups,
-                                                    knots.list = grouplasso_inputs$knots.list,
-                                                    emp.cent = grouplasso_inputs$emp.cent,
-                                                    QQ.inv = grouplasso_inputs$QQ.inv,
-                                                    b = grouplasso_linreg_cv.out$b.folds.arr[,l,fold])
-
-        f.hat.folds[[l]][[fold]] <- semipaddgt_fitted$f.hat
-
-      }
-
-    }
-
-  # prepare output
-  output <- list( f.hat = f.hat,
-                  f.hat.folds = f.hat.folds,
-                  f.hat.design = f.hat.design,
-                  beta.hat = beta.hat,
-                  nonparm = nonparm,
-                  d = d,
-                  xi = xi,
-                  knots.list = grouplasso_inputs$knots.list,
-                  lambda.beta = lambda.beta,
-                  lambda.f = lambda.f,
-                  n.lambda = n.lambda,
-                  n.folds = n.folds,
-                  lambda.seq = grouplasso_linreg_cv.out$lambda.seq,
-                  which.lambda.cv = grouplasso_linreg_cv.out$which.lambda.cv,
-                  iterations = grouplasso_linreg_cv.out$iterations)
-
-  class(output) <- "sempaddgt_cv"
-
-  return(output)
-
-}
-
-
-#' Compute semiparametric continuous-response regression model using CV to select tuning parameters after an adaptive step
-#'
-#' @param Y the response vector
-#' @param X the matrix with the observed covariate values (including a column of ones for the intercept)
-#' @param nonparm a vector indicating for which covariates a nonparametric function is to be estimated
-#' @param w covariate-specific weights for different penalization toward similarity for different covariates
-#' @param d vector giving the dimensions the  B-spline bases to be used when fitting the nonparametric effects. If a scalar is given, this dimension is used for all nonparametric effects.
-#' @param xi a tuning parameter governing the smoothness of the nonparametric estimates
-#' @param n.lambda the number of lambda values with which to make the grid
-#' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
-#' @param n.folds the number of crossvalidation folds
-#' @param lambda.beta the level of sparsity penalization for the parametric effects (relative to nonparametric effects)
-#' @param lambda.f the level of sparsity penalization for the nonparametric effects (relative to the parametric effects)
-#' @param tol a convergence criterion
-#' @param max.iter the maximum allowed number of iterations
-#' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
-#' @return Returns the estimator of the semiparametric additive model
-#'
-#' @examples
-#' semipadd_linreg_data <- get_semipadd_linreg_data(n = 501)
-#' 
-#' semipadd_linreg_cv_adapt.out <- semipadd_linreg_cv_adapt(Y = semipadd_linreg_data$Y,
-#'                                                          X = semipadd_linreg_data$X,
-#'                                                          nonparm = semipadd_linreg_data$nonparm,
-#'                                                          d = 25,
-#'                                                          xi = 1,
-#'                                                          w = 1,
-#'                                                          lambda.beta = 1,
-#'                                                          lambda.f = 1,
-#'                                                          n.lambda = 25,
-#'                                                          lambda.min.ratio = 0.001,
-#'                                                          lambda.max.ratio = 0.1,
-#'                                                          tol = 1e-3,
-#'                                                          max.iter = 500,
-#'                                                          report.prog = TRUE)
-#' 
-#' plot_semipaddgt_cv(semipadd_linreg_cv_adapt.out,
-#'                    true.functions = list(f = semipadd_linreg_data$f,
-#'                                          X = semipadd_linreg_data$X)
-#'                    
-#' )
-#' @export
-semipadd_linreg_cv_adapt <- function(Y,X,nonparm,w,d,xi,n.lambda = 5,lambda.min.ratio=.01,lambda.max.ratio = 1,n.folds=5,lambda.beta=1,lambda.f=1,tol=1e-3,max.iter = 1000,report.prog = FALSE)
-{
-
-  # prepare input for grouplasso function
-  grouplasso_inputs <- semipadd_to_grouplasso(X = X,
-                                              nonparm = nonparm,
-                                              d = d,
-                                              xi = xi,
-                                              w = w,
-                                              lambda.beta = lambda.beta,
-                                              lambda.f = lambda.f)
-
-  # get group lasso estimators over a grid of lambda and eta values
-  grouplasso_linreg_cv_adapt.out <- grouplasso_linreg_cv_adapt(Y = Y,
-                                                               X = grouplasso_inputs$DD.tilde,
-                                                               groups = grouplasso_inputs$groups,
-                                                               n.lambda = n.lambda,
-                                                               lambda.min.ratio = lambda.min.ratio,
-                                                               lambda.max.ratio = lambda.max.ratio,
-                                                               n.folds = n.folds,
-                                                               w = grouplasso_inputs$w,
-                                                               tol = tol,
-                                                               max.iter = max.iter,
-                                                               report.prog = report.prog)
-
-
-  # get matrices of the fitted functions evaluated at the design points
-  f.hat.design <- array(0,dim=c(nrow(X),ncol(X),n.lambda))
-  beta.hat <- matrix(0,ncol(X),n.lambda)
-
-  f.hat <- vector("list",n.lambda)
-  f.hat.folds <- vector("list",n.lambda)
-
-  for(l in 1:n.lambda){
-
-    f.hat[[l]] <- vector("list",n.folds)
-    f.hat.folds[[l]] <- vector("list",n.folds)
-
-  }
-
-  for(l in 1:n.lambda){
-
-    semipaddgt_fitted <- grouplasso_to_semipadd(X = X,
-                                                nonparm = nonparm,
-                                                groups = grouplasso_inputs$groups,
-                                                knots.list = grouplasso_inputs$knots.list,
-                                                emp.cent = grouplasso_inputs$emp.cent,
-                                                QQ.inv = grouplasso_inputs$QQ.inv,
-                                                b = grouplasso_linreg_cv_adapt.out$b.mat[,l])
-
-    f.hat[[l]] <- semipaddgt_fitted$f.hat
-    f.hat.design[,,l] <- semipaddgt_fitted$f.hat.design
-    beta.hat[,l] <- semipaddgt_fitted$beta.hat
-
-    for( fold in 1:n.folds){
-
-      semipaddgt_fitted <- grouplasso_to_semipadd(X = X,
-                                                  nonparm = nonparm,
-                                                  groups = grouplasso_inputs$groups,
-                                                  knots.list = grouplasso_inputs$knots.list,
-                                                  emp.cent = grouplasso_inputs$emp.cent,
-                                                  QQ.inv = grouplasso_inputs$QQ.inv,
-                                                  b = grouplasso_linreg_cv_adapt.out$b.folds.arr[,l,fold])
-
-      f.hat.folds[[l]][[fold]] <- semipaddgt_fitted$f.hat
-
-    }
-
-  }
-
-  # prepare output
-  output <- list( f.hat = f.hat,
-                  f.hat.folds = f.hat.folds,
-                  f.hat.design = f.hat.design,
-                  beta.hat = beta.hat,
-                  nonparm = nonparm,
-                  d = d,
-                  xi = xi,
-                  knots.list = grouplasso_inputs$knots.list,
-                  lambda.beta = lambda.beta,
-                  lambda.f = lambda.f,
-                  n.lambda = n.lambda,
-                  n.folds = n.folds,
-                  lambda.seq = grouplasso_linreg_cv_adapt.out$lambda.seq,
-                  which.lambda.cv = grouplasso_linreg_cv_adapt.out$which.lambda.cv,
-                  lambda.initial.fit = grouplasso_linreg_cv_adapt.out$lambda.initial.fit,
-                  iterations = grouplasso_linreg_cv_adapt.out$iterations)
-
-  class(output) <- "sempaddgt_cv"
 
   return(output)
 

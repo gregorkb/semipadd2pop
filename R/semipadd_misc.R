@@ -469,7 +469,7 @@ grouplasso2pop_to_semipadd2pop <- function(X1,nonparm1,groups1,knots.list1,emp.c
 
 #' @param xi a tuning parameter governing the smoothness of the nonparametric estimates
 #' @export
-semipadd_to_grouplasso <- function(X,nonparm,d,xi,w=1,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1)
+semipadd_to_grouplasso_noint <- function(X,nonparm,d,xi,w=1,lambda.beta=1,lambda.f=1)
 {
   
   ww <- ((1-nonparm) + nonparm * lambda.f/lambda.beta) * w
@@ -571,7 +571,7 @@ semipadd_to_grouplasso <- function(X,nonparm,d,xi,w=1,lambda.beta=1,lambda.f=1,e
 #' @param QQ.inv the matrix with which to back-transform the group lasso coefficients
 #' @param b the group lasso coefficients
 #' @export
-grouplasso_to_semipadd <- function(X,nonparm,groups,knots.list,emp.cent,QQ.inv,b)
+grouplasso_to_semipadd_noint <- function(X,nonparm,groups,knots.list,emp.cent,QQ.inv,b)
 {
   
   n <- nrow(X)
