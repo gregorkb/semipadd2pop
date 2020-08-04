@@ -79,24 +79,24 @@ Returns the minimizers of the 2-population group lasso objective function for th
 Minimize the objective function of the 2-population group lasso problem with a binary response
 }
 \examples{
-grouplasso2pop_logreg_data <- get_grouplasso2pop_logreg_data(n1 = 400, n2 = 600)
+data <- get_grouplasso2pop_data(n1 = 400,n2 = 600, response = "binary")
 
-grouplasso2pop_logreg.out <- grouplasso2pop_logreg(rY1 = grouplasso2pop_logreg_data$Y1,
-                                                   rX1 = grouplasso2pop_logreg_data$X1,
-                                                   groups1 = grouplasso2pop_logreg_data$groups1,
-                                                   rY2 = grouplasso2pop_logreg_data$Y2,
-                                                   rX2 = grouplasso2pop_logreg_data$X2,
-                                                   groups2 = grouplasso2pop_logreg_data$groups2,
+grouplasso2pop_logreg.out <- grouplasso2pop_logreg(rY1 = data$Y1,
+                                                   rX1 = data$X1,
+                                                   groups1 = data$groups1,
+                                                   rY2 = data$Y2,
+                                                   rX2 = data$X2,
+                                                   groups2 = data$groups2,
                                                    rho1 = 2,
                                                    rho2 = 1,
                                                    lambda = 1,
                                                    eta = 1,
-                                                   w1 = grouplasso2pop_logreg_data$w1,
-                                                   w2 = grouplasso2pop_logreg_data$w2,
-                                                   w = grouplasso2pop_logreg_data$w,
-                                                   rAA1 = grouplasso2pop_logreg_data$AA1,
-                                                   rAA2 = grouplasso2pop_logreg_data$AA2,
-                                                   rCom = grouplasso2pop_logreg_data$Com,
+                                                   w1 = data$w1,
+                                                   w2 = data$w2,
+                                                   w = data$w,
+                                                   rAA1 = data$AA1,
+                                                   rAA2 = data$AA2,
+                                                   rCom = data$Com,
                                                    tol = 1e-4,
                                                    maxiter = 500)
 }
