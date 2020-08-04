@@ -43,13 +43,13 @@ Returns the minimizer of the group lasso objective function
 Minimize the objective function of the group lasso problem with a binary response
 }
 \examples{
-grouplasso_logreg_data <- get_grouplasso_logreg_data(n = 500)
+data <- get_grouplasso_data(n = 500, response = "binary")
 
-grouplasso_logreg.out <- grouplasso_logreg(rY = grouplasso_logreg_data$Y,
-                                           rX = grouplasso_logreg_data$X,
-                                           groups = grouplasso_logreg_data$groups,
+grouplasso_logreg.out <- grouplasso_logreg(rY = data$Y,
+                                           rX = data$X,
+                                           groups = data$groups,
                                            lambda = 10,
-                                           w = grouplasso_logreg_data$w,
-                                           tol = 1e-4,                               
+                                           w = data$w,
+                                           tol = 1e-4,
                                            maxiter = 500)
 }

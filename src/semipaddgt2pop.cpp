@@ -111,14 +111,14 @@ arma::colvec FoygelDrton_Armadillo(arma::colvec h, arma::mat L, double lambda, a
 //' @return Returns the minimizer of the group lasso objective function
 //'
 //' @examples
-//' grouplasso_linreg_data <- get_grouplasso_linreg_data(n = 500)
+//' data <- get_grouplasso_data(n = 500,response = "continuous")
 //' 
-//' grouplasso_linreg.out <- grouplasso_linreg(rY = grouplasso_linreg_data$Y,
-//'                                            rX = grouplasso_linreg_data$X,
-//'                                            groups = grouplasso_linreg_data$groups,
+//' grouplasso_linreg.out <- grouplasso_linreg(rY = data$Y,
+//'                                            rX = data$X,
+//'                                            groups = data$groups,
 //'                                            lambda = 10,
-//'                                            w = grouplasso_linreg_data$w,
-//'                                            tol = 1e-4,                               
+//'                                            w = data$w,
+//'                                            tol = 1e-4,
 //'                                            maxiter = 500)
 // [[Rcpp::export]]
 List grouplasso_linreg(NumericVector rY,
@@ -290,6 +290,474 @@ List grouplasso_linreg(NumericVector rY,
 
 
 
+//' Minimize the objective function of the 2-population group lasso problem with a continuous response
+//'
+//' @param Y1 the continuous response vector of data set 1
+//' @param X1 matrix containing the design matrices for data set 1
+//' @param groups1 a vector of integers indicating to which group each covariate in data set 1 belongs
+//' @param Y2 the continuous response vector of data set 2
+//' @param X2 matrix containing the design matrices for data set 2
+//' @param groups2 a vector of integers indicating to which group each covariate in data set 1 belongs
+//' @param rho1 weight placed on the first data set
+//' @param rho2 weight placed on the second data set
+//' @param lambda the level of sparsity penalization
+//' @param eta the level of penalization towards model similarity
+//' @param w1 group-specific weights for different penalization across groups in data set 1
+//' @param w2 group-specific weights for different penalization across groups in data set 2
+//' @param w group-specific weights for different penalization toward similarity for different groups
+//' @param AA1 a list of the matrices A1j
+//' @param AA1 a list of the matrices A2j
+//' @param eigen1 a list of eigen info on groups from data set 1
+//' @param eigen2 a list of eigen info on groups from data set 2
+//' @param Com the indices of the covariate groups which are common in the two datasets
+//' @param tol a convergence criterion
+//' @param max.iter the maximum allowed number of iterations
+//' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
+//' @param beta1_init optional starting value for beta1
+//' @param beta2_init optional starting value for beta2
+//' @return Returns the minimizers of the 2-population group lasso objective function for the two data sets.
+//'
+//' @examples
+//' data <- get_grouplasso2pop_data(n1 = 400, n2 = 600, response = "continuous")
+//'   
+//' grouplasso2pop_linreg.out <- grouplasso2pop_linreg(rY1 = data$Y1,
+//'                                                    rX1 = data$X1,
+//'                                                    groups1 = data$groups1,
+//'                                                    rY2 = data$Y2,
+//'                                                    rX2 = data$X2,
+//'                                                    groups2 = data$groups2,
+//'                                                    rho1 = 2,
+//'                                                    rho2 = 1,
+//'                                                    lambda = 1,
+//'                                                    eta = 1,
+//'                                                    w1 = data$w1,
+//'                                                    w2 = data$w2,
+//'                                                    w = data$w,
+//'                                                    rAA1 = data$AA1,
+//'                                                    rAA2 = data$AA2,
+//'                                                    rCom = data$Com,
+//'                                                    tol = 1e-4,
+//'                                                    maxiter = 500)
+// [[Rcpp::export]]
+List grouplasso2pop_linreg(NumericVector rY1,
+                           NumericMatrix rX1,
+                           IntegerVector groups1,
+                           NumericVector rY2,
+                           NumericMatrix rX2,
+                           IntegerVector groups2,
+                           float rho1,
+                           float rho2,
+                           float lambda,
+                           float eta,
+                           NumericVector w1,
+                           NumericVector w2,
+                           NumericVector w,
+                           List rAA1,
+                           List rAA2,
+                           IntegerVector rCom,
+                           float tol,
+                           int maxiter,
+                           NumericVector beta1_init = NumericVector::create(),
+                           NumericVector beta2_init = NumericVector::create()){
+  
+  // get dimensions
+  int n1 = rY1.size(), n2 = rY2.size();
+  int q1 = rX1.ncol(), q2 = rX2.ncol();
+  
+  int i,j,k,l,m,i2,k2;
+  
+  int g1 = max(groups1);
+  int g2 = max(groups2);
+  
+  LogicalVector got_eigen1(g1);
+  LogicalVector got_eigen2(g2);
+  
+  IntegerVector d1(g1);
+  IntegerVector d2(g2);
+  IntegerVector is_grp_singleton1(g1);
+  IntegerVector is_grp_singleton2(g2);
+  IntegerVector grp_begin_ind1(g1);
+  IntegerVector grp_begin_ind2(g2);
+  
+  // make vector indicating what groups are common
+  IntegerVector is_com(std::max(g1,g2));
+  
+  for(j = 0; j < rCom.size(); j++){
+    
+    is_com[rCom[j]-1] = 1;
+    
+  }
+  
+  // identify singleton and non-singleton groups for data set 1 
+  j = 1;
+  for(i = 0; i < q1; i++){
+    
+    if(groups1[i] != j){
+      
+      if( d1[j-1] == 1){
+        
+        is_grp_singleton1[j-1] = 1;
+        
+      }
+      
+      j++;
+      
+    }
+    
+    d1[j-1]++;
+    
+  }
+  
+  grp_begin_ind1[0] = 0;
+  for(j = 1; j < g1;j++){
+    
+    grp_begin_ind1[j] = sum(d1[Range(0,j-1)]);
+    
+  }
+  
+  // identify singleton and non-singleton groups for data set 2
+  j = 1;
+  for(i = 0; i < q2; i++){
+    
+    if(groups2[i] != j){
+      
+      if( d2[j-1] == 1){
+        
+        is_grp_singleton2[j-1] = 1;
+        
+      }
+      
+      j++;
+      
+    }
+    
+    d2[j-1] ++;
+    
+  }
+  
+  grp_begin_ind2[0] = 0;
+  for(j = 1; j < g2;j++){
+    
+    grp_begin_ind2[j] = sum(d2[Range(0,j-1)]);
+    
+  }
+  
+  // make Armadillo matrices/vectors
+  arma::colvec Y1(rY1.begin(),n1,false);
+  arma::colvec Y2(rY2.begin(),n2,false);
+  
+  arma::colvec Y1j(n1);
+  arma::colvec r1j(n1);
+  
+  arma::colvec Y2j(n2);
+  arma::colvec r2j(n2);
+  
+  arma::mat X1(rX1.begin(),n1,q1,false);
+  arma::mat X2(rX2.begin(),n2,q2,false);
+  
+  arma::colvec b1 = arma::zeros(q1);
+  arma::colvec b2 = arma::zeros(q2);
+  
+  // Set up initial values if provided
+  if( beta1_init.size() == q1 ){
+    
+    arma::colvec b1_silly_copy(beta1_init.begin(),q1,false);
+    b1 = b1_silly_copy;
+    
+  }
+  
+  if( beta2_init.size() == q2 ){
+    
+    arma::colvec b2_silly_copy(beta2_init.begin(),q2,false);
+    b2 = b2_silly_copy;
+    
+  }
+  
+  arma::colvec b1_0 = b1;
+  arma::colvec b2_0 = b2;
+  
+  arma::colvec h1(n1);
+  arma::colvec h2(n2);
+  
+  arma::colvec x1r1j_AAb2(max(d1));
+  arma::colvec x2r2j_AAb1(max(d2));
+  arma::mat LtL1(max(d1),max(d1));
+  arma::mat LtL2(max(d2),max(d2));
+  
+  arma::field<arma::vec> eigval1(g1);
+  arma::field<arma::mat> eigvec1(g1);
+  arma::field<arma::mat> cholLtL1(g1);
+  
+  arma::field<arma::vec> eigval2(g2);
+  arma::field<arma::mat> eigvec2(g2);
+  arma::field<arma::mat> cholLtL2(g2);
+  
+  k = max(rCom);
+  arma::field<arma::mat> AA1(k);
+  arma::field<arma::mat> AA2(k);
+  
+  for( j = 0; j < k; j++){
+    if(is_com[j] == 1){
+      
+      arma::mat AA1_silly_copy(as<NumericMatrix>(rAA1[j]).begin(),as<NumericMatrix>(rAA1[j]).nrow(),d1[j]);
+      AA1(j) = AA1_silly_copy;
+      
+      arma::mat AA2_silly_copy(as<NumericMatrix>(rAA2[j]).begin(),as<NumericMatrix>(rAA2[j]).nrow(),d2[j]);
+      AA2(j) = AA2_silly_copy;
+      
+    }
+    
+  }
+  
+  // define other floats
+  float sx1j, x1r1j_scalar, x1r1j_norm;
+  float sx1j_AA, x1r1j_AAb2_scalar, x1r1j_AAb2_norm;
+  
+  float sx2j, x2r2j_scalar, x2r2j_norm;
+  float sx2j_AA, x2r2j_AAb1_scalar, x2r2j_AAb1_norm;
+  
+  float lambda1 = lambda * n1 / rho1;
+  float eta1 = eta * n1 / rho1;
+  
+  float lambda2 = lambda * n2 / rho1;
+  float eta2 = eta * n2 / rho2;
+  
+  // algorithmic control
+  bool conv = false;
+  int iter = 0;
+  NumericVector obj_val(maxiter);
+  
+  // begin looping!
+  while( (conv == false) & (iter < maxiter)){
+    
+    b1_0 = b1;
+    b2_0 = b2;
+    
+    // go through groups of data set 1
+    for( j = 0; j < g1 ; j++){
+      
+      // first and last columns of X1 belonging to group
+      i = grp_begin_ind1[j];
+      k = i + d1[j] - 1;
+      
+      // get predicted values of Y without effects of current covariate
+      Y1j = arma::zeros(n1);
+      for( l = 0 ; l < g1 ; l++)
+      {
+        
+        if(l == j) continue;
+        
+        i2 = grp_begin_ind1[l];
+        k2 = i2 + d1[l] - 1;
+        
+        Y1j = Y1j + X1.cols(i2,k2) * b1.rows(i2,k2);
+        
+      }
+      
+      // get residuals
+      r1j = Y1 - Y1j;
+      
+      if(is_com[j] == 1){
+        
+        // first and last columns of X2 belonging to corresponding group
+        l = grp_begin_ind2[j];
+        m = l + d2[j] - 1;
+        
+        if(d1[j] == 1){
+          
+          x1r1j_AAb2_scalar = arma::as_scalar(X1.cols(i,i).t() * r1j + eta1 * w[j] * AA1(j).t() * AA2(j) * b2.rows(l,m));
+          sx1j_AA = arma::as_scalar(X1.cols(i,i).t() * X1.cols(i,i) + eta1 * w[j] * AA1(j).t() * AA1(j));
+          b1(i) = SoftThresh_scalar(x1r1j_AAb2_scalar,lambda1*w1[j]) / sx1j_AA;  
+          
+        } else {
+          
+          x1r1j_AAb2.rows(0,d1[j]-1) = X1.cols(i,k).t() * r1j + eta1 * w[j] * AA1(j).t() * AA2(j) * b2.rows(l,m);
+          x1r1j_AAb2_norm = sqrt(accu(pow(x1r1j_AAb2.rows(0,d1[j]-1),2)));
+          
+          if(x1r1j_AAb2_norm < lambda1 * w1[j])
+          {
+            
+            b1.rows(i,k) = arma::zeros(k-i+1);
+            
+          } else {
+            
+            if(got_eigen1[j] == false){
+  
+              LtL1.submat(0,0,d1[j]-1,d1[j]-1) = X1.cols(i,k).t() * X1.cols(i,k) + eta1 * w[j] * AA1(j).t() * AA1(j);
+              arma::eig_sym(eigval1(j),eigvec1(j),LtL1.submat(0,0,d1[j]-1,d1[j]-1));
+              cholLtL1(j) = chol(LtL1.submat(0,0,d1[j]-1,d1[j]-1));
+              got_eigen1[j] = true;
+  
+            }
+  
+            h1 = arma::inv(cholLtL1(j).t()) * x1r1j_AAb2.rows(0,d1[j]-1);
+  
+            b1.rows(i,k) = FoygelDrton_Armadillo(h1, cholLtL1(j), lambda1 * w1[j], eigval1(j), eigvec1(j).t());
+              
+          }
+          
+        }
+        
+      } else { // not a common covariate
+        
+        
+          if(d1[j] == 1){
+            
+            sx1j = arma::as_scalar(X1.cols(i,i).t() * X1.cols(i,i));
+            x1r1j_scalar = arma::as_scalar(X1.cols(i,i).t() * r1j);
+            b1(i) = SoftThresh_scalar(x1r1j_scalar,lambda1 * w1[j]) / sx1j;
+            
+          } else {
+            
+            x1r1j_norm = sqrt(arma::accu(pow(trans(X1.cols(i,k)) * r1j,2)));
+            
+            if( x1r1j_norm < lambda1 * w1[j]){
+              
+              b1.rows(i,k) = arma::zeros(k-i+1);
+              
+            } else {
+              
+              if(got_eigen1[j] == false){
+                
+                arma::eig_sym(eigval1(j),eigvec1(j),X1.cols(i,k).t() * X1.cols(i,k));
+                got_eigen1[j] = true;
+                
+              } 
+              
+              b1.rows(i,k) = FoygelDrton_Armadillo(r1j, X1.cols(i,k), lambda1 * w1[j], eigval1(j), eigvec1(j).t());
+              
+            }
+            
+          }
+          
+        }
+        
+      }
+      
+    // go through groups of data set 2
+    for( j = 0; j < g2 ; j++){
+      
+      // first and last columns of X2 belonging to group
+      i = grp_begin_ind2[j];
+      k = i + d2[j] - 1;
+      
+      // get predicted values of Y without effects of current covariate
+      Y2j = arma::zeros(n2);
+      for( l = 0 ; l < g2 ; l++)
+      {
+        
+        if(l == j) continue;
+        
+        i2 = grp_begin_ind2[l];
+        k2 = i2 + d2[l] - 1;
+        
+        Y2j = Y2j + X2.cols(i2,k2) * b2.rows(i2,k2);
+        
+      }
+      
+      // get residuals
+      r2j = Y2 - Y2j;
+      
+      if(is_com[j] == 1){
+        
+        // first and last columns of X1 belonging to corresponding group
+        l = grp_begin_ind1[j];
+        m = l + d1[j] - 1;
+        
+        if(d2[j] == 1){
+          
+          x2r2j_AAb1_scalar = arma::as_scalar(X2.cols(i,i).t() * r2j + eta2 * w[j] * AA2(j).t() * AA1(j) * b1.rows(l,m));
+          sx2j_AA = arma::as_scalar(X2.cols(i,i).t() * X2.cols(i,i) + eta2 * w[j] * AA2(j).t() * AA2(j));
+          b2(i) = SoftThresh_scalar(x2r2j_AAb1_scalar,lambda2*w2[j]) / sx2j_AA;  
+          
+        } else {
+          
+          x2r2j_AAb1.rows(0,d2[j]-1) = X2.cols(i,k).t() * r2j + eta2 * w[j] * AA2(j).t() * AA1(j) * b1.rows(l,m);
+          x2r2j_AAb1_norm = sqrt(accu(pow(x2r2j_AAb1.rows(0,d2[j]-1),2)));
+          
+          if(x2r2j_AAb1_norm < lambda2 * w2[j])
+          {
+            
+            b2.rows(i,k) = arma::zeros(k-i+1);
+            
+          } else {
+            
+            if(got_eigen2[j] == false){
+              
+              LtL2.submat(0,0,d2[j]-1,d2[j]-1) = X2.cols(i,k).t() * X2.cols(i,k) + eta2 * w[j] * AA2(j).t() * AA2(j);
+              arma::eig_sym(eigval2(j),eigvec2(j),LtL2.submat(0,0,d2[j]-1,d2[j]-1));
+              cholLtL2(j) = chol(LtL2.submat(0,0,d2[j]-1,d2[j]-1));
+              got_eigen2[j] = true;
+              
+            }
+            
+            h2 = arma::inv(cholLtL2(j).t()) * x2r2j_AAb1.rows(0,d2[j]-1);
+            b2.rows(i,k) = FoygelDrton_Armadillo(h2, cholLtL2(j), lambda2 * w2[j], eigval2(j), eigvec2(j).t());
+            
+          }
+          
+        }
+        
+      } else { // not a common covariate
+        
+        
+        if(d2[j] == 1){
+          
+          sx2j = arma::as_scalar(X2.cols(i,i).t() * X2.cols(i,i));
+          x2r2j_scalar = arma::as_scalar(X2.cols(i,i).t() * r2j);
+          b2(i) = SoftThresh_scalar(x2r2j_scalar,lambda2 * w2[j]) / sx2j;
+          
+        } else {
+          
+          x2r2j_norm = sqrt(arma::accu(pow(trans(X2.cols(i,k)) * r2j,2)));
+          
+          if( x2r2j_norm < lambda2 * w2[j]){
+            
+            b2.rows(i,k) = arma::zeros(k-i+1);
+            
+          } else {
+            
+            if(got_eigen2[j] == false){
+              
+              arma::eig_sym(eigval2(j),eigvec2(j),X2.cols(i,k).t() * X2.cols(i,k));
+              got_eigen2[j] = true;
+              
+            } 
+            
+            b2.rows(i,k) = FoygelDrton_Armadillo(r2j, X2.cols(i,k), lambda2 * w2[j], eigval2(j), eigvec2(j).t());
+            
+          }
+          
+        }
+        
+      }
+      
+    }
+    
+    if(any(abs(b1 - b1_0) > tol) | any(abs(b2 - b2_0) > tol) ){
+      
+      conv = false;
+      
+    } else {
+      
+      conv = true;
+    }
+    
+    iter++;
+    
+  }
+  // close while statement
+  
+  return Rcpp::List::create(Named("beta1.hat") = b1,
+                            Named("beta2.hat") = b2,
+                            Named("iter") = iter,
+                            Named("conv") = conv);
+  
+}
+
+
+
+
 //' Minimize the objective function of the group lasso problem with a binary response
 //'
 //' @param Y the binary response vector
@@ -305,14 +773,14 @@ List grouplasso_linreg(NumericVector rY,
 //' @return Returns the minimizer of the group lasso objective function
 //'
 //' @examples
-//' grouplasso_logreg_data <- get_grouplasso_logreg_data(n = 500)
+//' data <- get_grouplasso_data(n = 500, response = "binary")
 //' 
-//' grouplasso_logreg.out <- grouplasso_logreg(rY = grouplasso_logreg_data$Y,
-//'                                            rX = grouplasso_logreg_data$X,
-//'                                            groups = grouplasso_logreg_data$groups,
+//' grouplasso_logreg.out <- grouplasso_logreg(rY = data$Y,
+//'                                            rX = data$X,
+//'                                            groups = data$groups,
 //'                                            lambda = 10,
-//'                                            w = grouplasso_logreg_data$w,
-//'                                            tol = 1e-4,                               
+//'                                            w = data$w,
+//'                                            tol = 1e-4,
 //'                                            maxiter = 500)
 // [[Rcpp::export]]
 List grouplasso_logreg(NumericVector rY,
@@ -507,24 +975,24 @@ List grouplasso_logreg(NumericVector rY,
 //' @return Returns the minimizers of the 2-population group lasso objective function for the two data sets.
 //'
 //' @examples
-//' grouplasso2pop_logreg_data <- get_grouplasso2pop_logreg_data(n1 = 400, n2 = 600)
+//' data <- get_grouplasso2pop_data(n1 = 400,n2 = 600, response = "binary")
 //' 
-//' grouplasso2pop_logreg.out <- grouplasso2pop_logreg(rY1 = grouplasso2pop_logreg_data$Y1,
-//'                                                    rX1 = grouplasso2pop_logreg_data$X1,
-//'                                                    groups1 = grouplasso2pop_logreg_data$groups1,
-//'                                                    rY2 = grouplasso2pop_logreg_data$Y2,
-//'                                                    rX2 = grouplasso2pop_logreg_data$X2,
-//'                                                    groups2 = grouplasso2pop_logreg_data$groups2,
+//' grouplasso2pop_logreg.out <- grouplasso2pop_logreg(rY1 = data$Y1,
+//'                                                    rX1 = data$X1,
+//'                                                    groups1 = data$groups1,
+//'                                                    rY2 = data$Y2,
+//'                                                    rX2 = data$X2,
+//'                                                    groups2 = data$groups2,
 //'                                                    rho1 = 2,
 //'                                                    rho2 = 1,
 //'                                                    lambda = 1,
 //'                                                    eta = 1,
-//'                                                    w1 = grouplasso2pop_logreg_data$w1,
-//'                                                    w2 = grouplasso2pop_logreg_data$w2,
-//'                                                    w = grouplasso2pop_logreg_data$w,
-//'                                                    rAA1 = grouplasso2pop_logreg_data$AA1,
-//'                                                    rAA2 = grouplasso2pop_logreg_data$AA2,
-//'                                                    rCom = grouplasso2pop_logreg_data$Com,
+//'                                                    w1 = data$w1,
+//'                                                    w2 = data$w2,
+//'                                                    w = data$w,
+//'                                                    rAA1 = data$AA1,
+//'                                                    rAA2 = data$AA2,
+//'                                                    rCom = data$Com,
 //'                                                    tol = 1e-4,
 //'                                                    maxiter = 500)
 // [[Rcpp::export]]

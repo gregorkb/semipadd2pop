@@ -43,13 +43,13 @@ Returns the minimizer of the group lasso objective function
 Minimize the objective function of the group lasso problem with a continuous response
 }
 \examples{
-grouplasso_linreg_data <- get_grouplasso_linreg_data(n = 500)
+data <- get_grouplasso_data(n = 500,response = "continuous")
 
-grouplasso_linreg.out <- grouplasso_linreg(rY = grouplasso_linreg_data$Y,
-                                           rX = grouplasso_linreg_data$X,
-                                           groups = grouplasso_linreg_data$groups,
+grouplasso_linreg.out <- grouplasso_linreg(rY = data$Y,
+                                           rX = data$X,
+                                           groups = data$groups,
                                            lambda = 10,
-                                           w = grouplasso_linreg_data$w,
-                                           tol = 1e-4,                               
+                                           w = data$w,
+                                           tol = 1e-4,
                                            maxiter = 500)
 }
