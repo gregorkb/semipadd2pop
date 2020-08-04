@@ -66,17 +66,69 @@ FoygelDrton_Armadillo <- function(h, L, lambda, evals, evecs) {
 #' @return Returns the minimizer of the group lasso objective function
 #'
 #' @examples
-#' grouplasso_linreg_data <- get_grouplasso_linreg_data(n = 500)
+#' data <- get_grouplasso_data(n = 500,response = "continuous")
 #' 
-#' grouplasso_linreg.out <- grouplasso_linreg(rY = grouplasso_linreg_data$Y,
-#'                                            rX = grouplasso_linreg_data$X,
-#'                                            groups = grouplasso_linreg_data$groups,
+#' grouplasso_linreg.out <- grouplasso_linreg(rY = data$Y,
+#'                                            rX = data$X,
+#'                                            groups = data$groups,
 #'                                            lambda = 10,
-#'                                            w = grouplasso_linreg_data$w,
-#'                                            tol = 1e-4,                               
+#'                                            w = data$w,
+#'                                            tol = 1e-4,
 #'                                            maxiter = 500)
 grouplasso_linreg <- function(rY, rX, groups, lambda, w, tol, maxiter, beta_init = as.numeric( c())) {
     .Call(`_semipaddgt2pop_grouplasso_linreg`, rY, rX, groups, lambda, w, tol, maxiter, beta_init)
+}
+
+#' Minimize the objective function of the 2-population group lasso problem with a continuous response
+#'
+#' @param Y1 the continuous response vector of data set 1
+#' @param X1 matrix containing the design matrices for data set 1
+#' @param groups1 a vector of integers indicating to which group each covariate in data set 1 belongs
+#' @param Y2 the continuous response vector of data set 2
+#' @param X2 matrix containing the design matrices for data set 2
+#' @param groups2 a vector of integers indicating to which group each covariate in data set 1 belongs
+#' @param rho1 weight placed on the first data set
+#' @param rho2 weight placed on the second data set
+#' @param lambda the level of sparsity penalization
+#' @param eta the level of penalization towards model similarity
+#' @param w1 group-specific weights for different penalization across groups in data set 1
+#' @param w2 group-specific weights for different penalization across groups in data set 2
+#' @param w group-specific weights for different penalization toward similarity for different groups
+#' @param AA1 a list of the matrices A1j
+#' @param AA1 a list of the matrices A2j
+#' @param eigen1 a list of eigen info on groups from data set 1
+#' @param eigen2 a list of eigen info on groups from data set 2
+#' @param Com the indices of the covariate groups which are common in the two datasets
+#' @param tol a convergence criterion
+#' @param max.iter the maximum allowed number of iterations
+#' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
+#' @param beta1_init optional starting value for beta1
+#' @param beta2_init optional starting value for beta2
+#' @return Returns the minimizers of the 2-population group lasso objective function for the two data sets.
+#'
+#' @examples
+#' data <- get_grouplasso2pop_data(n1 = 400, n2 = 600, response = "continuous")
+#'   
+#' grouplasso2pop_linreg.out <- grouplasso2pop_linreg(rY1 = data$Y1,
+#'                                                    rX1 = data$X1,
+#'                                                    groups1 = data$groups1,
+#'                                                    rY2 = data$Y2,
+#'                                                    rX2 = data$X2,
+#'                                                    groups2 = data$groups2,
+#'                                                    rho1 = 2,
+#'                                                    rho2 = 1,
+#'                                                    lambda = 1,
+#'                                                    eta = 1,
+#'                                                    w1 = data$w1,
+#'                                                    w2 = data$w2,
+#'                                                    w = data$w,
+#'                                                    rAA1 = data$AA1,
+#'                                                    rAA2 = data$AA2,
+#'                                                    rCom = data$Com,
+#'                                                    tol = 1e-4,
+#'                                                    maxiter = 500)
+grouplasso2pop_linreg <- function(rY1, rX1, groups1, rY2, rX2, groups2, rho1, rho2, lambda, eta, w1, w2, w, rAA1, rAA2, rCom, tol, maxiter, beta1_init = as.numeric( c()), beta2_init = as.numeric( c())) {
+    .Call(`_semipaddgt2pop_grouplasso2pop_linreg`, rY1, rX1, groups1, rY2, rX2, groups2, rho1, rho2, lambda, eta, w1, w2, w, rAA1, rAA2, rCom, tol, maxiter, beta1_init, beta2_init)
 }
 
 #' Minimize the objective function of the group lasso problem with a binary response
@@ -94,14 +146,14 @@ grouplasso_linreg <- function(rY, rX, groups, lambda, w, tol, maxiter, beta_init
 #' @return Returns the minimizer of the group lasso objective function
 #'
 #' @examples
-#' grouplasso_logreg_data <- get_grouplasso_logreg_data(n = 500)
+#' data <- get_grouplasso_data(n = 500, response = "binary")
 #' 
-#' grouplasso_logreg.out <- grouplasso_logreg(rY = grouplasso_logreg_data$Y,
-#'                                            rX = grouplasso_logreg_data$X,
-#'                                            groups = grouplasso_logreg_data$groups,
+#' grouplasso_logreg.out <- grouplasso_logreg(rY = data$Y,
+#'                                            rX = data$X,
+#'                                            groups = data$groups,
 #'                                            lambda = 10,
-#'                                            w = grouplasso_logreg_data$w,
-#'                                            tol = 1e-4,                               
+#'                                            w = data$w,
+#'                                            tol = 1e-4,
 #'                                            maxiter = 500)
 grouplasso_logreg <- function(rY, rX, groups, lambda, w, tol, maxiter, beta_init = as.numeric( c())) {
     .Call(`_semipaddgt2pop_grouplasso_logreg`, rY, rX, groups, lambda, w, tol, maxiter, beta_init)
@@ -135,24 +187,24 @@ grouplasso_logreg <- function(rY, rX, groups, lambda, w, tol, maxiter, beta_init
 #' @return Returns the minimizers of the 2-population group lasso objective function for the two data sets.
 #'
 #' @examples
-#' grouplasso2pop_logreg_data <- get_grouplasso2pop_logreg_data(n1 = 400, n2 = 600)
+#' data <- get_grouplasso2pop_data(n1 = 400,n2 = 600, response = "binary")
 #' 
-#' grouplasso2pop_logreg.out <- grouplasso2pop_logreg(rY1 = grouplasso2pop_logreg_data$Y1,
-#'                                                    rX1 = grouplasso2pop_logreg_data$X1,
-#'                                                    groups1 = grouplasso2pop_logreg_data$groups1,
-#'                                                    rY2 = grouplasso2pop_logreg_data$Y2,
-#'                                                    rX2 = grouplasso2pop_logreg_data$X2,
-#'                                                    groups2 = grouplasso2pop_logreg_data$groups2,
+#' grouplasso2pop_logreg.out <- grouplasso2pop_logreg(rY1 = data$Y1,
+#'                                                    rX1 = data$X1,
+#'                                                    groups1 = data$groups1,
+#'                                                    rY2 = data$Y2,
+#'                                                    rX2 = data$X2,
+#'                                                    groups2 = data$groups2,
 #'                                                    rho1 = 2,
 #'                                                    rho2 = 1,
 #'                                                    lambda = 1,
 #'                                                    eta = 1,
-#'                                                    w1 = grouplasso2pop_logreg_data$w1,
-#'                                                    w2 = grouplasso2pop_logreg_data$w2,
-#'                                                    w = grouplasso2pop_logreg_data$w,
-#'                                                    rAA1 = grouplasso2pop_logreg_data$AA1,
-#'                                                    rAA2 = grouplasso2pop_logreg_data$AA2,
-#'                                                    rCom = grouplasso2pop_logreg_data$Com,
+#'                                                    w1 = data$w1,
+#'                                                    w2 = data$w2,
+#'                                                    w = data$w,
+#'                                                    rAA1 = data$AA1,
+#'                                                    rAA2 = data$AA2,
+#'                                                    rCom = data$Com,
 #'                                                    tol = 1e-4,
 #'                                                    maxiter = 500)
 grouplasso2pop_logreg <- function(rY1, rX1, groups1, rY2, rX2, groups2, rho1, rho2, lambda, eta, w1, w2, w, rAA1, rAA2, rCom, tol, maxiter, beta1_init = as.numeric( c()), beta2_init = as.numeric( c())) {
