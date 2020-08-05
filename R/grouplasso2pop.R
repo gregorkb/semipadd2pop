@@ -435,6 +435,29 @@ grouplasso2pop_linreg_R <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,lambda
 #' @param Com the indices of the covariate groups which are common in the two datasets
 #' @return a list containing the fits over a grid of lambda and eta values as well as the vector of lambda values and the vector of eta values
 #' @examples 
+#' data <- get_grouplasso2pop_data(n1 = 400, n2 = 600, response = "continuous")
+#' 
+#' grouplasso2pop_lingreg_grid.out <- grouplasso2pop_linreg_grid(Y1 = data$Y1,
+#'                                                               X1 = data$X1,
+#'                                                               groups1 = data$groups1,
+#'                                                               Y2 = data$Y2,
+#'                                                               X2 = data$X2,
+#'                                                               groups2 = data$groups2,
+#'                                                               rho1 = 1,
+#'                                                               rho2 = 2,
+#'                                                               n.lambda = 10,
+#'                                                               n.eta = 5,
+#'                                                               lambda.min.ratio = 0.001,
+#'                                                               lambda.max.ratio = .5,
+#'                                                               w1 = data$w1,
+#'                                                               w2 = data$w2,
+#'                                                               w = data$w,
+#'                                                               AA1 = data$AA1,
+#'                                                               AA2 = data$AA2,
+#'                                                               Com = data$Com,
+#'                                                               tol = 1e-3,
+#'                                                               maxiter = 500,
+#'                                                               report.prog = TRUE)
 #' @export
 grouplasso2pop_linreg_grid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio = 1,w1,w2,w,AA1,AA2,Com,tol=1e-4,maxiter=500,report.prog=FALSE)
 {

@@ -11,3 +11,4 @@ Depends: splines
 Imports: Rcpp (>= 1.0.4)
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.1.1
+Encoding: UTF-8

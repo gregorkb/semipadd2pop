@@ -69,3 +69,28 @@ a list containing the fits over a grid of lambda and eta values as well as the v
 \description{
 Fit grouplasso2pop regression estimator over a grid of lambda and eta values
 }
+\examples{
+data <- get_grouplasso2pop_data(n1 = 400, n2 = 600, response = "continuous")
+
+grouplasso2pop_lingreg_grid.out <- grouplasso2pop_linreg_grid(Y1 = data$Y1,
+                                                              X1 = data$X1,
+                                                              groups1 = data$groups1,
+                                                              Y2 = data$Y2,
+                                                              X2 = data$X2,
+                                                              groups2 = data$groups2,
+                                                              rho1 = 1,
+                                                              rho2 = 2,
+                                                              n.lambda = 10,
+                                                              n.eta = 5,
+                                                              lambda.min.ratio = 0.001,
+                                                              lambda.max.ratio = .5,
+                                                              w1 = data$w1,
+                                                              w2 = data$w2,
+                                                              w = data$w,
+                                                              AA1 = data$AA1,
+                                                              AA2 = data$AA2,
+                                                              Com = data$Com,
+                                                              tol = 1e-3,
+                                                              maxiter = 500,
+                                                              report.prog = TRUE)
+}

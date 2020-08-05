@@ -12,10 +12,7 @@
 /Users/GREGORKB/OneDrive - University of South Carolina/Research/semipaddgt2pop_project/Rscripts/dev/semipadd2pop/semipadd2pop_20200803.R="637850BB"
 /Users/GREGORKB/OneDrive - University of South Carolina/Research/semipaddgt2pop_project/Rscripts/dev/semipadd2pop/semipadd2pop_cv_20200804.R="637F5F7D"
 /Users/GREGORKB/OneDrive - University of South Carolina/Research/semipaddgt2pop_project/Rscripts/dev/semipadd2pop/semipadd2pop_cv_adapt_20200804.R="F2609C3F"
-<<<<<<< HEAD
 /Users/GREGORKB/OneDrive - University of South Carolina/Research/semipaddgt2pop_project/Rscripts/dev/semipadd2pop/semipadd2pop_cv_adapt_fixedgrid_20200804.R="D1A8148"
-=======
->>>>>>> 41111af18c06589c17fa564506d2fe41a1f4872f
 /Users/GREGORKB/OneDrive - University of South Carolina/Research/semipaddgt2pop_project/Rscripts/dev/semipadd2pop/semipadd2pop_grid_20200804.R="C68C2CB6"
 /Users/GREGORKB/OneDrive - University of South Carolina/Research/semipaddgt2pop_project/Rscripts/dev/semipadd2pop_linreg_functions/grouplasso2pop_linreg_20200803.R="EC428C3A"
 /Users/GREGORKB/OneDrive - University of South Carolina/Research/semipaddgt2pop_project/Rscripts/dev/semipadd2pop_linreg_functions/grouplasso2pop_linreg_cv_20200228.R="8795F376"
@@ -50,23 +47,12 @@
 /Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/DESCRIPTION="14D8ABF9"
 /Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/NAMESPACE="C8278B1A"
 /Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/RcppExports.R="8102C34F"
-<<<<<<< HEAD
-/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/grouplasso2pop.R="25643D69"
-/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/semipadd2pop.R="9DB0D3A9"
-/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/semipadd2pop_gt.R="41563584"
-/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/semipadd2pop_linreg.R="B04DE5B"
-/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/semipadd2pop_logreg.R="ED6432C7"
-/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/semipadd_gt.R="C6737BD"
-/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/semipadd_logreg.R="B686C16F"
-/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/semipadd_misc.R="66598BEC"
-=======
 /Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/grouplasso.R="422F8AC0"
-/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/grouplasso2pop.R="802D4450"
+/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/grouplasso2pop.R="25643D69"
 /Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/misc.R="5A8DF68F"
 /Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/semipadd.R="119D1E56"
-/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/semipadd2pop.R="D5A3A4C5"
+/Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/semipadd2pop.R="9DB0D3A9"
 /Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/R/semipadd2pop_wint.R="E2A2B655"
 /Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/man/semipadd.Rd="826DF0F7"
->>>>>>> 41111af18c06589c17fa564506d2fe41a1f4872f
 /Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/src/RcppExports.cpp="2796D6D5"
 /Users/GREGORKB/OneDrive - University of South Carolina/myPackages/semipaddgt2pop/src/semipaddgt2pop.cpp="CA123980"

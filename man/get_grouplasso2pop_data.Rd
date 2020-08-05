@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{get_grouplasso2pop_data}
 \alias{get_grouplasso2pop_data}
-\title{}
+\title{Generate two data sets with some common covariates}
 \usage{
 get_grouplasso2pop_data(n1, n2, response)
 }
@@ -17,15 +17,5 @@ get_grouplasso2pop_data(n1, n2, response)
 a list containing the data
 }
 \description{
-d1 <- c(1,1,1,4,5)
-  q1 <- length(d1)
-  X1 <- matrix(rnorm(n1*sum(d1)),n1,sum(d1))
-  groups1 <- numeric() ; for(j in 1:q1){ groups1 <- c(groups1,rep(j,d1[j])) }
-  beta1 <- rnorm(ncol(X1))
-  
-  P1 <- logit(X1 %*% beta1)
-  Y1 <- rbinom(n1,1,P1)
-}
-\details{
-
+Generate two data sets with some common covariates
 }

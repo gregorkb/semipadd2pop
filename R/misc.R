@@ -1,5 +1,4 @@
-
-#' Get design matrix for finding regression splines coefficients under wiggliness penalization
+#' @title Get design matrix for finding regression splines coefficients under wiggliness penalization
 #' 
 #' @param X a vector of values at which penalized cubic B-splines are to be evaluated
 #' @param d the number of B-spline functions in the basis.  If negative, knots are evenly spaced.
@@ -9,7 +8,6 @@
 #' @export
 spsm_cubespline_design <- function(X,d,xi,W = NULL)
 {
-  
   
   n <- length(X)
   
@@ -296,144 +294,7 @@ grouplasso_to_semipadd_noint <- function(X,nonparm,groups,knots.list,emp.cent,QQ
   
 }
 
-
-#' 
-#' #' Plot method for class semipaddgt
-#' #' @export
-#' plot_semipaddgt <- function(x,true.functions=NULL)
-#' {
-#'   
-#'   f.hat <- x$f.hat
-#'   f.hat.design <- x$f.hat.design
-#'   knots.list <- x$knots.list
-#'   pp <- length(f.hat)
-#'   n.plots <- length(which(x$nonparm == 1))
-#'   
-#'   ncols <- 4
-#'   nrows <- ceiling(n.plots/ncols)
-#'   
-#'   par(mfrow=c(nrows,ncols),mar=c(2.1,2.1,1.1,1.1))
-#'   
-#'   for( j in which(x$nonparm == 1) ){
-#'     
-#'     xj.min <- min(knots.list[[j]]) + 1e-2
-#'     xj.max <- max(knots.list[[j]]) - 1e-2
-#'     
-#'       plot(NA,ylim = range(f.hat.design[,-1]),xlim=c(xj.min,xj.max))
-#'       if(x$nonparm[j]==1) abline(v=knots.list[[j]],col=rgb(0,0,0,0.15))
-#'       
-#'       plot(f.hat[[j]],xj.min,xj.max,add=TRUE,col=rgb(0,0,0,1))
-#'       
-#'       if(length(true.functions)!=0)
-#'       {
-#'         
-#'         x.seq <- seq(xj.min,xj.max,length=300)
-#'         f.cent.seq <- true.functions$f[[j]](x.seq) - mean(true.functions$f[[j]](true.functions$X[,j]))
-#'         lines(f.cent.seq ~ x.seq,lty=2)
-#'         
-#'       }
-#'       
-#'   }
-#'   
-#' }
-#' 
-#' 
-#' 
-#' #' Plot method for class semipaddgt_grid
-#' #' @export
-#' plot_semipaddgt_grid <- function(x,true.functions=NULL)
-#' {
-#'   
-#'   f.hat <- x$f.hat
-#'   f.hat.design <- x$f.hat.design
-#'   knots.list <- x$knots.list
-#'   n.lambda <- length(x$lambda.seq)
-#'   pp <- length(f.hat)
-#'   
-#'   n.plots <- length(unique(which(x$nonparm == 1)))
-#'   
-#'   ncols <- 4
-#'   nrows <- ceiling(n.plots/ncols)
-#'   
-#'   par(mfrow=c(nrows,ncols),mar=c(2.1,2.1,1.1,1.1))
-#'   
-#'   for( j in which(x$nonparm == 1) ){
-#'     
-#'     xj.min <- min(knots.list[[j]]) + 1e-2
-#'     xj.max <- max(knots.list[[j]]) - 1e-2
-#'     
-#'     plot(NA,ylim = range(f.hat.design[,-1,]),xlim=c(xj.min,xj.max))
-#'     if(x$nonparm[j]==1) abline(v=knots.list[[j]],col=rgb(0,0,0,0.15))
-#'     
-#'     for(l in 1:n.lambda){
-#' 
-#'       plot(f.hat[[l]][[j]],xj.min,xj.max,add=TRUE,col=rgb(0,0,0,.5))
-#'       
-#'     }
-#'     
-#'     if(length(true.functions)!=0){
-#'       
-#'       x.seq <- seq(xj.min,xj.max,length=300)
-#'       f.cent.seq <- true.functions$f[[j]](x.seq) - mean(true.functions$f[[j]](true.functions$X[,j]))
-#'       lines(f.cent.seq ~ x.seq,lty=2)
-#'       
-#'     }
-#'   }
-#'   
-#' }
-#' 
-#' 
-#' #' Plot method for class semipaddgt_cv
-#' #' @export
-#' plot_semipaddgt_cv <- function(x,true.functions=NULL)
-#' {
-#'   
-#'   f.hat <- x$f.hat
-#'   f.hat.folds <- x$f.hat.folds
-#'   f.hat.design <- x$f.hat.design
-#'   knots.list <- x$knots.list
-#'   n.lambda <- x$n.lambda
-#'   which.lambda.cv <- x$which.lambda.cv
-#'   
-#'   pp <- length(f.hat)
-#'   n.plots <- length(unique(which(x$nonparm == 1)))
-#'   
-#'   ncols <- 4
-#'   nrows <- ceiling(n.plots/ncols)
-#'   
-#'   par(mfrow=c(nrows,ncols),mar=c(2.1,2.1,1.1,1.1))
-#'   
-#'   for( j in which(x$nonparm == 1) ){
-#'     
-#'     xj.min <- min(knots.list[[j]]) + 1e-2
-#'     xj.max <- max(knots.list[[j]]) - 1e-2
-#'     
-#'     plot(NA,ylim = range(f.hat.design[,-1,]),xlim=c(xj.min,xj.max))
-#'     if(x$nonparm[j]==1) abline(v=knots.list[[j]],col=rgb(0,0,0,0.15))
-#'     
-#'     for(l in 1:n.lambda){
-#'       
-#'       opacity <- ifelse( l == which.lambda.cv,1,0.25)
-#'       plot(f.hat[[l]][[j]],xj.min,xj.max,add=TRUE,col=rgb(0,0,0,opacity))
-#'       
-#'     }
-#'     
-#'     if(length(true.functions)!=0){
-#'       
-#'       x.seq <- seq(xj.min,xj.max,length=300)
-#'       f.cent.seq <- true.functions$f[[j]](x.seq) - mean(true.functions$f[[j]](true.functions$X[,j]))
-#'       lines(f.cent.seq ~ x.seq,lty=2)
-#'       
-#'     }
-#'     
-#'   }
-#'   
-#' }
-
-
-
-
-#' Plot method for class semipadd2pop_gt
+#' Plot method for class semipadd2pop
 #' @export
 plot_semipadd2pop <- function(x,true.functions=NULL)
 {
@@ -1121,63 +982,6 @@ get_semipadd_linreg_data <- function(n,extrafuns=0)
 }
 
 
-#' #' Generate two data sets with binary responses and some common covariates
-#' #'
-#' #' @param n1 the sample size for the first data set
-#' #' @param n2 the sample size for the second data set
-#' #' @return a list containing the data
-#' #' @export
-#' get_grouplasso2pop_logreg_data <- function(n1,n2){
-#' 
-#'   d1 <- c(1,1,1,4,5)
-#'   q1 <- length(d1)
-#'   X1 <- matrix(rnorm(n1*sum(d1)),n1,sum(d1))
-#'   groups1 <- numeric() ; for(j in 1:q1){ groups1 <- c(groups1,rep(j,d1[j])) }
-#'   beta1 <- rnorm(ncol(X1))
-#'   
-#'   P1 <- logit(X1 %*% beta1)
-#'   Y1 <- rbinom(n1,1,P1)
-#' 
-#'   d2 <- c(1,1,4,3,4,1)
-#'   q2 <- length(d2)
-#'   X2 <- matrix(rnorm(n2*sum(d2)),n2,sum(d2))
-#'   groups2 <- numeric() ; for(j in 1:q2){ groups2 <- c(groups2,rep(j,d2[j])) }
-#'   beta2 <- rnorm(ncol(X2))
-#' 
-#'   P2 <- logit(X2 %*% beta2)
-#'   Y2 <- rbinom(n2,1,P2)
-#' 
-#'   # set tuning parameters
-#'   Com <- c(3,4)
-#'   AA1 <- AA2 <- vector("list",min(q1,q2))
-#'   for(j in Com){
-#'     n.int <- rpois(1,4)
-#'     AA1[[j]] <- matrix(rnorm(n.int*d1[j]),n.int,d1[j])
-#'     AA2[[j]] <- matrix(rnorm(n.int*d2[j]),n.int,d2[j])
-#'   }
-#' 
-#'   w1 <- rexp(q1,2)
-#'   w2 <- rexp(q2,2)
-#'   w <- rexp(min(q1,q2),2)
-#'   
-#'   output <- list(Y1 = Y1,
-#'                  X1 = X1,
-#'                  groups1 = groups1,
-#'                  Y2 = Y2,
-#'                  X2 = X2,
-#'                  groups2 = groups2,
-#'                  w1 = w1,
-#'                  w2 = w2,
-#'                  w = w,
-#'                  AA1 = AA1,
-#'                  AA2 = AA2,
-#'                  Com = Com,
-#'                  P1 = P1,
-#'                  P2 = P2)
-#' 
-#' }
-
-
 #' Generate two data sets with some common covariates
 #'
 #' @param n1 the sample size for the first data set
@@ -1575,82 +1379,6 @@ get_semipadd_gt_data <- function(n)
   return(output)
   
 }
-
-
-
-#' #' Generate two data sets with group testing responses and some common covariates
-#' #'
-#' #' @param n1 the sample size for the first data set
-#' #' @param n2 the sample size for the second data set
-#' #' @return a list containing the data
-#' #' @export
-#' get_grouplassogt2pop_data <- function(n1,n2){
-#' 
-#'   d1 <- c(1,1,3,4)
-#'   q1 <- length(d1)
-#'   X1 <- matrix(rnorm(n1*sum(d1)),n1,sum(d1))
-#'   groups1 <- numeric() ; for(j in 1:q1){ groups1 <- c(groups1,rep(j,d1[j])) }
-#'   beta1 <- rnorm(ncol(X1))
-#'   Y1.true <- rbinom(n1,1,logit(X1 %*% beta1))
-#' 
-#'   # Se1 <- c(.98,.96)
-#'   # Sp1 <- c(.97,.99)
-#'   Se1 <- c(.98,.96)
-#'   Sp1 <- c(.97,.99)
-#'   assay1.out <- dorfman.assay.gen(Y1.true,Se1,Sp1,cj=4)
-#'   Z1 <- assay1.out$Z
-#'   Y1 <- assay1.out$Y
-#' 
-#'   d2 <- c(1,1,4,3,3,2)
-#'   q2 <- length(d2)
-#'   X2 <- matrix(rnorm(n2*sum(d2)),n2,sum(d2))
-#'   groups2 <- numeric() ; for(j in 1:q2){ groups2 <- c(groups2,rep(j,d2[j])) }
-#'   beta2 <- rnorm(ncol(X2))
-#' 
-#'   Y2.true <- rbinom(n2,1,logit(X2 %*% beta2))
-#' 
-#'   Se2 <- .98
-#'   Sp2 <- .97
-#'   assay2.out <- individual.assay.gen(Y2.true,Se2,Sp2,cj=1)
-#'   Z2 <- assay2.out$Z
-#'   Y2 <- assay2.out$Y
-#' 
-#'   # set tuning parameters
-#'   Com <- c(3,4)
-#'   AA1 <- AA2 <- vector("list",min(q1,q2))
-#'   for(j in Com){
-#'     n.int <- rpois(1,4)
-#'     AA1[[j]] <- matrix(rnorm(n.int*d1[j]),n.int,d1[j])
-#'     AA2[[j]] <- matrix(rnorm(n.int*d2[j]),n.int,d2[j])
-#'   }
-#' 
-#'   w1 <- rexp(q1,2)
-#'   w2 <- rexp(q2,2)
-#'   w <- rexp(min(q1,q2),2)
-#' 
-#'   output <- list(Y1 = Y1,
-#'                  Y1.true = Y1.true,
-#'                  Z1 = Z1,
-#'                  Se1 = Se1,
-#'                  Sp1 = Sp1,
-#'                  X1 = X1,
-#'                  groups1 = groups1,
-#'                  Y2 = Y2,
-#'                  Y2.true = Y2.true,
-#'                  Z2 = Z2,
-#'                  Se2 = Se2,
-#'                  Sp2 = Sp2,
-#'                  X2 = X2,
-#'                  groups2 = groups2,
-#'                  w1 = w1,
-#'                  w2 = w2,
-#'                  w = w,
-#'                  AA1 = AA1,
-#'                  AA2 = AA2,
-#'                  Com = Com)
-#' 
-#' }
-
 
 #' Generate two data sets for semiparametric additive modeling with group testing responses and some common covariates
 #'

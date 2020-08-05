@@ -66,51 +66,17 @@ semipadd2pop_to_grouplasso2pop <- function(X1,nonparm1,X2,nonparm2,nCom,d1,d2,xi
       
     } else {
       
-      if(d1[j] < 0){
-        
-        int.knots <- seq(min(X1[,j]), max(X1[,j]), length = -d1[j] - 2 + 1 )
-        d1[j] <- -d1[j]
-        
-      } else {
-        
-        int.knots <- quantile(X1[,j],seq(0,1,length=d1[j]-2+1)) # add one, so that one can be removed after centering to restore full-rank.
-        
-      }
+      spsm_cubespline_design.out <- spsm_cubespline_design(X = X1[,j],
+                                                           d = d1[j],
+                                                           xi = xi,
+                                                           W = NULL)
       
-      boundary.knots <- range(int.knots)
-      all.knots <- sort(c(rep(boundary.knots,3),int.knots))
-      knots.list1[[j]] <- all.knots
+      knots.list1[[j]] <- spsm_cubespline_design.out$knots
+      emp.cent1[[j]] <- spsm_cubespline_design.out$emp.cent
+      QQ1.inv[[j]] <- spsm_cubespline_design.out$Q.inv
+      DD1.tilde <- cbind(DD1.tilde, spsm_cubespline_design.out$D.tilde)
       
-      B1j <- spline.des(all.knots,X1[,j],ord=4,derivs=0,outer.ok=TRUE)$design[,-1] # remove one so we can center and keep full-rank
-      emp.cent1[[j]] <- apply(B1j,2,mean)
-      B1j.cent <- B1j - matrix(emp.cent1[[j]],n1,d1[j],byrow=TRUE)
-      
-      # construct matrix in which l2 norm of function is a quadratic form
-      M <- t(B1j.cent) %*% B1j.cent / n1
-      
-      # construct matrix in which 2nd derivative penalty is a quadratic form
-      R <- matrix(NA,d1[j]+1,d1[j]+1)
-      dsq_bspline.mat <- spline.des(int.knots,knots = all.knots,outer.ok=TRUE,derivs=2)$design
-      for(k in 1:(d1[j]+1))
-        for(l in 1:(d1[j]+1))
-        {
-          
-          pcwiselin <- dsq_bspline.mat[,k] * dsq_bspline.mat[,l] # Get sum of trapezoidal areas.
-          h <- diff(int.knots)
-          R[k,l] <- sum(.5*(pcwiselin[-1] + pcwiselin[-length(int.knots)])*h)  # sum of trapezoidal areas.
-          
-        }
-      
-      Q <-  chol(M + xi^2 * R[-1,-1]) # remove the one corresponding to the first coefficient (since we have removed one column)
-      Q.inv <- solve(Q)
-      
-      QQ1.inv[[j]] <- Q.inv
-      
-      # construct transformed basis function matrices
-      DD1.tilde <- cbind(DD1.tilde, B1j.cent %*% Q.inv)
-      
-      if(j %in% Com){  # Make the AA matrices based on a common centering between the data sets... since we are not really interested in the centering but in the shape.
-        # We penalize the shapes to be similar, not the intercepts!!!!!!  I don't know if this will address the problem I am seeing though....
+      if(j %in% Com){  # Make the AA matrices based on a common centering between the data sets...
         
         X1j.srt <- sort(X1[,j])
         X2j.srt <- sort(X2[,j])
@@ -120,9 +86,9 @@ semipadd2pop_to_grouplasso2pop <- function(X1,nonparm1,X2,nonparm2,nCom,d1,d2,xi
         
         Xj.int <- Xj.union[int.ind]
         
-        AA1j <- spline.des(all.knots,Xj.int,ord=4,derivs=0,outer.ok=TRUE)$design[,-1] # remove same one
+        AA1j <- spline.des(knots.list1[[j]],Xj.int,ord=4,derivs=0,outer.ok=TRUE)$design[,-1] # remove same one
         AA1j.cent <- AA1j - matrix(apply(AA1j,2,mean),length(int.ind),d1[j],byrow=TRUE)
-        AA1.tilde[[j]] <- AA1j.cent %*% Q.inv
+        AA1.tilde[[j]] <- AA1j.cent %*% QQ1.inv[[j]]
         
       }
       
@@ -151,51 +117,17 @@ semipadd2pop_to_grouplasso2pop <- function(X1,nonparm1,X2,nonparm2,nCom,d1,d2,xi
       
     } else {
       
-      if(d2[j] < 0){
-        
-        int.knots <- seq(min(X2[,j]), max(X2[,j]), length = -d2[j] - 2 + 1 )
-        d2[j] <- -d2[j]
-        
-      } else {
-        
-        int.knots <- quantile(X2[,j],seq(0,1,length=d2[j]-2+1)) # add one, so that one can be removed after centering to restore full-rank.
-        
-      }
+      spsm_cubespline_design.out <- spsm_cubespline_design(X = X2[,j],
+                                                           d = d2[j],
+                                                           xi = xi,
+                                                           W = NULL)
       
-      boundary.knots <- range(int.knots)
-      all.knots <- sort(c(rep(boundary.knots,3),int.knots))
-      knots.list2[[j]] <- all.knots
+      knots.list2[[j]] <- spsm_cubespline_design.out$knots
+      emp.cent2[[j]] <- spsm_cubespline_design.out$emp.cent
+      QQ2.inv[[j]] <- spsm_cubespline_design.out$Q.inv
+      DD2.tilde <- cbind(DD2.tilde, spsm_cubespline_design.out$D.tilde)
       
-      B2j <- spline.des(all.knots,X2[,j],ord=4,derivs=0,outer.ok=TRUE)$design[,-1] # remove one so we can center and keep full-rank
-      emp.cent2[[j]] <- apply(B2j,2,mean)
-      B2j.cent <- B2j - matrix(emp.cent2[[j]],n2,d2[j],byrow=TRUE)
-      
-      # construct matrix in which l2 norm of function is a quadratic form
-      M <- t(B2j.cent) %*% B2j.cent / n2
-      
-      # construct matrix in which 2nd derivative penalty is a quadratic form
-      R <- matrix(NA,d2[j]+1,d2[j]+1)
-      dsq_bspline.mat <- spline.des(int.knots,knots = all.knots,outer.ok=TRUE,derivs=2)$design
-      for(k in 1:(d2[j]+1))
-        for(l in 1:(d2[j]+1))
-        {
-          
-          pcwiselin <- dsq_bspline.mat[,k] * dsq_bspline.mat[,l] # Get sum of trapezoidal areas.
-          h <- diff(int.knots)
-          R[k,l] <- sum(.5*(pcwiselin[-1] + pcwiselin[-length(int.knots)])*h)  # sum of trapezoidal areas.
-          
-        }
-      
-      Q <-  chol(M + xi^2 * R[-1,-1]) # remove the one corresponding to the first coefficient (since we have removed one column)
-      Q.inv <- solve(Q)
-      
-      QQ2.inv[[j]] <- Q.inv
-      
-      # construct transformed basis function matrices
-      DD2.tilde <- cbind(DD2.tilde, B2j.cent %*% Q.inv)
-      
-      if(j %in% Com){  # Make the AA matrices based on a common centering between the data sets... since we are not really interested in the centering but in the shape.
-        # We penalize the shapes to be similar, not the intercepts!!!!!!  I don't know if this will address the problem I am seeing though....
+      if(j %in% Com){  # Make the AA matrices based on a common centering between the data sets
         
         X1j.srt <- sort(X1[,j])
         X2j.srt <- sort(X2[,j])
@@ -205,9 +137,9 @@ semipadd2pop_to_grouplasso2pop <- function(X1,nonparm1,X2,nonparm2,nCom,d1,d2,xi
         
         Xj.int <- Xj.union[int.ind]
         
-        AA2j <- spline.des(all.knots,Xj.int,ord=4,derivs=0,outer.ok=TRUE)$design[,-1] # remove same one
+        AA2j <- spline.des(knots.list2[[j]],Xj.int,ord=4,derivs=0,outer.ok=TRUE)$design[,-1] # remove same one
         AA2j.cent <- AA2j - matrix(apply(AA2j,2,mean),length(int.ind),d2[j],byrow=TRUE)
-        AA2.tilde[[j]] <- AA2j.cent %*% Q.inv
+        AA2.tilde[[j]] <- AA2j.cent %*% QQ2.inv[[j]]
         
       }
       

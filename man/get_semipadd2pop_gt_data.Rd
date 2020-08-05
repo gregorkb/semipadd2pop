@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{get_semipadd2pop_gt_data}
 \alias{get_semipadd2pop_gt_data}
-\title{}
+\title{Generate two data sets for semiparametric additive modeling with group testing responses and some common covariates}
 \usage{
 get_semipadd2pop_gt_data(n1, n2, model = 1)
 }
@@ -15,13 +15,5 @@ get_semipadd2pop_gt_data(n1, n2, model = 1)
 a list containing the data
 }
 \description{
-d1 <- c(1,1,3,4)
-  q1 <- length(d1)
-  X1 <- matrix(rnorm(n1*sum(d1)),n1,sum(d1))
-  groups1 <- numeric() ; for(j in 1:q1){ groups1 <- c(groups1,rep(j,d1[j])) }
-  beta1 <- rnorm(ncol(X1))
-  Y1.true <- rbinom(n1,1,logit(X1 %*% beta1))
-}
-\details{
-
+Generate two data sets for semiparametric additive modeling with group testing responses and some common covariates
 }
