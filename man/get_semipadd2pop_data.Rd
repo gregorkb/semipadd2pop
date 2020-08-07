@@ -4,7 +4,7 @@
 \alias{get_semipadd2pop_data}
 \title{Generate two data sets for semiparametric additive modeling with group testing responses and some common covariates}
 \usage{
-get_semipadd2pop_data(n1, n2, response, model = 1)
+get_semipadd2pop_data(n1, n2, response, model = 1, int = FALSE)
 }
 \arguments{
 \item{n1}{the sample size for the first data set}
