@@ -1,3 +1,4 @@
+="======"
 %2FLibrary%2FFrameworks%2FR.framework%2FVersions%2F3.5%2FResources%2Flibrary%2FRcpp%2Finclude%2FRcpp%2Ftraits%2Ftraits.h="E6DBF345"
 %2FLibrary%2FFrameworks%2FR.framework%2FVersions%2F3.5%2FResources%2Flibrary%2FRcppArmadillo%2Finclude%2Farmadillo="E14A8014"
 ~%2FDocuments%2FResearch%2Fprojects%2Fpooledtesting%2FRscripts%2Fdataanalysis%2FIowa_data_analysis_20180406%2FIowa_data_analysis_20180406_bayes.R="C35CAEB"
@@ -38,15 +39,17 @@
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fgrouplassogt2pop_cv_adapt_fixedgrid_20200303.R="C6744AA"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fgrouplassogt2pop_cv_fixedgrid_20200303.R="5BEEAC75"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fgrouplassogt2pop_grid_20200219.R="33B2FA1B"
-<<<<<<< HEAD
-~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop%2Fsemipadd2pop_cv_adapt_fixedgrid_20200804.R="8F680AD1"
-=======
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd%2Fsemipadd_20200730.R="F23BB9AF"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop%2Fsemipadd2pop_20200803.R="7E4E1F7B"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop%2Fsemipadd2pop_cv_20200804.R="C921F00D"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop%2Fsemipadd2pop_cv_adapt_20200804.R="35CB468E"
-~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop%2Fsemipadd2pop_cv_adapt_fixedgrid_20200804.R="A4CC9BFF"
+~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop%2Fsemipadd2pop_cv_adapt_fixedgrid_20200804.R="8F680AD1"
+~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop%2Fsemipadd2pop_cv_adapt_wint_20200806.R="18F798FB"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop%2Fsemipadd2pop_grid_20200804.R="E18EFD91"
+~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop%2Fsemipadd2pop_grid_wint_20200806.R="9A278DC6"
+~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop%2Fsemipadd2pop_to_grouplasso2pop_with_20200805.R="AB20E8B2"
+~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop%2Fsemipadd2pop_wint_20200803.R="EBDE5CD7"
+~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop%2Fsemipaddpop_cv_wint_20200806.R="D7F805B9"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop_linreg_functions%2Fgrouplasso2pop_linreg_20200803.R="38C4BB50"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop_linreg_functions%2Fgrouplasso2pop_linreg_cv_20200228.R="198AD929"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop_linreg_functions%2Fgrouplasso2pop_linreg_cv_adapt_20200228.R="FA2E7952"
@@ -55,7 +58,6 @@
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop_linreg_functions%2Fgrouplasso2pop_linreg_fixed_grid_20200804.R="8B1B0A24"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop_linreg_functions%2Fgrouplasso2pop_linreg_grid_20200804.R="1A6F2E9F"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop_linreg_functions%2Fsemipadd2pop_linreg_20200207.R="5197268F"
->>>>>>> 41111af18c06589c17fa564506d2fe41a1f4872f
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop_logreg_20200212.R="68FDAC69"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop_logreg_cv_20200224.R="82944F8D"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FResearch%2Fsemipaddgt2pop_project%2FRscripts%2Fdev%2Fsemipadd2pop_logreg_cv_adapt_20200224.R="4F4A85B6"
@@ -122,11 +124,7 @@
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FmyPackages%2Fsemipaddgt2pop%2FR%2Fsemipadd2pop_gt.R="3BCB7D0F"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FmyPackages%2Fsemipaddgt2pop%2FR%2Fsemipadd2pop_linreg.R="513CF322"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FmyPackages%2Fsemipaddgt2pop%2FR%2Fsemipadd2pop_logreg.R="32560B5F"
-<<<<<<< HEAD
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FmyPackages%2Fsemipaddgt2pop%2FR%2Fsemipadd2pop_wint.R="FFC7D289"
-=======
-~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FmyPackages%2Fsemipaddgt2pop%2FR%2Fsemipadd2pop_wint.R="2CAED479"
->>>>>>> 41111af18c06589c17fa564506d2fe41a1f4872f
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FmyPackages%2Fsemipaddgt2pop%2FR%2Fsemipadd_gt.R="9FC45CCD"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FmyPackages%2Fsemipaddgt2pop%2FR%2Fsemipadd_linreg.R="43F59929"
 ~%2FOneDrive%20-%20University%20of%20South%20Carolina%2FmyPackages%2Fsemipaddgt2pop%2FR%2Fsemipadd_linreg_wint.R="BBBE0E66"

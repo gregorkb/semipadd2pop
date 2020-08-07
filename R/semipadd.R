@@ -259,6 +259,12 @@ grouplasso_to_semipadd <- function(X,nonparm,int = NULL,groups,knots.list,emp.ce
 semipadd <- function(Y,X,nonparm,response,w,int=NULL,w_int=NULL,d,xi,lambda.beta,lambda.f,tol=1e-4,max.iter=500)
 {
 
+  if( any(apply(abs(X),2,sum) == 0)){
+    
+    stop( "One or more columns of design matrix contain only zeroes")
+    
+  }
+  
   # prepare input for grouplasso function
   grouplasso_inputs <- semipadd_to_grouplasso(X = X,
                                               nonparm = nonparm,
@@ -270,7 +276,13 @@ semipadd <- function(Y,X,nonparm,response,w,int=NULL,w_int=NULL,d,xi,lambda.beta
                                               lambda.beta = lambda.beta,
                                               lambda.f = lambda.f)
                                                    
-                                              
+                                            
+  if( any(apply(abs(grouplasso_inputs$DD.tilde),2,sum) == 0)){
+    
+    stop( "A Gram matrix is not positive definite: Try reducing the number of knots." )
+    
+  }
+  
   # get group lasso estimators
   if(response == "continuous"){
     

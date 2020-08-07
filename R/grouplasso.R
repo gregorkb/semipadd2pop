@@ -125,6 +125,12 @@ grouplasso_linreg_R <- function(Y,X,groups,lambda,w,tol=1e-4,maxiter=500,plot_ob
             eigen[[j]] <- eigen(LtL)
             got.eigen[j] <- 1
             
+            if(any(eigen[[j]]$values==0)){
+              
+              stop("A Gram matrix is not positive definite: Try reducing the number of knots.")
+              
+            }
+            
           }
           
           h <- rj

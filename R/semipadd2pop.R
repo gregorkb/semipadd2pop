@@ -35,14 +35,6 @@ semipadd2pop_to_grouplasso2pop <- function(X1,nonparm1,X2,nonparm2,nCom,d1,d2,xi
   pp1 <- ncol(X1)
   pp2 <- ncol(X2)
   
-  ##### For first data set
-  DD1.tilde <- matrix(NA,n1,0)
-  groups1 <- numeric()
-  AA1.tilde <- vector("list",length=pp1)
-  QQ1.inv <- vector("list",length=pp1)
-  knots.list1 <- vector("list",length=pp1)
-  emp.cent1 <- vector("list",length=pp1)
-  
   if( length(d1) == 1 ){
     
     d1 <- rep(d1,pp1)
@@ -55,13 +47,18 @@ semipadd2pop_to_grouplasso2pop <- function(X1,nonparm1,X2,nonparm2,nCom,d1,d2,xi
     
   }
   
-  for( j in 1:pp1 )
-  {
+  ##### For first data set
+  DD1.tilde <- matrix(NA,n1,0)
+  groups1 <- numeric()
+  QQ1.inv <- vector("list",length=pp1)
+  knots.list1 <- vector("list",length=pp1)
+  emp.cent1 <- vector("list",length=pp1)
+  
+  for( j in 1:pp1 ){
     
     if(nonparm1[j] == 0){
       
       DD1.tilde <- cbind(DD1.tilde,X1[,j])
-      AA1.tilde[[j]] <- as.matrix(1)
       groups1 <- c(groups1,j)
       
     } else {
@@ -76,22 +73,6 @@ semipadd2pop_to_grouplasso2pop <- function(X1,nonparm1,X2,nonparm2,nCom,d1,d2,xi
       QQ1.inv[[j]] <- spsm_cubespline_design.out$Q.inv
       DD1.tilde <- cbind(DD1.tilde, spsm_cubespline_design.out$D.tilde)
       
-      if(j %in% Com){  # Make the AA matrices based on a common centering between the data sets...
-        
-        X1j.srt <- sort(X1[,j])
-        X2j.srt <- sort(X2[,j])
-        
-        Xj.union <- sort(c(X1[,j],X2[,j]))
-        int.ind <- which( max(X1j.srt[1],X2j.srt[1]) < Xj.union & Xj.union < min(X1j.srt[n1],X2j.srt[n2]) )
-        
-        Xj.int <- Xj.union[int.ind]
-        
-        AA1j <- spline.des(knots.list1[[j]],Xj.int,ord=4,derivs=0,outer.ok=TRUE)$design[,-1] # remove same one
-        AA1j.cent <- AA1j - matrix(apply(AA1j,2,mean),length(int.ind),d1[j],byrow=TRUE)
-        AA1.tilde[[j]] <- AA1j.cent %*% QQ1.inv[[j]]
-        
-      }
-      
       groups1 <- c(groups1,rep(j,d1[j]))
       
     }
@@ -101,7 +82,6 @@ semipadd2pop_to_grouplasso2pop <- function(X1,nonparm1,X2,nonparm2,nCom,d1,d2,xi
   ##### For second data set
   DD2.tilde <- matrix(NA,n2,0)
   groups2 <- numeric()
-  AA2.tilde <- vector("list",length=pp2)
   QQ2.inv <- vector("list",length=pp2)
   knots.list2 <- vector("list",length=pp2)
   emp.cent2 <- vector("list",length=pp2)
@@ -112,7 +92,6 @@ semipadd2pop_to_grouplasso2pop <- function(X1,nonparm1,X2,nonparm2,nCom,d1,d2,xi
     if(nonparm2[j] == 0){
       
       DD2.tilde <- cbind(DD2.tilde,X2[,j])
-      AA2.tilde[[j]] <- as.matrix(1)
       groups2 <- c(groups2,j)
       
     } else {
@@ -127,7 +106,26 @@ semipadd2pop_to_grouplasso2pop <- function(X1,nonparm1,X2,nonparm2,nCom,d1,d2,xi
       QQ2.inv[[j]] <- spsm_cubespline_design.out$Q.inv
       DD2.tilde <- cbind(DD2.tilde, spsm_cubespline_design.out$D.tilde)
       
-      if(j %in% Com){  # Make the AA matrices based on a common centering between the data sets
+      groups2 <- c(groups2,rep(j,d2[j]))
+      
+    }
+    
+  }
+  
+  
+  # now construct matrices needed for the dissimilarity penalties for the effects of common covariates
+  AA1.tilde <- vector("list",length=pp1)
+  AA2.tilde <- vector("list",length=pp2)
+  
+  if(length(Com)>0){
+    for( j in Com ){
+      
+      if(nonparm1[j]==0){ # nonparm1 and nonparm2 are identical over the indices in Com
+        
+        AA1.tilde[[j]] <- as.matrix(1)
+        AA2.tilde[[j]] <- as.matrix(1)
+        
+      } else if(nonparm1[j]==1){
         
         X1j.srt <- sort(X1[,j])
         X2j.srt <- sort(X2[,j])
@@ -137,18 +135,19 @@ semipadd2pop_to_grouplasso2pop <- function(X1,nonparm1,X2,nonparm2,nCom,d1,d2,xi
         
         Xj.int <- Xj.union[int.ind]
         
+        AA1j <- spline.des(knots.list1[[j]],Xj.int,ord=4,derivs=0,outer.ok=TRUE)$design[,-1] # remove same one
+        AA1j.cent <- AA1j - matrix(apply(AA1j,2,mean),length(int.ind),d1[j],byrow=TRUE)
+        AA1.tilde[[j]] <- AA1j.cent %*% QQ1.inv[[j]]
+        
         AA2j <- spline.des(knots.list2[[j]],Xj.int,ord=4,derivs=0,outer.ok=TRUE)$design[,-1] # remove same one
         AA2j.cent <- AA2j - matrix(apply(AA2j,2,mean),length(int.ind),d2[j],byrow=TRUE)
         AA2.tilde[[j]] <- AA2j.cent %*% QQ2.inv[[j]]
         
       }
-      
-      groups2 <- c(groups2,rep(j,d2[j]))
-      
     }
-    
   }
   
+
   output <- list( DD1.tilde = DD1.tilde,
                   DD2.tilde = DD2.tilde,
                   groups1 = groups1,
