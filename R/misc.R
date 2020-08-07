@@ -88,7 +88,6 @@ logit <- function(z){
 #' a <- 2
 #' y <- SoftThresh(z,a)
 #' plot(y~z,type="l")
-#' @export
 SoftThresh_R <- function(z,a){
 
   return( (z + a)*( z < - a) + (z - a)*(z > a) )
@@ -126,7 +125,6 @@ SoftThresh_R <- function(z,a){
 #'  return(val)
 #' }
 #' optim(par=rep(0,d),obj,L = L, h = h, lambda = lambda)$par
-#' @export
 FoygelDrton_R <- function(h,L,lambda,evals,evecs)
 {
 
@@ -394,128 +392,9 @@ plot_semipadd2pop <- function(x,true.functions=NULL)
 }
 
 
-#' Plot method for class semipadd2pop_gt_grid
-#' @export
-plot_semipadd2pop_grid <- function(x,true.functions=NULL)
-{
-
-  f1.hat <- x$f1.hat
-  f2.hat <- x$f2.hat
-
-  f1.hat.design <- x$f1.hat.design
-  f2.hat.design <- x$f2.hat.design
-  Com <- x$Com
-  knots.list1 <- x$knots.list1
-  knots.list2 <- x$knots.list2
-  n.lambda <- length(x$lambda.seq)
-  n.eta <- length(x$eta.seq)
-
-  pp1 <- length(f1.hat)
-  pp2 <- length(f2.hat)
-
-  n.plots <- length(unique(c(which(x$nonparm1 == 1),which(x$nonparm2 == 1)) ))
-
-  ncols <- 4
-  nrows <- ceiling(n.plots/ncols)
-
-  par(mfrow=c(nrows,ncols),mar=c(2.1,2.1,1.1,1.1))
-
-  for( j in which(x$nonparm1 == 1) ){
-
-    x1j.min <- min(knots.list1[[j]]) + 1e-2
-    x1j.max <- max(knots.list1[[j]]) - 1e-2
-
-    if( j %in% Com ){
-
-
-      x2j.min <- min(knots.list2[[j]]) + 1e-2
-      x2j.max <- max(knots.list2[[j]]) - 1e-2
-
-      plot(NA,ylim = range(f1.hat.design[,-1,,],f2.hat.design[,-1,,]),xlim=c(min(x1j.min,x2j.min),max(x1j.max,x2j.max)))
-      if(x$nonparm1[j]==1) abline(v=knots.list1[[j]],col=rgb(0,0,0,.15))
-      if(x$nonparm2[j]==1) abline(v=knots.list2[[j]],col=rgb(0,0,1,.15))
-
-      for(l in 1:n.lambda)
-        for(k in 1:n.eta)
-        {
-
-          plot(f1.hat[[l]][[k]][[j]],x1j.min,x1j.max,add=TRUE,col=rgb(0,0,0,.5))
-          plot(f2.hat[[l]][[k]][[j]],x2j.min,x2j.max,add=TRUE,col=rgb(0,0,.545,.5))
-
-        }
-
-      if(length(true.functions)!=0)
-      {
-
-        x1.seq <- seq(x1j.min,x1j.max,length=300)
-        f1.cent.seq <- true.functions$f1[[j]](x1.seq) - mean(true.functions$f1[[j]](true.functions$X1[,j]))
-        lines(f1.cent.seq ~ x1.seq,lty=2)
-
-        x2.seq <- seq(x2j.min,x2j.max,length=300)
-        f2.cent.seq <- true.functions$f2[[j]](x2.seq) - mean(true.functions$f2[[j]](true.functions$X2[,j]))
-        lines(f2.cent.seq ~ x2.seq,lty=2,col=rgb(0,0,.545,1))
-
-      }
-
-    } else {
-
-      plot(NA,ylim = range(f1.hat.design[,-1,,],f2.hat.design[,-1,,]),xlim=c(x1j.min,x1j.max))
-      if(x$nonparm1[j]==1) abline(v=knots.list1[[j]],col=rgb(0,0,0,0.15))
-
-      for(l in 1:n.lambda)
-        for(k in 1:n.eta)
-        {
-
-          plot(f1.hat[[l]][[k]][[j]],x1j.min,x1j.max,add=TRUE,col=rgb(0,0,0,.5))
-        }
-
-      if(length(true.functions)!=0)
-      {
-
-        x1.seq <- seq(x1j.min,x1j.max,length=300)
-        f1.cent.seq <- true.functions$f1[[j]](x1.seq) - mean(true.functions$f1[[j]](true.functions$X1[,j]))
-        lines(f1.cent.seq ~ x1.seq,lty=2)
-
-      }
-    }
-  }
-
-  for(j in which(x$nonparm2==1)){
-
-    x2j.min <- min(knots.list2[[j]]) + 1e-2
-    x2j.max <- max(knots.list2[[j]]) - 1e-2
-
-    if(j %in% Com) next;
-
-    plot(NA,ylim = range(f1.hat.design[,-1,,],f2.hat.design[,-1,,]),xlim=c(x2j.min,x2j.max))
-
-    if(x$nonparm2[j]==1) abline(v=knots.list2[[j]],col=rgb(0,0,1,.15))
-
-    for(l in 1:n.lambda)
-      for(k in 1:n.eta)
-      {
-
-        plot(f2.hat[[l]][[k]][[j]],x2j.min,x2j.max,add=TRUE,col=rgb(0,0,.545,.5))
-
-      }
-
-    if(length(true.functions)!=0)
-    {
-
-      x2.seq <- seq(x2j.min,x2j.max,length=300)
-      f2.cent.seq <- true.functions$f2[[j]](x2.seq) - mean(true.functions$f2[[j]](true.functions$X2[,j]))
-      lines(f2.cent.seq ~ x2.seq,lty=2,col=rgb(0,0,.545,1))
-
-    }
-
-  }
-
-}
-
-
 #' Plot method for class semipadd2pop_gt_cv
 #' @export
-plot_semipadd2pop_cv <- function(x,true.functions=NULL)
+plot_semipadd2pop_grid <- function(x,true.functions=NULL)
 {
 
   f1.hat <- x$f1.hat
@@ -529,6 +408,9 @@ plot_semipadd2pop_cv <- function(x,true.functions=NULL)
   knots.list2 <- x$knots.list2
   n.lambda <- x$n.lambda
   n.eta <- x$n.eta
+  
+  
+  # get cv choices if they exist
   which.lambda.cv <- x$which.lambda.cv
   which.eta.cv <- x$which.eta.cv
 
@@ -560,7 +442,18 @@ plot_semipadd2pop_cv <- function(x,true.functions=NULL)
       for(l in 1:n.lambda)
         for(k in 1:n.eta)
         {
-          opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv,1,0.1)
+          
+          if(length(which.lambda.cv) == 0){
+            
+            opacity <- 1
+            
+          } else {
+          
+            opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv,1,0.1)
+              
+          }
+          
+          
           plot(f1.hat[[l]][[k]][[j]],x1j.min,x1j.max,add=TRUE,col=rgb(0,0,0,opacity))
           plot(f2.hat[[l]][[k]][[j]],x2j.min,x2j.max,add=TRUE,col=rgb(0,0,.545,opacity))
         }
@@ -585,9 +478,18 @@ plot_semipadd2pop_cv <- function(x,true.functions=NULL)
       if(x$nonparm1[j]==1) abline(v=knots.list1[[j]],col=rgb(0,0,0,0.15))
 
       for(l in 1:n.lambda)
-        for(k in 1:n.eta)
-        {
-          opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv,1,0.1)
+        for(k in 1:n.eta){
+          
+          if(length(which.lambda.cv) == 0){
+            
+            opacity <- 1
+            
+          } else {
+            
+            opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv,1,0.1)
+            
+          }
+          
           plot(f1.hat[[l]][[k]][[j]],x1j.min,x1j.max,add=TRUE,col=rgb(0,0,0,opacity))
         }
 
@@ -615,9 +517,18 @@ plot_semipadd2pop_cv <- function(x,true.functions=NULL)
     if(x$nonparm2[j]==1) abline(v=knots.list2[[j]],col=rgb(0,0,1,.15))
 
     for(l in 1:n.lambda)
-      for(k in 1:n.eta)
-      {
-        opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv,1,0.1)
+      for(k in 1:n.eta){
+        
+        if(length(which.lambda.cv) == 0){
+          
+          opacity <- 1
+          
+        } else {
+          
+          opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv,1,0.1)
+          
+        }
+        
         plot(f2.hat[[l]][[k]][[j]],x2j.min,x2j.max,add=TRUE,col=rgb(0,0,.545,opacity))
       }
 
@@ -772,176 +683,11 @@ plot_semipadd2pop_wint <- function(x)
 }
 
 
-#' Plot method for class semipadd2pop_gt_grid
-#' @export
-plot_semipadd2pop_grid_wint <- function(x,true.functions=NULL)
-{
-  
-  f1.hat <- x$f1.hat
-  f2.hat <- x$f2.hat
-  
-  f1.hat.design <- x$f1.hat.design
-  f2.hat.design <- x$f2.hat.design
-  Com <- x$Com
-  knots.list1 <- x$knots.list1
-  knots.list2 <- x$knots.list2
-  n.lambda <- length(x$lambda.seq)
-  n.eta <- length(x$eta.seq)
-  
-  int1 <- x$int1
-  int2 <- x$int2
-  
-  pp1 <- length(x$nonparm1)
-  pp2 <- length(x$nonparm2)
-  
-  n.plots <- length(unique(c(which(x$nonparm1 == 1),which(x$nonparm2 == 1)) ))
-  
-  ncols <- 4
-  nrows <- ceiling(n.plots/ncols)
-  
-  par(mfrow=c(nrows,ncols),mar=c(2.1,2.1,1.1,1.1))
-  
-  for( j in which(x$nonparm1 == 1) ){
-    
-    x1j.min <- min(knots.list1[[j]]) + 1e-2
-    x1j.max <- max(knots.list1[[j]]) - 1e-2
-    x1j.seq <- seq(x1j.min,x1j.max,length=200)
-    
-    if( j %in% Com ){
-      
-      x2j.min <- min(knots.list2[[j]]) + 1e-2
-      x2j.max <- max(knots.list2[[j]]) - 1e-2
-      x2j.seq <- seq(x2j.min,x2j.max,length=200)
-      
-      plot(NA,ylim = range(f1.hat.design[,-1,,],f2.hat.design[,-1,,]),xlim=c(min(x1j.min,x2j.min),max(x1j.max,x2j.max)))
-      abline(v=knots.list1[[j]],col=rgb(0,0,0,.15))
-      abline(v=knots.list2[[j]],col=rgb(0,0,1,.15))
-      
-      for(l in 1:n.lambda)
-        for(k in 1:n.eta)
-        {
-          
-          plot(f1.hat[[l]][[k]][[j]],x1j.min,x1j.max,add=TRUE,col=rgb(0,0,0,.5))
-          plot(f2.hat[[l]][[k]][[j]],x2j.min,x2j.max,add=TRUE,col=rgb(0,0,.545,.5))
-          
-          if(length(int1)!=0){
-            
-            if(any(int1 == j)){
-              
-              which.interactions <- which(int1 == j, arr.ind = TRUE)[,1]
-              
-              for( m in (which.interactions + pp1))
-              {
-                y.seq <- f1.hat[[l]][[k]][[m]](x1j.seq) + f1.hat[[l]][[k]][[j]](x1j.seq)
-                lines(y.seq~x1j.seq,col=rgb(0,.545,0,1))
-                
-              }
-            }
-          }
-          
-          if(length(int2)!=0){
-            
-            if(any(int2 == j)){
-              
-              which.interactions <- which(int2 == j, arr.ind = TRUE)[,1]
-              
-              for( m in (which.interactions + pp2))
-              {
-                y.seq <- f2.hat[[l]][[k]][[m]](x2j.seq) + f2.hat[[l]][[k]][[j]](x2j.seq)
-                lines(y.seq~x2j.seq,col=rgb(0,.545,.545,1))
-                
-              }
-            }
-          }
-          
-          
-          
-        }
-      
-
-    } else {
-      
-      plot(NA,ylim = range(f1.hat.design[,-1,,],f2.hat.design[,-1,,]),xlim=c(x1j.min,x1j.max))
-      if(x$nonparm1[j]==1) abline(v=knots.list1[[j]],col=rgb(0,0,0,0.15))
-      
-      for(l in 1:n.lambda)
-        for(k in 1:n.eta)
-        {
-          
-          plot(f1.hat[[l]][[k]][[j]],x1j.min,x1j.max,add=TRUE,col=rgb(0,0,0,.5))
-          
-          
-          if(length(int1)!=0){
-            
-            if(any(int1 == j)){
-              
-              which.interactions <- which(int1 == j, arr.ind = TRUE)[,1]
-              
-              for( m in (which.interactions + pp1))
-              {
-                y.seq <- f1.hat[[l]][[k]][[m]](x1j.seq) + f1.hat[[l]][[k]][[j]](x1j.seq)
-                lines(y.seq~x1j.seq,col=rgb(0,.545,0,1))
-                
-              }
-            }
-          }
-          
-          
-        }
-      
-
-    }
-  }
-  
-  for(j in which(x$nonparm2==1)){
-    
-    x2j.min <- min(knots.list2[[j]]) + 1e-2
-    x2j.max <- max(knots.list2[[j]]) - 1e-2
-    x2j.seq <- seq(x2j.min,x2j.max,length=200)
-    
-    if(j %in% Com) next;
-    
-    plot(NA,ylim = range(f1.hat.design[,-1,,],f2.hat.design[,-1,,]),xlim=c(x2j.min,x2j.max))
-    
-    if(x$nonparm2[j]==1) abline(v=knots.list2[[j]],col=rgb(0,0,1,.15))
-    
-    for(l in 1:n.lambda)
-      for(k in 1:n.eta)
-      {
-        
-        plot(f2.hat[[l]][[k]][[j]],x2j.min,x2j.max,add=TRUE,col=rgb(0,0,.545,.5))
-        
-        if(length(int2)!=0){
-          
-          if(any(int2 == j)){
-            
-            which.interactions <- which(int2 == j, arr.ind = TRUE)[,1]
-            
-            for( m in (which.interactions + pp2))
-            {
-              y.seq <- f2.hat[[l]][[k]][[m]](x2j.seq) + f2.hat[[l]][[k]][[j]](x2j.seq)
-              lines(y.seq~x2j.seq,col=rgb(0,.545,.545,1))
-              
-            }
-          }
-        }
-        
-        
-      }
-    
-
-  }
-  
-}
-
-
-
-
 
 
 #' Plot method for class semipadd2pop_cv_wint
 #' @export
-plot_semipadd2pop_cv_wint <- function(x,true.functions=NULL)
+plot_semipadd2pop_grid_wint <- function(x,true.functions=NULL)
 {
   
   f1.hat <- x$f1.hat
@@ -988,10 +734,17 @@ plot_semipadd2pop_cv_wint <- function(x,true.functions=NULL)
       abline(v=knots.list2[[j]],col=rgb(0,0,1,.15))
       
       for(l in 1:n.lambda)
-        for(k in 1:n.eta)
-        {
+        for(k in 1:n.eta){
           
-          opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv ,1,.05)
+          if(length(which.lambda.cv) == 0){
+            
+            opacity <- 1
+            
+          } else {
+            
+            opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv,1,0.1)
+            
+          }
             
           plot(f1.hat[[l]][[k]][[j]],x1j.min,x1j.max,add=TRUE,col=rgb(0,0,0,opacity))
           plot(f2.hat[[l]][[k]][[j]],x2j.min,x2j.max,add=TRUE,col=rgb(0,0,.545,opacity))
@@ -1037,10 +790,17 @@ plot_semipadd2pop_cv_wint <- function(x,true.functions=NULL)
       if(x$nonparm1[j]==1) abline(v=knots.list1[[j]],col=rgb(0,0,0,0.15))
       
       for(l in 1:n.lambda)
-        for(k in 1:n.eta)
-        {
+        for(k in 1:n.eta){
           
-          opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv, 1,.05)
+          if(length(which.lambda.cv) == 0){
+            
+            opacity <- 1
+            
+          } else {
+            
+            opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv,1,0.1)
+            
+          }
           
           plot(f1.hat[[l]][[k]][[j]],x1j.min,x1j.max,add=TRUE,col=rgb(0,0,0,opacity))
           
@@ -1080,9 +840,17 @@ plot_semipadd2pop_cv_wint <- function(x,true.functions=NULL)
     if(x$nonparm2[j]==1) abline(v=knots.list2[[j]],col=rgb(0,0,1,.15))
     
     for(l in 1:n.lambda)
-      for(k in 1:n.eta)
-      {
-        opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv,1,.05)
+      for(k in 1:n.eta){
+        
+        if(length(which.lambda.cv) == 0){
+          
+          opacity <- 1
+          
+        } else {
+          
+          opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv,1,0.1)
+          
+        }
         
         plot(f2.hat[[l]][[k]][[j]],x2j.min,x2j.max,add=TRUE,col=rgb(0,0,.545,opacity))
         
@@ -1863,7 +1631,6 @@ pull.diagnoses <- function(Z,Y)
 #'                b = rep(1,ncol(grouplassogt2pop_data$X1)),
 #'                Se = grouplassogt2pop_data$Se1,
 #'                Sp = grouplassogt2pop_data$Sp1)
-#'
 EYexact_R <- function(Z,Y,X,b,Se,Sp)
 {
   # get sample size
@@ -2036,7 +1803,7 @@ plot_semipadd <- function(x)
   }
 }
 
-#' Plot method for class semipadd_grid
+#' Plot method for class semipadd_cv
 #' @export
 plot_semipadd_grid <- function(x)
 {
@@ -2050,58 +1817,6 @@ plot_semipadd_grid <- function(x)
   int <- x$int
   n.lambda <- x$n.lambda
   
-  ncols <- 4
-  nrows <- ceiling(n.plots/ncols)
-  
-  par(mfrow = c(nrows,ncols), mar = c(2.1,2.1,1.1,1.1))
-  
-  for( j in which(nonparm == 1) ){
-    
-    xj.min <- min(knots.list[[j]]) + 1e-2
-    xj.max <- max(knots.list[[j]]) - 1e-2
-    
-    xj.seq <- seq(xj.min,xj.max,length=200)
-    
-    plot(NA,ylim = range(f.hat.design[,-1,]),xlim=c(xj.min,xj.max))
-    if(nonparm[j]==1) abline(v=knots.list[[j]],col=rgb(0,0,0,0.15))
-    
-    
-    for(l in 1:n.lambda){
-      
-      plot(f.hat[[l]][[j]],xj.min,xj.max,add=TRUE,col=rgb(0,0,0,.5))
-      
-      if(length(x$int)!=0){
-        
-        if(any(int == j)){
-          
-          which.interactions <- which(int == j, arr.ind = TRUE)[,1]
-          
-          for( k in (which.interactions + pp))
-          {
-            y.seq <- f.hat[[l]][[k]](xj.seq) + f.hat[[l]][[j]](xj.seq)
-            lines(y.seq~xj.seq,col=rgb(0,0,0,.5))
-            
-          }
-        }
-      }
-    }
-  }
-}
-
-
-#' Plot method for class semipadd_cv
-#' @export
-plot_semipadd_cv <- function(x)
-{
-  
-  f.hat <- x$f.hat
-  f.hat.design <- x$f.hat.design
-  knots.list <- x$knots.list
-  nonparm <- x$nonparm
-  pp <- length(nonparm)
-  n.plots <- length(which(nonparm == 1))
-  int <- x$int
-  n.lambda <- x$n.lambda
   which.lambda.cv <- x$which.lambda.cv
   
   ncols <- 4
@@ -2121,7 +1836,17 @@ plot_semipadd_cv <- function(x)
     
     for(l in 1:n.lambda){
       
-      opacity <- ifelse(l == which.lambda.cv,1,0.25)
+      
+      if(length(which.lambda.cv) == 0){
+        
+        opacity <- 1
+        
+      } else {
+        
+        opacity <- ifelse( l == which.lambda.cv,1,0.25)
+        
+      }
+      
       plot(f.hat[[l]][[j]],xj.min,xj.max,add=TRUE,col=rgb(0,0,0,opacity))
       
       if(length(x$int)!=0){

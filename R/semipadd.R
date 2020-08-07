@@ -551,7 +551,7 @@ semipadd_grid <- function(Y,X,nonparm,response,w=1,int=NULL,w_int=NULL,d,xi,n.la
 #'                                maxiter = 500,
 #'                                report.prog = TRUE)
 #' 
-#' plot_semipadd_cv(semipadd_cv.out)
+#' plot_semipadd_grid(semipadd_cv.out)
 #' @export
 semipadd_cv <- function(Y,X,nonparm,response,int=NULL,w,w_int=NULL,d,xi,n.lambda=5,lambda.min.ratio=.01,lambda.max.ratio=1,n.folds=5,lambda.beta=1,lambda.f=1,tol=1e-3,maxiter = 1000,report.prog = FALSE)
 {
@@ -715,7 +715,7 @@ semipadd_cv <- function(Y,X,nonparm,response,int=NULL,w,w_int=NULL,d,xi,n.lambda
 #'                                            maxiter = 1000,
 #'                                            report.prog = TRUE)
 #' 
-#' plot_semipadd_cv(semipadd_cv_adapt.out)
+#' plot_semipadd_grid(semipadd_cv_adapt.out)
 #' @export
 semipadd_cv_adapt <- function(Y,X,response,nonparm,int=NULL,w,w_int=NULL,d,xi,n.lambda = 5,lambda.min.ratio=.01,lambda.max.ratio=1,n.folds=5,lambda.beta=1,lambda.f=1,tol=1e-3,maxiter = 1000,report.prog = FALSE)
 {

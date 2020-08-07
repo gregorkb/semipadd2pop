@@ -1460,7 +1460,7 @@ semipadd2pop_cv_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,rho
 #'                                                              maxiter = 500,
 #'                                                              report.prog = TRUE)
 #' 
-#' plot_semipadd2pop_cv_wint(semipadd2pop_cv_adapt_wint.out)
+#' plot_semipadd2pop_grid_wint(semipadd2pop_cv_adapt_wint.out)
 #' @export
 semipadd2pop_cv_adapt_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,rho2,w1,w2,w,nCom,int1=NULL,int2=NULL,w1_int=1,w2_int=1,w_int=1,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,n.folds=5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,tol=1e-3,maxiter = 1000,report.prog = FALSE)
 {
