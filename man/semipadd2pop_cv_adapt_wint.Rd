@@ -150,5 +150,5 @@ semipadd2pop_cv_adapt_wint.out <- semipadd2pop_cv_adapt_wint(Y1 = data$Y1,
                                                              maxiter = 500,
                                                              report.prog = TRUE)
 
-plot_semipadd2pop_cv_wint(semipadd2pop_cv_adapt_wint.out)
+plot_semipadd2pop_grid_wint(semipadd2pop_cv_adapt_wint.out)
 }

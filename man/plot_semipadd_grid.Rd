@@ -2,10 +2,10 @@
 % Please edit documentation in R/misc.R
 \name{plot_semipadd_grid}
 \alias{plot_semipadd_grid}
-\title{Plot method for class semipadd_grid}
+\title{Plot method for class semipadd_cv}
 \usage{
 plot_semipadd_grid(x)
 }
 \description{
-Plot method for class semipadd_grid
+Plot method for class semipadd_cv
 }

@@ -39,5 +39,4 @@ oldEY <- EYexact_R(Z = grouplassogt2pop_data$Z1,
                b = rep(1,ncol(grouplassogt2pop_data$X1)),
                Se = grouplassogt2pop_data$Se1,
                Sp = grouplassogt2pop_data$Sp1)
-
 }

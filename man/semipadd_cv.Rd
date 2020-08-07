@@ -86,5 +86,5 @@ semipadd_cv.out <- semipadd_cv(Y = data$Y,
                                maxiter = 500,
                                report.prog = TRUE)
 
-plot_semipadd_cv(semipadd_cv.out)
+plot_semipadd_grid(semipadd_cv.out)
 }
