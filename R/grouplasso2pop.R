@@ -459,7 +459,7 @@ grouplasso2pop_linreg_R <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,lambda
 #'                                                               maxiter = 500,
 #'                                                               report.prog = TRUE)
 #' @export
-grouplasso2pop_linreg_grid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio = 1,w1,w2,w,AA1,AA2,Com,tol=1e-4,maxiter=500,report.prog=FALSE)
+grouplasso2pop_linreg_grid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio = 1,eta.min.ratio = 0.001,eta.max.ratio = 10,w1,w2,w,AA1,AA2,Com,tol=1e-4,maxiter=500,report.prog=FALSE)
 {
   
   # find lambda.max
@@ -552,8 +552,8 @@ grouplasso2pop_linreg_grid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.l
           beta1beta2.wl2  <- beta1beta2.wl2 + w[j] * sum( (AA1[[j]] %*% b1[ind1] - AA2[[j]] %*% b2[ind2] )^2 )
         }
         
-        eta.max <- (SSE1 + SSE2) / beta1beta2.wl2
-        eta.min <- 0.001 * eta.max
+        eta.max <- eta.max.ratio * (SSE1 + SSE2) / beta1beta2.wl2
+        eta.min <- eta.min.ratio * eta.max
         eta.seq <- sort(exp(log(eta.min) + ((n.eta-1):0)/(n.eta-1) * (log(eta.max) - log(eta.min))) )
         eta.seq[1] <- 0
         
@@ -966,7 +966,7 @@ grouplasso2pop_linreg_cv_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,
 #'                                                          maxiter = 500,
 #'                                                          report.prog = TRUE)
 #' @export
-grouplasso2pop_linreg_cv <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-4,maxiter=500,report.prog = TRUE){
+grouplasso2pop_linreg_cv <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,eta.min.ratio = 0.001, eta.max.ratio = 10,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-4,maxiter=500,report.prog = TRUE){
   
   # obtain lambda.seq and eta.seq from the grid function, as well as the fits on the entire data set,
   # which will be used as initial values for the crossvalidation training fits.
@@ -982,6 +982,8 @@ grouplasso2pop_linreg_cv <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lam
                                                                n.eta = n.eta,
                                                                lambda.min.ratio = lambda.min.ratio,
                                                                lambda.max.ratio = lambda.max.ratio,
+                                                               eta.min.ratio = eta.min.ratio,
+                                                               eta.max.ratio = eta.max.ratio,
                                                                w1 = w1,
                                                                w2 = w2,
                                                                w = w,
@@ -1085,7 +1087,7 @@ grouplasso2pop_linreg_cv <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lam
 #'                                                                      maxiter = 500,
 #'                                                                      report.prog = TRUE)
 #' @export
-grouplasso2pop_linreg_cv_adapt <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-3,maxiter=500,report.prog = TRUE){
+grouplasso2pop_linreg_cv_adapt <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,eta.min.ratio = 0.001, eta.max.ratio = 10,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-3,maxiter=500,report.prog = TRUE){
   
   # find lambda.max and lambda.min
   q1 <- length(unique(groups1))
@@ -1171,6 +1173,8 @@ grouplasso2pop_linreg_cv_adapt <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2
                                                                n.eta = n.eta,
                                                                lambda.min.ratio = lambda.min.ratio,
                                                                lambda.max.ratio = lambda.max.ratio,
+                                                               eta.min.ratio = eta.min.ratio,
+                                                               eta.max.ratio = eta.max.ratio,
                                                                w1 = w1,
                                                                w2 = w2,
                                                                w = w,
@@ -1873,7 +1877,7 @@ grouplasso2pop_logreg_R <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,lambda
 #'                                                              maxiter = 500,
 #'                                                              report.prog = TRUE)
 #' @export
-grouplasso2pop_logreg_grid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio = 1,w1,w2,w,AA1,AA2,Com,tol=1e-4,maxiter=500,report.prog=FALSE)
+grouplasso2pop_logreg_grid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio = 1,eta.min.ratio = 0.001, eta.max.ratio = 10,w1,w2,w,AA1,AA2,Com,tol=1e-4,maxiter=500,report.prog=FALSE)
 {
   
   # find lambda.max
@@ -1969,8 +1973,8 @@ grouplasso2pop_logreg_grid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.l
           beta1beta2.wl2  <- beta1beta2.wl2 + w[j] * sum( (AA1[[j]] %*% b1[ind1] - AA2[[j]] %*% b2[ind2] )^2 )
         }
         
-        eta.max <- (neg2LL1 + neg2LL2) / beta1beta2.wl2
-        eta.min <- 0.001 * eta.max
+        eta.max <- eta.max.ratio * (neg2LL1 + neg2LL2) / beta1beta2.wl2
+        eta.min <- eta.min.ratio * eta.max
         eta.seq <- sort(exp(log(eta.min) + ((n.eta-1):0)/(n.eta-1) * (log(eta.max) - log(eta.min))) )
         eta.seq[1] <- 0
         
@@ -2355,7 +2359,7 @@ grouplasso2pop_logreg_cv_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,
 #'                                                          maxiter = 500,
 #'                                                          report.prog = TRUE)
 #' @export
-grouplasso2pop_logreg_cv <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-4,maxiter=500,report.prog = TRUE){
+grouplasso2pop_logreg_cv <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,eta.min.ratio = 0.001, eta.max.ratio = 10,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-4,maxiter=500,report.prog = TRUE){
   
   # obtain lambda.seq and eta.seq from the grid function, as well as the fits on the entire data set,
   # which will be used as initial values for the crossvalidation training fits.
@@ -2371,6 +2375,8 @@ grouplasso2pop_logreg_cv <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lam
                                                                n.eta = n.eta,
                                                                lambda.min.ratio = lambda.min.ratio,
                                                                lambda.max.ratio = lambda.max.ratio,
+                                                               eta.min.ratio = eta.min.ratio,
+                                                               eta.max.ratio = eta.max.ratio,
                                                                w1 = w1,
                                                                w2 = w2,
                                                                w = w,
@@ -2474,7 +2480,7 @@ grouplasso2pop_logreg_cv <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lam
 #'                                                                      maxiter = 500,
 #'                                                                      report.prog = TRUE)
 #' @export
-grouplasso2pop_logreg_cv_adapt <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-3,maxiter=500,report.prog = TRUE){
+grouplasso2pop_logreg_cv_adapt <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,eta.min.ratio = 0.001,eta.max.ratio =10,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-3,maxiter=500,report.prog = TRUE){
   
   # find lambda.max and lambda.min
   q1 <- length(unique(groups1))
@@ -2560,6 +2566,8 @@ grouplasso2pop_logreg_cv_adapt <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2
                                                                n.eta = n.eta,
                                                                lambda.min.ratio = lambda.min.ratio,
                                                                lambda.max.ratio = lambda.max.ratio,
+                                                               eta.min.ratio = eta.min.ratio,
+                                                               eta.max.ratio = eta.max.ratio,
                                                                w1 = w1,
                                                                w2 = w2,
                                                                w = w,
@@ -2977,7 +2985,7 @@ grouplasso2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1 = FALSE,Y2,Z2,S
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the parametric model with group testing data
 #' @export
-grouplasso2pop_gt_grid <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1 = FALSE,Y2,Z2,Se2,Sp2,X2,groups2,E.approx2=FALSE,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,w1,w2,w,AA1,AA2,Com,tol=1e-3,maxiter=1000,report.prog=TRUE)
+grouplasso2pop_gt_grid <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1 = FALSE,Y2,Z2,Se2,Sp2,X2,groups2,E.approx2=FALSE,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio=1,eta.min.ratio = 0.001, eta.max.ratio = 10,w1,w2,w,AA1,AA2,Com,tol=1e-3,maxiter=1000,report.prog=TRUE)
 {
   # pull the individual diagnoses to be treated as true disease statuses to find the sequence of lambda values.
   # later on think about how to do this without individual diagnoses, e.g. under master pool testing.
@@ -3085,8 +3093,8 @@ grouplasso2pop_gt_grid <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1 = FALSE,Y2
           beta1beta2.wl2  <- beta1beta2.wl2 + w[j] * sum( (AA1[[j]] %*% b1[ind1] - AA2[[j]] %*% b2[ind2] )^2 )
         }
         
-        eta.max <- (neg2LL1 + neg2LL2) / beta1beta2.wl2
-        eta.min <- 0.001 * eta.max
+        eta.max <- eta.max.ratio * (neg2LL1 + neg2LL2) / beta1beta2.wl2
+        eta.min <- eta.min.ratio * eta.max
         eta.seq <- sort(exp(log(eta.min) + ((n.eta-1):0)/(n.eta-1) * (log(eta.max) - log(eta.min))) )
         eta.seq[1] <- 0
         
@@ -3570,7 +3578,7 @@ grouplasso2pop_gt_cv_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1=FA
 #'                                                maxiter = 500,
 #'                                                report.prog = TRUE)
 #' @export
-grouplasso2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1 = FALSE,Y2,Z2,Se2,Sp2,X2,groups2,E.approx2=FALSE,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-3,maxiter=1000,report.prog=TRUE){
+grouplasso2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1 = FALSE,Y2,Z2,Se2,Sp2,X2,groups2,E.approx2=FALSE,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio,eta.min.ratio = 0.001, eta.max.ratio = 10,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-3,maxiter=1000,report.prog=TRUE){
   
   # obtain lambda.seq and eta.seq from the grid function, as well as the fits on the entire data set,
   # which will be used as initial values for the crossvalidation training fits.
@@ -3594,6 +3602,8 @@ grouplasso2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1 = FALSE,Y2,Z
                                                        n.eta = n.eta,
                                                        lambda.min.ratio = lambda.min.ratio,
                                                        lambda.max.ratio = lambda.max.ratio,
+                                                       eta.min.ratio = eta.min.ratio,
+                                                       eta.max.ratio = eta.max.ratio,
                                                        w1 = w1,
                                                        w2 = w2,
                                                        w = w,
@@ -3728,7 +3738,7 @@ grouplasso2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1 = FALSE,Y2,Z
 #'                                                            maxiter = 500,
 #'                                                            report.prog = TRUE)
 #' @export
-grouplasso2pop_gt_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1=FALSE,Y2,Z2,Se2,Sp2,X2,groups2,E.approx2=FALSE,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-3,maxiter=1000,report.prog=TRUE)
+grouplasso2pop_gt_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1=FALSE,Y2,Z2,Se2,Sp2,X2,groups2,E.approx2=FALSE,rho1,rho2,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio,eta.min.ratio = 0.001, eta.max.ratio = 10,n.folds,w1,w2,w,AA1,AA2,Com,tol=1e-3,maxiter=1000,report.prog=TRUE)
 {
   
   # pull the individual diagnoses to be treated as true disease statuses to find the sequence of lambda values.
@@ -3835,6 +3845,8 @@ grouplasso2pop_gt_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1=FALSE,
                                                        n.eta = n.eta,
                                                        lambda.min.ratio = lambda.min.ratio,
                                                        lambda.max.ratio = lambda.max.ratio,
+                                                       eta.min.ratio = eta.min.ratio,
+                                                       eta.max.ratio = eta.max.ratio,
                                                        w1 = w1,
                                                        w2 = w2,
                                                        w = w,

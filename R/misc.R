@@ -62,7 +62,8 @@ spsm_cubespline_design <- function(X,d,xi,W = NULL)
   output <- list(knots = all.knots,
                  emp.cent = emp.cent,
                  Q.inv = Q.inv,
-                 D.tilde = D.tilde)
+                 D.tilde = D.tilde,
+                 d = d)
   
 }
 
@@ -2155,8 +2156,8 @@ get_semipadd2pop_data <- function(n1,n2,response,model = 1,int = FALSE){
   if( response == "continuous")
   {
     
-    Y1 <- apply(f1.design,1,sum) + rnorm(n1,0,.5)
-    Y2 <- apply(f2.design,1,sum) + rnorm(n2,0,.5)
+    Y1 <- apply(f1.design,1,sum) + rnorm(n1,0,1)
+    Y2 <- apply(f2.design,1,sum) + rnorm(n2,0,1)
     
   } else if(response == "binary"){
     

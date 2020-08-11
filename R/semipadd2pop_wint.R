@@ -100,8 +100,8 @@ semipadd2pop_to_grouplasso2pop_wint <- function(X1,nonparm1,X2,nonparm2,nCom,int
         emp.cent1[[j]] <- spsm_cubespline_design.out$emp.cent
         QQ1.inv[[j]] <- spsm_cubespline_design.out$Q.inv
         DD1.tilde <- cbind(DD1.tilde, spsm_cubespline_design.out$D.tilde)
-
-        groups1 <- c(groups1,rep(j,d1[j]))
+        
+        groups1 <- c(groups1,rep(j,abs(d1[j])))
 
       }
 
@@ -127,8 +127,8 @@ semipadd2pop_to_grouplasso2pop_wint <- function(X1,nonparm1,X2,nonparm2,nCom,int
         emp.cent1[[j]] <- spsm_cubespline_design.out$emp.cent
         QQ1.inv[[j]] <- spsm_cubespline_design.out$Q.inv
         DD1.tilde <- cbind(DD1.tilde, spsm_cubespline_design.out$D.tilde)
-
-        groups1 <- c(groups1,rep(j,d1[which_nonparm]))
+        
+        groups1 <- c(groups1,rep(j,abs(d1[which_nonparm])))
         d1 <- c(d1,d1[which_nonparm])
         nonparm1 <- c(nonparm1,1)
         ww1 <- c(ww1,w1_int[k]*lambda.f/lambda.beta)
@@ -180,8 +180,8 @@ semipadd2pop_to_grouplasso2pop_wint <- function(X1,nonparm1,X2,nonparm2,nCom,int
         emp.cent2[[j]] <- spsm_cubespline_design.out$emp.cent
         QQ2.inv[[j]] <- spsm_cubespline_design.out$Q.inv
         DD2.tilde <- cbind(DD2.tilde, spsm_cubespline_design.out$D.tilde)
-
-        groups2 <- c(groups2,rep(j,d2[j]))
+        
+        groups2 <- c(groups2,rep(j,abs(d2[j])))
 
       }
 
@@ -210,7 +210,7 @@ semipadd2pop_to_grouplasso2pop_wint <- function(X1,nonparm1,X2,nonparm2,nCom,int
         QQ2.inv[[j]] <- spsm_cubespline_design.out$Q.inv
         DD2.tilde <- cbind(DD2.tilde, spsm_cubespline_design.out$D.tilde)
 
-        groups2 <- c(groups2,rep(j,d2[which_nonparm]))
+        groups2 <- c(groups2,rep(j,abs(d2[which_nonparm])))
         ww2 <- c(ww2,w2_int[k]*lambda.f/lambda.beta)
 
       } else if(sum(nonparm2[int2[k,]]) == 0){ # int between parametric effects like w1*w2
@@ -329,11 +329,11 @@ semipadd2pop_to_grouplasso2pop_wint <- function(X1,nonparm1,X2,nonparm2,nCom,int
           Xj.int <- Xj.union[int.ind]
 
           AA1j <- spline.des(knots.list1[[j]],Xj.int,ord=4,derivs=0,outer.ok=TRUE)$design[,-1] # remove same one
-          AA1j.cent <- AA1j - matrix(apply(AA1j,2,mean),length(int.ind),d1[j],byrow=TRUE)
+          AA1j.cent <- AA1j - matrix(apply(AA1j,2,mean),length(int.ind),abs(d1[j]),byrow=TRUE)
           AA1.tilde[[j]] <- AA1j.cent %*% QQ1.inv[[j]]
 
           AA2j <- spline.des(knots.list2[[j]],Xj.int,ord=4,derivs=0,outer.ok=TRUE)$design[,-1] # remove same one
-          AA2j.cent <- AA2j - matrix(apply(AA2j,2,mean),length(int.ind),d2[j],byrow=TRUE)
+          AA2j.cent <- AA2j - matrix(apply(AA2j,2,mean),length(int.ind),abs(d2[j]),byrow=TRUE)
           AA2.tilde[[j]] <- AA2j.cent %*% QQ2.inv[[j]]
 
         }
@@ -365,11 +365,11 @@ semipadd2pop_to_grouplasso2pop_wint <- function(X1,nonparm1,X2,nonparm2,nCom,int
           Wj.int <- Wj.union[int.ind]
           
           AA1j <- diag(Wj.int) %*% spline.des(knots.list1[[which_nonparm]],Xj.int,ord=4,derivs=0,outer.ok=TRUE)$design[,-1] # remove same one
-          AA1j.cent <- AA1j - matrix(apply(AA1j,2,mean),length(int.ind),d1[which_nonparm],byrow=TRUE)
+          AA1j.cent <- AA1j - matrix(apply(AA1j,2,mean),length(int.ind),abs(d1[which_nonparm]),byrow=TRUE)
           AA1.tilde[[j]] <- AA1j.cent %*% QQ1.inv[[which_nonparm]]
           
           AA2j <-  diag(Wj.int) %*% spline.des(knots.list2[[which_nonparm]],Xj.int,ord=4,derivs=0,outer.ok=TRUE)$design[,-1] # remove same one
-          AA2j.cent <- AA2j - matrix(apply(AA2j,2,mean),length(int.ind),d2[which_nonparm],byrow=TRUE)
+          AA2j.cent <- AA2j - matrix(apply(AA2j,2,mean),length(int.ind),abs(d2[which_nonparm]),byrow=TRUE)
           AA2.tilde[[j]] <- AA2j.cent %*% QQ2.inv[[which_nonparm]]
           
           ww <- c(ww,w_int[k]*lambda.f/lambda.beta)
@@ -898,7 +898,7 @@ semipadd2pop_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,rho2,w
 #' 
 #' plot_semipadd2pop_grid_wint(semipadd2pop_grid_wint.out)
 #' @export
-semipadd2pop_grid_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,rho2,w1,w2,w,nCom,int1=NULL,int2=NULL,w1_int=1,w2_int=1,w_int=1,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,tol=1e-3,maxiter = 1000,report.prog = FALSE)
+semipadd2pop_grid_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,rho2,w1,w2,w,nCom,int1=NULL,int2=NULL,w1_int=1,w2_int=1,w_int=1,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,eta.min.ratio = 0.001, eta.max.ratio = 10,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,tol=1e-3,maxiter = 1000,report.prog = FALSE)
 {
 
   # prepare input for grouplasso2pop function
@@ -938,6 +938,8 @@ semipadd2pop_grid_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,r
                                                           n.eta = n.eta,
                                                           lambda.min.ratio = lambda.min.ratio,
                                                           lambda.max.ratio = lambda.max.ratio,
+                                                          eta.min.ratio = eta.min.ratio,
+                                                          eta.max.ratio = eta.max.ratio,
                                                           w1 = grouplasso2pop_inputs$w1,
                                                           w2 = grouplasso2pop_inputs$w2,
                                                           w = grouplasso2pop_inputs$w,
@@ -962,6 +964,8 @@ semipadd2pop_grid_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,r
                                                         n.eta = n.eta,
                                                         lambda.min.ratio = lambda.min.ratio,
                                                         lambda.max.ratio = lambda.max.ratio,
+                                                        eta.min.ratio = eta.min.ratio,
+                                                        eta.max.ratio = eta.max.ratio,
                                                         w1 = grouplasso2pop_inputs$w1,
                                                         w2 = grouplasso2pop_inputs$w2,
                                                         w = grouplasso2pop_inputs$w,
@@ -994,6 +998,8 @@ semipadd2pop_grid_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,r
                                                       n.eta = n.eta,
                                                       lambda.min.ratio = lambda.min.ratio,
                                                       lambda.max.ratio = lambda.max.ratio,
+                                                      eta.min.ratio = eta.min.ratio,
+                                                      eta.max.ratio = eta.max.ratio,
                                                       w1 = grouplasso2pop_inputs$w1,
                                                       w2 = grouplasso2pop_inputs$w2,
                                                       w = grouplasso2pop_inputs$w,
@@ -1175,7 +1181,7 @@ semipadd2pop_grid_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,r
 #' 
 #' plot_semipadd2pop_grid_wint(semipadd2pop_grid_wint.out)
 #' @export
-semipadd2pop_cv_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,rho2,w1,w2,w,nCom,int1=NULL,int2=NULL,w1_int=1,w2_int=1,w_int=1,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,n.folds=5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,tol=1e-3,maxiter = 1000,report.prog = FALSE)
+semipadd2pop_cv_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,rho2,w1,w2,w,nCom,int1=NULL,int2=NULL,w1_int=1,w2_int=1,w_int=1,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,eta.min.ratio = 0.001, eta.max.ratio = 10,n.folds=5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,tol=1e-3,maxiter = 1000,report.prog = FALSE)
 {
   
   # prepare input for grouplasso2pop function
@@ -1216,6 +1222,8 @@ semipadd2pop_cv_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,rho
                                                       n.eta = n.eta,
                                                       lambda.min.ratio = lambda.min.ratio,
                                                       lambda.max.ratio = lambda.max.ratio,
+                                                      eta.min.ratio = eta.min.ratio,
+                                                      eta.max.ratio = eta.max.ratio,
                                                       w1 = grouplasso2pop_inputs$w1,
                                                       w2 = grouplasso2pop_inputs$w2,
                                                       w = grouplasso2pop_inputs$w,
@@ -1241,6 +1249,8 @@ semipadd2pop_cv_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,rho
                                                       n.eta = n.eta,
                                                       lambda.min.ratio = lambda.min.ratio,
                                                       lambda.max.ratio = lambda.max.ratio,
+                                                      eta.min.ratio = eta.min.ratio,
+                                                      eta.max.ratio = eta.max.ratio,
                                                       w1 = grouplasso2pop_inputs$w1,
                                                       w2 = grouplasso2pop_inputs$w2,
                                                       w = grouplasso2pop_inputs$w,
@@ -1275,6 +1285,8 @@ semipadd2pop_cv_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,rho
                                                   n.eta = n.eta,
                                                   lambda.min.ratio = lambda.min.ratio,
                                                   lambda.max.ratio = lambda.max.ratio,
+                                                  eta.min.ratio = eta.min.ratio,
+                                                  eta.max.ratio = eta.max.ratio,
                                                   w1 = grouplasso2pop_inputs$w1,
                                                   w2 = grouplasso2pop_inputs$w2,
                                                   w = grouplasso2pop_inputs$w,
@@ -1462,7 +1474,7 @@ semipadd2pop_cv_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,rho
 #' 
 #' plot_semipadd2pop_grid_wint(semipadd2pop_cv_adapt_wint.out)
 #' @export
-semipadd2pop_cv_adapt_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,rho2,w1,w2,w,nCom,int1=NULL,int2=NULL,w1_int=1,w2_int=1,w_int=1,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,n.folds=5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,tol=1e-3,maxiter = 1000,report.prog = FALSE)
+semipadd2pop_cv_adapt_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,rho2,w1,w2,w,nCom,int1=NULL,int2=NULL,w1_int=1,w2_int=1,w_int=1,d1,d2,xi,n.lambda = 5,n.eta = 5,lambda.min.ratio=.01,lambda.max.ratio=1,eta.min.ratio = 0.001, eta.max.ratio = 10, n.folds=5,lambda.beta=1,lambda.f=1,eta.beta=1,eta.f=1,tol=1e-3,maxiter = 1000,report.prog = FALSE)
 {
   
   # prepare input for grouplasso2pop function
@@ -1503,6 +1515,8 @@ semipadd2pop_cv_adapt_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rh
                                                             n.eta = n.eta,
                                                             lambda.min.ratio = lambda.min.ratio,
                                                             lambda.max.ratio = lambda.max.ratio,
+                                                            eta.min.ratio = eta.min.ratio,
+                                                            eta.max.ratio = eta.max.ratio,
                                                             w1 = grouplasso2pop_inputs$w1,
                                                             w2 = grouplasso2pop_inputs$w2,
                                                             w = grouplasso2pop_inputs$w,
@@ -1529,6 +1543,8 @@ semipadd2pop_cv_adapt_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rh
                                                             n.eta = n.eta,
                                                             lambda.min.ratio = lambda.min.ratio,
                                                             lambda.max.ratio = lambda.max.ratio,
+                                                            eta.min.ratio = eta.min.ratio,
+                                                            eta.max.ratio = eta.max.ratio,
                                                             w1 = grouplasso2pop_inputs$w1,
                                                             w2 = grouplasso2pop_inputs$w2,
                                                             w = grouplasso2pop_inputs$w,
@@ -1564,6 +1580,8 @@ semipadd2pop_cv_adapt_wint <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rh
                                                         n.eta = n.eta,
                                                         lambda.min.ratio = lambda.min.ratio,
                                                         lambda.max.ratio = lambda.max.ratio,
+                                                        eta.min.ratio = eta.min.ratio,
+                                                        eta.max.ratio = eta.max.ratio,
                                                         w1 = grouplasso2pop_inputs$w1,
                                                         w2 = grouplasso2pop_inputs$w2,
                                                         w = grouplasso2pop_inputs$w,
