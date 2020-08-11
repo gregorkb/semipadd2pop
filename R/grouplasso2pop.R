@@ -427,6 +427,8 @@ grouplasso2pop_linreg_R <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,lambda
 #' @param n.eta the number of eta values desired
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param eta.min.ratio ratio of the smallest to largest value in the sequence of eta values
+#' @param eta.max.ratio controls the largest value of eta in the eta sequence
 #' @param w1 group-specific weights for different penalization across groups in data set 1
 #' @param w2 group-specific weights for different penalization across groups in data set 2
 #' @param w group-specific weights for different penalization toward similarity for different groups
@@ -932,6 +934,8 @@ grouplasso2pop_linreg_cv_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,
 #' @param n.eta the number of eta values desired
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param eta.min.ratio ratio of the smallest to largest value in the sequence of eta values
+#' @param eta.max.ratio controls the largest value of eta in the eta sequence
 #' @param n.folds the number of crossvalidation folds
 #' @param w1 group-specific weights for different penalization across groups in data set 1
 #' @param w2 group-specific weights for different penalization across groups in data set 2
@@ -1052,6 +1056,8 @@ grouplasso2pop_linreg_cv <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lam
 #' @param n.eta the number of eta values desired
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param eta.min.ratio ratio of the smallest to largest value in the sequence of eta values
+#' @param eta.max.ratio controls the largest value of eta in the eta sequence
 #' @param n.folds the number of crossvalidation folds
 #' @param w1 group-specific weights for different penalization across groups in data set 1
 #' @param w2 group-specific weights for different penalization across groups in data set 2
@@ -1845,6 +1851,8 @@ grouplasso2pop_logreg_R <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,lambda
 #' @param n.eta the number of eta values desired
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param eta.min.ratio ratio of the smallest to largest value in the sequence of eta values
+#' @param eta.max.ratio controls the largest value of eta in the eta sequence
 #' @param w1 group-specific weights for different penalization across groups in data set 1
 #' @param w2 group-specific weights for different penalization across groups in data set 2
 #' @param w group-specific weights for different penalization toward similarity for different groups
@@ -2324,6 +2332,8 @@ grouplasso2pop_logreg_cv_fixedgrid <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,
 #' @param n.eta the number of eta values desired
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param eta.min.ratio ratio of the smallest to largest value in the sequence of eta values
+#' @param eta.max.ratio controls the largest value of eta in the eta sequence
 #' @param n.folds the number of crossvalidation folds
 #' @param w1 group-specific weights for different penalization across groups in data set 1
 #' @param w2 group-specific weights for different penalization across groups in data set 2
@@ -2446,6 +2456,8 @@ grouplasso2pop_logreg_cv <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2,n.lam
 #' @param n.eta the number of eta values desired
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param eta.min.ratio ratio of the smallest to largest value in the sequence of eta values
+#' @param eta.max.ratio controls the largest value of eta in the eta sequence
 #' @param n.folds the number of crossvalidation folds
 #' @param w1 group-specific weights for different penalization across groups in data set 1
 #' @param w2 group-specific weights for different penalization across groups in data set 2
@@ -2973,6 +2985,9 @@ grouplasso2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1 = FALSE,Y2,Z2,S
 #' @param n.lambda the number of lambda values
 #' @param n.eta the number of eta values
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param eta.min.ratio ratio of the smallest to largest value in the sequence of eta values
+#' @param eta.max.ratio controls the largest value of eta in the eta sequence
 #' @param w1 group-specific weights for different penalization across groups in data set 1
 #' @param w2 group-specific weights for different penalization across groups in data set 2
 #' @param w group-specific weights for different penalization toward similarity for different groups
@@ -3533,6 +3548,9 @@ grouplasso2pop_gt_cv_fixedgrid <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1=FA
 #' @param n.lambda the number of lambda values
 #' @param n.eta the number of eta values
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param eta.min.ratio ratio of the smallest to largest value in the sequence of eta values
+#' @param eta.max.ratio controls the largest value of eta in the eta sequence
 #' @param n.folds the number of crossvalidation folds
 #' @param w1 group-specific weights for different penalization across groups in data set 1
 #' @param w2 group-specific weights for different penalization across groups in data set 2
@@ -3694,6 +3712,9 @@ grouplasso2pop_gt_cv <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1 = FALSE,Y2,Z
 #' @param n.lambda the number of lambda values
 #' @param n.eta the number of eta values
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param eta.min.ratio ratio of the smallest to largest value in the sequence of eta values
+#' @param eta.max.ratio controls the largest value of eta in the eta sequence
 #' @param n.folds the number of crossvalidation folds
 #' @param w1 group-specific weights for different penalization across groups in data set 1
 #' @param w2 group-specific weights for different penalization across groups in data set 2
@@ -3937,9 +3958,8 @@ grouplasso2pop_gt_cv_adapt <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1=FALSE,
 #' @param groups2 a vector indicating to which group each covariate of data set 2 belongs
 #' @param rho1 weight placed on the first data set
 #' @param rho2 weight placed on the second data set
-#' @param n.lambda the number of lambda values
-#' @param n.eta the number of eta values
-#' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param lambda.seq the sequence of lambda values
+#' @param eta.seq the sequence of eta values
 #' @param n.folds the number of crossvalidation folds
 #' @param w1 group-specific weights for different penalization across groups in data set 1
 #' @param w2 group-specific weights for different penalization across groups in data set 2

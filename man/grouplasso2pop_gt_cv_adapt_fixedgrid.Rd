@@ -73,6 +73,10 @@ test specificity for individual testing, if applicable.}
 
 \item{rho2}{weight placed on the second data set}
 
+\item{lambda.seq}{the sequence of lambda values}
+
+\item{eta.seq}{the sequence of eta values}
+
 \item{n.folds}{the number of crossvalidation folds}
 
 \item{w1}{group-specific weights for different penalization across groups in data set 1}
@@ -90,12 +94,6 @@ test specificity for individual testing, if applicable.}
 \item{maxiter}{the maximum allowed number of iterations (EM steps)}
 
 \item{report.prog}{a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.}
-
-\item{n.lambda}{the number of lambda values}
-
-\item{n.eta}{the number of eta values}
-
-\item{lambda.min.ratio}{ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model}
 
 \item{E.approx}{a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.}
 }

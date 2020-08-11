@@ -17,6 +17,8 @@ grouplasso2pop_logreg_cv_adapt(
   n.eta,
   lambda.min.ratio,
   lambda.max.ratio = 1,
+  eta.min.ratio = 0.001,
+  eta.max.ratio = 10,
   n.folds,
   w1,
   w2,
@@ -53,6 +55,10 @@ grouplasso2pop_logreg_cv_adapt(
 \item{lambda.min.ratio}{ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model}
 
 \item{lambda.max.ratio}{ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model}
+
+\item{eta.min.ratio}{ratio of the smallest to largest value in the sequence of eta values}
+
+\item{eta.max.ratio}{controls the largest value of eta in the eta sequence}
 
 \item{n.folds}{the number of crossvalidation folds}
 

@@ -25,6 +25,8 @@ grouplasso2pop_gt_cv_adapt(
   n.eta,
   lambda.min.ratio,
   lambda.max.ratio,
+  eta.min.ratio = 0.001,
+  eta.max.ratio = 10,
   n.folds,
   w1,
   w2,
@@ -79,6 +81,12 @@ test specificity for individual testing, if applicable.}
 \item{n.eta}{the number of eta values}
 
 \item{lambda.min.ratio}{ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model}
+
+\item{lambda.max.ratio}{ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model}
+
+\item{eta.min.ratio}{ratio of the smallest to largest value in the sequence of eta values}
+
+\item{eta.max.ratio}{controls the largest value of eta in the eta sequence}
 
 \item{n.folds}{the number of crossvalidation folds}
 

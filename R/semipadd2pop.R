@@ -517,6 +517,8 @@ semipadd2pop <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,rho2,w1,w2,
 #' @param n.eta the number of eta values with which to make the grid
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param eta.min.ratio ratio of the smallest to largest value in the sequence of eta values
+#' @param eta.max.ratio controls the largest value of eta in the eta sequence
 #' @param tol a convergence criterion
 #' @param maxiter the maximum allowed number of iterations
 #' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
@@ -771,6 +773,8 @@ semipadd2pop_grid <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,rho2,w
 #' @param n.eta the number of eta values with which to make the grid
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param eta.min.ratio ratio of the smallest to largest value in the sequence of eta values
+#' @param eta.max.ratio controls the largest value of eta in the eta sequence
 #' @param n.folds the number of crossvalidation folds
 #' @param lambda.beta the level of sparsity penalization for the parametric effects (relative to nonparametric effects)
 #' @param lambda.f the level of sparsity penalization for the nonparametric effects (relative to the parametric effects)
@@ -1028,6 +1032,8 @@ semipadd2pop_cv <- function(Y1,X1,nonparm1,Y2,X2,nonparm2,response,rho1,rho2,w1,
 #' @param n.eta the number of eta values with which to make the grid
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param eta.min.ratio ratio of the smallest to largest value in the sequence of eta values
+#' @param eta.max.ratio controls the largest value of eta in the eta sequence
 #' @param n.folds the number of crossvalidation folds
 #' @param lambda.beta the level of sparsity penalization for the parametric effects (relative to nonparametric effects)
 #' @param lambda.f the level of sparsity penalization for the nonparametric effects (relative to the parametric effects)

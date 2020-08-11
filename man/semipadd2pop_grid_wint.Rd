@@ -30,6 +30,8 @@ semipadd2pop_grid_wint(
   n.eta = 5,
   lambda.min.ratio = 0.01,
   lambda.max.ratio = 1,
+  eta.min.ratio = 0.001,
+  eta.max.ratio = 10,
   lambda.beta = 1,
   lambda.f = 1,
   eta.beta = 1,

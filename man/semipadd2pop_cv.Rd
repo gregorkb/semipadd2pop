@@ -25,6 +25,8 @@ semipadd2pop_cv(
   n.eta = 5,
   lambda.min.ratio = 0.01,
   lambda.max.ratio = 1,
+  eta.min.ratio = 0.001,
+  eta.max.ratio = 10,
   n.folds = 5,
   lambda.beta = 1,
   lambda.f = 1,
@@ -75,6 +77,10 @@ semipadd2pop_cv(
 \item{lambda.min.ratio}{ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model}
 
 \item{lambda.max.ratio}{ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model}
+
+\item{eta.min.ratio}{ratio of the smallest to largest value in the sequence of eta values}
+
+\item{eta.max.ratio}{controls the largest value of eta in the eta sequence}
 
 \item{n.folds}{the number of crossvalidation folds}
 

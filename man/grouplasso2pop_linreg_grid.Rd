@@ -17,6 +17,8 @@ grouplasso2pop_linreg_grid(
   n.eta,
   lambda.min.ratio,
   lambda.max.ratio = 1,
+  eta.min.ratio = 0.001,
+  eta.max.ratio = 10,
   w1,
   w2,
   w,
@@ -52,6 +54,10 @@ grouplasso2pop_linreg_grid(
 \item{lambda.min.ratio}{ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model}
 
 \item{lambda.max.ratio}{ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model}
+
+\item{eta.min.ratio}{ratio of the smallest to largest value in the sequence of eta values}
+
+\item{eta.max.ratio}{controls the largest value of eta in the eta sequence}
 
 \item{w1}{group-specific weights for different penalization across groups in data set 1}
 
