@@ -25,7 +25,8 @@ grouplasso2pop_logreg_cv_fixedgrid(
   AA2,
   Com,
   tol = 0.001,
-  maxiter = 500
+  maxiter = 500,
+  report.prog = FALSE
 )
 }
 \arguments{
@@ -68,6 +69,8 @@ grouplasso2pop_logreg_cv_fixedgrid(
 \item{tol}{the convergence tolerance}
 
 \item{maxiter}{the maximum number of iterations allowed for each fit}
+
+\item{report.prog}{a logical indicating whether the progress of the algorithm should be printed to the console}
 }
 \value{
 a list containing the fits over a grid of lambda and eta values as well as the vector of lambda values and the vector of eta values
@@ -76,7 +79,7 @@ a list containing the fits over a grid of lambda and eta values as well as the v
 Choose tuning parameters by crossvalidation for grouplasso2pop logreg when given a fixed grid of lambda and eta values
 }
 \examples{
-grouplasso2pop_logreg_data <- get_grouplasso2pop_logreg_data(n1 = 400,n2 = 600)
+grouplasso2pop_logreg_data <- get_grouplasso2pop_data(n1 = 1000, n2 = 800, response = "binary")
 
 grouplasso2pop_logreg_grid.out <- grouplasso2pop_logreg_grid(Y1 = grouplasso2pop_logreg_data$Y1,
                                                              X1 = grouplasso2pop_logreg_data$X1,
@@ -84,11 +87,12 @@ grouplasso2pop_logreg_grid.out <- grouplasso2pop_logreg_grid(Y1 = grouplasso2pop
                                                              Y2 = grouplasso2pop_logreg_data$Y2,
                                                              X2 = grouplasso2pop_logreg_data$X2,
                                                              groups2 = grouplasso2pop_logreg_data$groups2,
-                                                             rho1 = 2,
+                                                             rho1 = 1,
                                                              rho2 = 1,
                                                              n.lambda = 5,
-                                                             n.eta = 5,
-                                                             lambda.min.ratio = 0.01,
+                                                             n.eta = 3,
+                                                             lambda.min.ratio = 0.001,
+                                                             lambda.max.ratio = 0.50,
                                                              w1 = grouplasso2pop_logreg_data$w1,
                                                              w2 = grouplasso2pop_logreg_data$w2,
                                                              w = grouplasso2pop_logreg_data$w,
@@ -99,24 +103,19 @@ grouplasso2pop_logreg_grid.out <- grouplasso2pop_logreg_grid(Y1 = grouplasso2pop
                                                              maxiter = 500,
                                                              report.prog = TRUE)
 
-lambda.seq <- grouplasso2pop_logreg_grid.out$lambda.seq
-eta.seq <- grouplasso2pop_logreg_grid.out$eta.seq
-b1.arr <- grouplasso2pop_logreg_grid.out$b1.arr
-b2.arr <- grouplasso2pop_logreg_grid.out$b2.arr
-
 grouplasso2pop_logreg_cv_fixedgrid.out <- grouplasso2pop_logreg_cv_fixedgrid(Y1 = grouplasso2pop_logreg_data$Y1,
                                                                              X1 = grouplasso2pop_logreg_data$X1,
                                                                              groups1 = grouplasso2pop_logreg_data$groups1,
                                                                              Y2 = grouplasso2pop_logreg_data$Y2,
                                                                              X2 = grouplasso2pop_logreg_data$X2,
                                                                              groups2 = grouplasso2pop_logreg_data$groups2,
-                                                                             rho1 = 2,
+                                                                             rho1 = 1,
                                                                              rho2 = 1,
-                                                                             lambda.seq = lambda.seq,
-                                                                             eta.seq = eta.seq,
+                                                                             lambda.seq = grouplasso2pop_logreg_grid.out$lambda.seq,
+                                                                             eta.seq = grouplasso2pop_logreg_grid.out$eta.seq,
                                                                              n.folds = 5,
-                                                                             b1.init.arr = b1.arr,
-                                                                             b2.init.arr = b2.arr,
+                                                                             b1.init.arr = grouplasso2pop_logreg_grid.out$b1.arr,
+                                                                             b2.init.arr = grouplasso2pop_logreg_grid.out$b2.arr,
                                                                              w1 = grouplasso2pop_logreg_data$w1,
                                                                              w2 = grouplasso2pop_logreg_data$w2,
                                                                              w = grouplasso2pop_logreg_data$w,
@@ -124,5 +123,6 @@ grouplasso2pop_logreg_cv_fixedgrid.out <- grouplasso2pop_logreg_cv_fixedgrid(Y1 
                                                                              AA2 = grouplasso2pop_logreg_data$AA2,
                                                                              Com = grouplasso2pop_logreg_data$Com,
                                                                              tol = 1e-3,
-                                                                             maxiter = 500)
+                                                                             maxiter = 500,
+                                                                             report.prog = TRUE)
 }

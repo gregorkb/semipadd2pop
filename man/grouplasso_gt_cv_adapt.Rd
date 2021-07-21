@@ -10,6 +10,7 @@ grouplasso_gt_cv_adapt(
   Se,
   Sp,
   X,
+  E.approx = FALSE,
   groups,
   n.lambda,
   n.eta,
@@ -17,7 +18,6 @@ grouplasso_gt_cv_adapt(
   lambda.max.ratio,
   n.folds,
   w,
-  E.approx = FALSE,
   tol = 0.001,
   maxiter = 1000,
   report.prog = TRUE
@@ -38,17 +38,19 @@ test specificity for individual testing, if applicable.}
 
 \item{X}{matrix containing the design matrices}
 
+\item{E.approx}{a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.}
+
 \item{groups}{a vector indicating to which group each covariate belongs}
 
 \item{n.lambda}{the number of lambda values}
 
 \item{lambda.min.ratio}{ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model}
 
+\item{lambda.max.ratio}{ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model}
+
 \item{n.folds}{the number of crossvalidation folds}
 
 \item{w}{group-specific weights for different penalization toward similarity for different groups}
-
-\item{E.approx}{a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.}
 
 \item{tol}{a convergence criterion}
 
@@ -63,19 +65,20 @@ Returns the estimator of the parametric model with group testing data
 Choose tuning parameters for the group lasso estimator with group testing data
 }
 \examples{
-grouplasso_gt_data <- get_grouplasso_gt_data(n = 1000)
+grouplasso_gt_data <- get_grouplasso_data(n = 1000, response = "gt")
 
-grouplasso_gt_cv.out <- grouplasso_gt_cv_adapt(Y = grouplasso_gt_data$Y,
-                                               Z = grouplasso_gt_data$Z,
-                                               Se = grouplasso_gt_data$Se,
-                                               Sp = grouplasso_gt_data$Sp,
+grouplasso_gt_cv.out <- grouplasso_gt_cv_adapt(Y = grouplasso_gt_data$Y$I,
+                                               Z = grouplasso_gt_data$Y$A,
+                                               Se = grouplasso_gt_data$Y$Se,
+                                               Sp = grouplasso_gt_data$Y$Sp,
                                                X = grouplasso_gt_data$X,
+                                               E.approx = grouplasso_gt_data$Y$E.approx,
                                                groups = grouplasso_gt_data$groups,
                                                n.lambda = 10,
                                                lambda.min.ratio = 0.01,
+                                               lambda.max.ratio = 0.50,
                                                n.folds = 5,
                                                w  = grouplasso_gt_data$w,
-                                               E.approx = FALSE,
                                                tol = 1e-3,
                                                maxiter = 500,
                                                report.prog = TRUE)

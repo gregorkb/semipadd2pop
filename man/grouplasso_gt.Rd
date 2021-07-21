@@ -58,17 +58,17 @@ Returns the estimator of the semiparametric additive model with group testing da
 Compute group lasso for two populations with group testing data
 }
 \examples{
-data <- get_grouplasso_data(n = 1000, response = "gt")
+grouplasso_gt_data <- get_grouplasso_data(n = 1000, response = "gt")
 
-grouplasso_gt.out <- grouplasso_gt(Y = data$Y$I,
-                                   Z = data$Y$A,
-                                   Se = data$Y$Se,
-                                   Sp = data$Y$Sp,
-                                   E.approx = data$Y$E.approx,
-                                   X = data$X,
-                                   groups = data$groups,
+grouplasso_gt.out <- grouplasso_gt(Y = grouplasso_gt_data$Y$I,
+                                   Z = grouplasso_gt_data$Y$A,
+                                   Se = grouplasso_gt_data$Y$Se,
+                                   Sp = grouplasso_gt_data$Y$Sp,
+                                   E.approx = grouplasso_gt_data$Y$E.approx,
+                                   X = grouplasso_gt_data$X,
+                                   groups = grouplasso_gt_data$groups,
                                    lambda = 1,
-                                   w  = data$w,
+                                   w  = grouplasso_gt_data$w,
                                    tol = 1e-3,
                                    maxiter = 500,
                                    report.prog = TRUE)

@@ -12,7 +12,7 @@
 #' a <- 2
 #' SoftThresh(z,a)
 SoftThresh_scalar <- function(z, a) {
-    .Call(`_semipaddgt2pop_SoftThresh_scalar`, z, a)
+    .Call(`_semipadd2pop_SoftThresh_scalar`, z, a)
 }
 
 #' Minimize l2-penalized quadratic function
@@ -48,7 +48,35 @@ SoftThresh_scalar <- function(z, a) {
 #' }
 #' optim(par=rep(0,d),obj,L = L, h = h, lambda = lambda)$par
 FoygelDrton_Armadillo <- function(h, L, lambda, evals, evecs) {
-    .Call(`_semipaddgt2pop_FoygelDrton_Armadillo`, h, L, lambda, evals, evecs)
+    .Call(`_semipadd2pop_FoygelDrton_Armadillo`, h, L, lambda, evals, evecs)
+}
+
+#' Minimize the objective function of the group lasso problem with a continuous response
+#'
+#' @param Y the response vector
+#' @param X matrix containing the design matrices
+#' @param groups a vector of integers indicating to which group each covariate belongs
+#' @param lambda the level of sparsity penalization
+#' @param w vector of group-specific weights for different penalization of groups
+#' @param eigen a list of eigen info on groups
+#' @param tol a convergence criterion
+#' @param max.iter the maximum allowed number of iterations
+#' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
+#' @param beta_init optional starting value for beta
+#' @return Returns the minimizer of the group lasso objective function
+#'
+#' @examples
+#' data <- get_grouplasso_data(n = 500,response = "continuous")
+#' 
+#' grouplasso_linreg.out <- grouplasso_linreg(rY = data$Y,
+#'                                            rX = data$X,
+#'                                            groups = data$groups,
+#'                                            lambda = 10,
+#'                                            w = data$w,
+#'                                            tol = 1e-4,
+#'                                            maxiter = 500)
+grouplasso_linreg_slower <- function(rY, rX, groups, lambda, w, tol, maxiter, beta_init = as.numeric( c())) {
+    .Call(`_semipadd2pop_grouplasso_linreg_slower`, rY, rX, groups, lambda, w, tol, maxiter, beta_init)
 }
 
 #' Minimize the objective function of the group lasso problem with a continuous response
@@ -76,7 +104,59 @@ FoygelDrton_Armadillo <- function(h, L, lambda, evals, evecs) {
 #'                                            tol = 1e-4,
 #'                                            maxiter = 500)
 grouplasso_linreg <- function(rY, rX, groups, lambda, w, tol, maxiter, beta_init = as.numeric( c())) {
-    .Call(`_semipaddgt2pop_grouplasso_linreg`, rY, rX, groups, lambda, w, tol, maxiter, beta_init)
+    .Call(`_semipadd2pop_grouplasso_linreg`, rY, rX, groups, lambda, w, tol, maxiter, beta_init)
+}
+
+#' Minimize the objective function of the 2-population group lasso problem with a continuous response
+#'
+#' @param Y1 the continuous response vector of data set 1
+#' @param X1 matrix containing the design matrices for data set 1
+#' @param groups1 a vector of integers indicating to which group each covariate in data set 1 belongs
+#' @param Y2 the continuous response vector of data set 2
+#' @param X2 matrix containing the design matrices for data set 2
+#' @param groups2 a vector of integers indicating to which group each covariate in data set 1 belongs
+#' @param rho1 weight placed on the first data set
+#' @param rho2 weight placed on the second data set
+#' @param lambda the level of sparsity penalization
+#' @param eta the level of penalization towards model similarity
+#' @param w1 group-specific weights for different penalization across groups in data set 1
+#' @param w2 group-specific weights for different penalization across groups in data set 2
+#' @param w group-specific weights for different penalization toward similarity for different groups
+#' @param AA1 a list of the matrices A1j
+#' @param AA1 a list of the matrices A2j
+#' @param eigen1 a list of eigen info on groups from data set 1
+#' @param eigen2 a list of eigen info on groups from data set 2
+#' @param Com the indices of the covariate groups which are common in the two datasets
+#' @param tol a convergence criterion
+#' @param max.iter the maximum allowed number of iterations
+#' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
+#' @param beta1_init optional starting value for beta1
+#' @param beta2_init optional starting value for beta2
+#' @return Returns the minimizers of the 2-population group lasso objective function for the two data sets.
+#'
+#' @examples
+#' data <- get_grouplasso2pop_data(n1 = 400, n2 = 600, response = "continuous")
+#'   
+#' grouplasso2pop_linreg.out <- grouplasso2pop_linreg(rY1 = data$Y1,
+#'                                                    rX1 = data$X1,
+#'                                                    groups1 = data$groups1,
+#'                                                    rY2 = data$Y2,
+#'                                                    rX2 = data$X2,
+#'                                                    groups2 = data$groups2,
+#'                                                    rho1 = 2,
+#'                                                    rho2 = 1,
+#'                                                    lambda = 1,
+#'                                                    eta = 1,
+#'                                                    w1 = data$w1,
+#'                                                    w2 = data$w2,
+#'                                                    w = data$w,
+#'                                                    rAA1 = data$AA1,
+#'                                                    rAA2 = data$AA2,
+#'                                                    rCom = data$Com,
+#'                                                    tol = 1e-4,
+#'                                                    maxiter = 500)
+grouplasso2pop_linreg_slower <- function(rY1, rX1, groups1, rY2, rX2, groups2, rho1, rho2, lambda, eta, w1, w2, w, rAA1, rAA2, rCom, tol, maxiter, beta1_init = as.numeric( c()), beta2_init = as.numeric( c())) {
+    .Call(`_semipadd2pop_grouplasso2pop_linreg_slower`, rY1, rX1, groups1, rY2, rX2, groups2, rho1, rho2, lambda, eta, w1, w2, w, rAA1, rAA2, rCom, tol, maxiter, beta1_init, beta2_init)
 }
 
 #' Minimize the objective function of the 2-population group lasso problem with a continuous response
@@ -128,7 +208,35 @@ grouplasso_linreg <- function(rY, rX, groups, lambda, w, tol, maxiter, beta_init
 #'                                                    tol = 1e-4,
 #'                                                    maxiter = 500)
 grouplasso2pop_linreg <- function(rY1, rX1, groups1, rY2, rX2, groups2, rho1, rho2, lambda, eta, w1, w2, w, rAA1, rAA2, rCom, tol, maxiter, beta1_init = as.numeric( c()), beta2_init = as.numeric( c())) {
-    .Call(`_semipaddgt2pop_grouplasso2pop_linreg`, rY1, rX1, groups1, rY2, rX2, groups2, rho1, rho2, lambda, eta, w1, w2, w, rAA1, rAA2, rCom, tol, maxiter, beta1_init, beta2_init)
+    .Call(`_semipadd2pop_grouplasso2pop_linreg`, rY1, rX1, groups1, rY2, rX2, groups2, rho1, rho2, lambda, eta, w1, w2, w, rAA1, rAA2, rCom, tol, maxiter, beta1_init, beta2_init)
+}
+
+#' Minimize the objective function of the group lasso problem with a binary response
+#'
+#' @param Y the binary response vector
+#' @param X matrix containing the design matrices
+#' @param groups a vector of integers indicating to which group each covariate belongs
+#' @param lambda the level of sparsity penalization
+#' @param w vector of group-specific weights for different penalization of groups
+#' @param eigen a list of eigen info on groups
+#' @param tol a convergence criterion
+#' @param max.iter the maximum allowed number of iterations
+#' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
+#' @param beta_init optional starting value for beta
+#' @return Returns the minimizer of the group lasso objective function
+#'
+#' @examples
+#' data <- get_grouplasso_data(n = 500, response = "binary")
+#' 
+#' grouplasso_logreg.out <- grouplasso_logreg(rY = data$Y,
+#'                                            rX = data$X,
+#'                                            groups = data$groups,
+#'                                            lambda = 10,
+#'                                            w = data$w,
+#'                                            tol = 1e-4,
+#'                                            maxiter = 500)
+grouplasso_logreg_slower <- function(rY, rX, groups, lambda, w, tol, maxiter, beta_init = as.numeric( c())) {
+    .Call(`_semipadd2pop_grouplasso_logreg_slower`, rY, rX, groups, lambda, w, tol, maxiter, beta_init)
 }
 
 #' Minimize the objective function of the group lasso problem with a binary response
@@ -156,7 +264,7 @@ grouplasso2pop_linreg <- function(rY1, rX1, groups1, rY2, rX2, groups2, rho1, rh
 #'                                            tol = 1e-4,
 #'                                            maxiter = 500)
 grouplasso_logreg <- function(rY, rX, groups, lambda, w, tol, maxiter, beta_init = as.numeric( c())) {
-    .Call(`_semipaddgt2pop_grouplasso_logreg`, rY, rX, groups, lambda, w, tol, maxiter, beta_init)
+    .Call(`_semipadd2pop_grouplasso_logreg`, rY, rX, groups, lambda, w, tol, maxiter, beta_init)
 }
 
 #' Minimize the objective function of the 2-population group lasso problem with a binary response
@@ -207,15 +315,67 @@ grouplasso_logreg <- function(rY, rX, groups, lambda, w, tol, maxiter, beta_init
 #'                                                    rCom = data$Com,
 #'                                                    tol = 1e-4,
 #'                                                    maxiter = 500)
+grouplasso2pop_logreg_slower <- function(rY1, rX1, groups1, rY2, rX2, groups2, rho1, rho2, lambda, eta, w1, w2, w, rAA1, rAA2, rCom, tol, maxiter, beta1_init = as.numeric( c()), beta2_init = as.numeric( c())) {
+    .Call(`_semipadd2pop_grouplasso2pop_logreg_slower`, rY1, rX1, groups1, rY2, rX2, groups2, rho1, rho2, lambda, eta, w1, w2, w, rAA1, rAA2, rCom, tol, maxiter, beta1_init, beta2_init)
+}
+
+#' Minimize the objective function of the 2-population group lasso problem with a binary response
+#'
+#' @param Y1 the binary response vector of data set 1
+#' @param X1 matrix containing the design matrices for data set 1
+#' @param groups1 a vector of integers indicating to which group each covariate in data set 1 belongs
+#' @param Y2 the binary response vector of data set 2
+#' @param X2 matrix containing the design matrices for data set 2
+#' @param groups2 a vector of integers indicating to which group each covariate in data set 1 belongs
+#' @param rho1 weight placed on the first data set
+#' @param rho2 weight placed on the second data set
+#' @param lambda the level of sparsity penalization
+#' @param eta the level of penalization towards model similarity
+#' @param w1 group-specific weights for different penalization across groups in data set 1
+#' @param w2 group-specific weights for different penalization across groups in data set 2
+#' @param w group-specific weights for different penalization toward similarity for different groups
+#' @param AA1 a list of the matrices A1j
+#' @param AA1 a list of the matrices A2j
+#' @param eigen1 a list of eigen info on groups from data set 1
+#' @param eigen2 a list of eigen info on groups from data set 2
+#' @param Com the indices of the covariate groups which are common in the two datasets
+#' @param tol a convergence criterion
+#' @param max.iter the maximum allowed number of iterations
+#' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
+#' @param beta1_init optional starting value for beta1
+#' @param beta2_init optional starting value for beta2
+#' @return Returns the minimizers of the 2-population group lasso objective function for the two data sets.
+#'
+#' @examples
+#' data <- get_grouplasso2pop_data(n1 = 400,n2 = 600, response = "binary")
+#'
+#' grouplasso2pop_logreg.out <- grouplasso2pop_logreg(rY1 = data$Y1,
+#'                                                    rX1 = data$X1,
+#'                                                    groups1 = data$groups1,
+#'                                                    rY2 = data$Y2,
+#'                                                    rX2 = data$X2,
+#'                                                    groups2 = data$groups2,
+#'                                                    rho1 = 2,
+#'                                                    rho2 = 1,
+#'                                                    lambda = 1,
+#'                                                    eta = 1,
+#'                                                    w1 = data$w1,
+#'                                                    w2 = data$w2,
+#'                                                    w = data$w,
+#'                                                    rAA1 = data$AA1,
+#'                                                    rAA2 = data$AA2,
+#'                                                    rCom = data$Com,
+#'                                                    tol = 1e-4,
+#'                                                    maxiter = 500)
 grouplasso2pop_logreg <- function(rY1, rX1, groups1, rY2, rX2, groups2, rho1, rho2, lambda, eta, w1, w2, w, rAA1, rAA2, rCom, tol, maxiter, beta1_init = as.numeric( c()), beta2_init = as.numeric( c())) {
-    .Call(`_semipaddgt2pop_grouplasso2pop_logreg`, rY1, rX1, groups1, rY2, rX2, groups2, rho1, rho2, lambda, eta, w1, w2, w, rAA1, rAA2, rCom, tol, maxiter, beta1_init, beta2_init)
+    .Call(`_semipadd2pop_grouplasso2pop_logreg`, rY1, rX1, groups1, rY2, rX2, groups2, rho1, rho2, lambda, eta, w1, w2, w, rAA1, rAA2, rCom, tol, maxiter, beta1_init, beta2_init)
 }
 
 #' Generate all possible sequences of 0s and 1s of a given length
 #' @param a the length of the sequences.
 #' @return a matrix containing in its rows the sequences of 0s and 1s.
 all_binary_sequences <- function(a) {
-    .Call(`_semipaddgt2pop_all_binary_sequences`, a)
+    .Call(`_semipadd2pop_all_binary_sequences`, a)
 }
 
 #' Computes conditional expectations of individual disease statuses for individual, master pool, or Dorfman testing
@@ -240,7 +400,7 @@ all_binary_sequences <- function(a) {
 #'               Se = grouplassogt2pop_data$Se1,
 #'               Sp = grouplassogt2pop_data$Sp1)
 EYexact <- function(Z, Y, X, b, Se, Sp) {
-    .Call(`_semipaddgt2pop_EYexact`, Z, Y, X, b, Se, Sp)
+    .Call(`_semipadd2pop_EYexact`, Z, Y, X, b, Se, Sp)
 }
 
 #' Computes approximate conditional expectations of individual disease statuses for individual, master pool, or Dorfman testing
@@ -265,6 +425,6 @@ EYexact <- function(Z, Y, X, b, Se, Sp) {
 #'                Se = grouplassogt2pop_data$Se1,
 #'                Sp = grouplassogt2pop_data$Sp1)
 EYgibbs <- function(N, p, Y, Z, se, sp, na, GI) {
-    .Call(`_semipaddgt2pop_EYgibbs`, N, p, Y, Z, se, sp, na, GI)
+    .Call(`_semipadd2pop_EYgibbs`, N, p, Y, Z, se, sp, na, GI)
 }
 

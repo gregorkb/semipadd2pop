@@ -2,12 +2,12 @@
     "args" : [
         "-isystem",
         "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include",
-        "-I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.1/include",
+        "-I/Library/Developer/CommandLineTools/usr/lib/clang/12.0.0/include",
         "-I/usr/local/include",
-        "-I/Library/Developer/CommandLineTools/usr/include/c++/v1",
-        "-I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.1/include",
+        "-I/Library/Developer/CommandLineTools/usr/bin/../include/c++/v1",
+        "-I/Library/Developer/CommandLineTools/usr/lib/clang/12.0.0/include",
+        "-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include",
         "-I/Library/Developer/CommandLineTools/usr/include",
-        "-I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include",
         "-I/Library/Frameworks/R.framework/Versions/4.0/Resources/library/Rcpp/include",
         "-I/Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppArmadillo/include",
         "-std=gnu++11",
@@ -16,7 +16,7 @@
         "-I/usr/local/include",
         "-fPIC"
     ],
-    "hash" : "159544760815956061911595606191",
+    "hash" : "162680719215956061911595606191",
     "is_cpp" : true,
     "pch" : "Rcpp"
 }

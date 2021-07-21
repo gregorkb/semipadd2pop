@@ -29,9 +29,17 @@ grouplasso_logreg_cv_adapt(
 
 \item{lambda.min.ratio}{ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model}
 
+\item{lambda.max.ratio}{ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model}
+
 \item{n.folds}{the number of crossvalidation folds}
 
 \item{w}{group-specific weights for different penalization toward similarity for different groups}
+
+\item{tol}{a convergence criterion}
+
+\item{maxiter}{the maximum allowed number of iterations}
+
+\item{report.prog}{a logical indicating whether the progress of the algorithm should be printed to the console}
 }
 \value{
 a list containing the fits over a grid of lambda values as well as the vector of lambda values
@@ -40,13 +48,14 @@ a list containing the fits over a grid of lambda values as well as the vector of
 Choose tuning parameters by crossvalidation for grouplasso logreg with adaptive weights
 }
 \examples{
-grouplasso_logreg_data <- get_grouplasso_logreg_data(n = 100)
+grouplasso_logreg_data <- get_grouplasso_data(n = 500,response = "binary")
 
 grouplasso_logreg_cv_adapt.out <- grouplasso_logreg_cv_adapt(Y = grouplasso_logreg_data$Y,
                                                              X = grouplasso_logreg_data$X,
                                                              groups = grouplasso_logreg_data$groups,
                                                              n.lambda = 25,
                                                              lambda.min.ratio = 0.01,
+                                                             lambda.max.ratio = 0.50,
                                                              n.folds = 5,
                                                              w = grouplasso_logreg_data$w,
                                                              tol = 1e-3,

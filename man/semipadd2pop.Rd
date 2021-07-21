@@ -84,15 +84,13 @@ Returns the estimator of the semiparametric additive model
 Compute semiparametric binary-response regression model with 2 data sets while penalizing dissimilarity
 }
 \examples{
-data <- get_semipadd2pop_data(n1 = 500, n2 = 600, model = 1, response = "gt")
-
 semipadd.out <- semipadd2pop(Y1 = data$Y1,
                              X1 = data$X1,
                              nonparm1 = data$nonparm1,
                              Y2 = data$Y2,
                              X2 = data$X2,
                              nonparm2 = data$nonparm2,
-                             response = "gt",
+                             response = "binary",
                              rho1 = 2,
                              rho2 = 1,
                              nCom = data$nCom,
@@ -104,10 +102,14 @@ semipadd.out <- semipadd2pop(Y1 = data$Y1,
                              w = 1,
                              lambda.beta = .01,
                              lambda.f = .01,
-                             eta.beta = .1, 
+                             eta.beta = .1,
                              eta.f = .1,
                              tol = 1e-3,
                              maxiter = 500)
 
-plot_semipadd2pop_gt(semipadd.out)
+plot_semipadd2pop(semipadd.out,
+                  true.functions = list(f1 = data$f1,
+                                        f2 = data$f2,
+                                        X1 = data$X1,
+                                        X2 = data$X2))
 }

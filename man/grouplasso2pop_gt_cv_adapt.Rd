@@ -56,6 +56,8 @@ test specificity for individual testing, if applicable.}
 
 \item{groups1}{a vector indicating to which group each covariate of data set 2 belongs}
 
+\item{E.approx1}{a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly for data set 1}
+
 \item{Y2}{Group testing output for data set 2 in the format as output by one of the functions \code{individual.assay.gen}, \code{masterpool.assay.gen}, \code{dorfman.assay.gen}, or \code{array.assay.gen}.}
 
 \item{Z2}{Group testing output for data set 2 in the format as output by one of the functions \code{individual.assay.gen}, \code{masterpool.assay.gen}, \code{dorfman.assay.gen}, or \code{array.assay.gen}.}
@@ -71,6 +73,8 @@ test specificity for individual testing, if applicable.}
 \item{X2}{the matrix with the observed covariate values for data set 2 (including a column of ones for the intercept)}
 
 \item{groups2}{a vector indicating to which group each covariate of data set 2 belongs}
+
+\item{E.approx2}{a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly for data set 2}
 
 \item{rho1}{weight placed on the first data set}
 
@@ -105,8 +109,6 @@ test specificity for individual testing, if applicable.}
 \item{maxiter}{the maximum allowed number of iterations (EM steps)}
 
 \item{report.prog}{a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.}
-
-\item{E.approx}{a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.}
 }
 \value{
 Returns the estimator of the parametric model with group testing data
@@ -115,33 +117,38 @@ Returns the estimator of the parametric model with group testing data
 Choose tuning parameters for two population group lasso estimator with group testing data
 }
 \examples{
-grouplasso2pop_gt_data <- get_grouplasso2pop_gt_data(n1 = 1000, n2 = 1200)
+grouplasso2pop_gt_data <- get_grouplasso2pop_data(n1 = 1000, n2 = 1200, response = "gt")
 
-grouplasso2pop_gt_cv_adapt.out <- grouplasso2pop_gt_cv_adapt(Y1 = grouplasso2pop_gt_data$Y1,
-                                                           Z1 = grouplasso2pop_gt_data$Z1,
-                                                           Se1 = grouplasso2pop_gt_data$Se1,
-                                                           Sp1 = grouplasso2pop_gt_data$Sp1,
-                                                           X1 = grouplasso2pop_gt_data$X1,
-                                                           groups1 = grouplasso2pop_gt_data$groups1,
-                                                           Y2 = grouplasso2pop_gt_data$Y2,
-                                                           Z2 = grouplasso2pop_gt_data$Z2,
-                                                           Se2 = grouplasso2pop_gt_data$Se2,
-                                                           Sp2 = grouplasso2pop_gt_data$Sp2,
-                                                           X2 = grouplasso2pop_gt_data$X2,
-                                                           groups2 = grouplasso2pop_gt_data$groups2,
-                                                           rho1 = 2,
-                                                           rho2 = 1,
-                                                           n.lambda = 5,
-                                                           n.eta = 5,
-                                                           lambda.min.ratio = 0.01,
-                                                           n.folds = 5,
-                                                           w1 = grouplasso2pop_gt_data$w1,
-                                                           w2 = grouplasso2pop_gt_data$w2,
-                                                           w = grouplasso2pop_gt_data$w,
-                                                           AA1 = grouplasso2pop_gt_data$AA1,
-                                                           AA2 = grouplasso2pop_gt_data$AA2,
-                                                           Com = grouplasso2pop_gt_data$Com,
-                                                           tol = 1e-2,
-                                                           maxiter = 500,
-                                                           report.prog = TRUE)
+grouplasso2pop_gt_cv_adapt.out <- grouplasso2pop_gt_cv_adapt(Y1 = grouplasso2pop_gt_data$Y1$I,
+                                                             Z1 = grouplasso2pop_gt_data$Y1$A,
+                                                             Se1 = grouplasso2pop_gt_data$Y1$Se,
+                                                             Sp1 = grouplasso2pop_gt_data$Y1$Sp,
+                                                             X1 = grouplasso2pop_gt_data$X1,
+                                                             groups1 = grouplasso2pop_gt_data$groups1,
+                                                             E.approx1 = grouplasso2pop_gt_data$Y1$E.approx,
+                                                             Y2 = grouplasso2pop_gt_data$Y2$I,
+                                                             Z2 = grouplasso2pop_gt_data$Y2$A,
+                                                             Se2 = grouplasso2pop_gt_data$Y2$Se,
+                                                             Sp2 = grouplasso2pop_gt_data$Y2$Sp,
+                                                             X2 = grouplasso2pop_gt_data$X2,
+                                                             groups2  = grouplasso2pop_gt_data$groups2,
+                                                             E.approx2 = grouplasso2pop_gt_data$Y2$E.approx,
+                                                             rho1 = 1,
+                                                             rho2 = 1,
+                                                             n.lambda = 5,
+                                                             n.eta = 3,
+                                                             lambda.min.ratio = 0.01,
+                                                             lambda.max.ratio = 0.50,
+                                                             eta.min.ratio = 0.01,
+                                                             eta.max.ratio = 1,
+                                                             n.folds = 5,
+                                                             w1 = grouplasso2pop_gt_data$w1,
+                                                             w2 = grouplasso2pop_gt_data$w2,
+                                                             w = grouplasso2pop_gt_data$w,
+                                                             AA1 = grouplasso2pop_gt_data$AA1,
+                                                             AA2 = grouplasso2pop_gt_data$AA2,
+                                                             Com = grouplasso2pop_gt_data$Com,
+                                                             tol = 1e-2,
+                                                             maxiter = 500,
+                                                             report.prog = TRUE)
 }

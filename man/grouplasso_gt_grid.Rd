@@ -10,12 +10,12 @@ grouplasso_gt_grid(
   Se,
   Sp,
   X,
+  E.approx = FALSE,
   groups,
   n.lambda,
   lambda.min.ratio,
   lambda.max.ratio = 1,
   w,
-  E.approx = FALSE,
   tol = 1e-04,
   maxiter = 500,
   report.prog = FALSE
@@ -36,13 +36,23 @@ test specificity for individual testing, if applicable.}
 
 \item{X}{the matrix with the observed covariate values (including a column of ones for the intercept)}
 
+\item{E.approx}{a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.}
+
 \item{groups}{a vector indicating to which group each covariate belongs}
 
 \item{n.lambda}{the number of lambda values desired}
 
 \item{lambda.min.ratio}{ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model}
 
+\item{lambda.max.ratio}{ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model}
+
 \item{w}{group-specific weights for different penalization of different groups}
+
+\item{tol}{a convergence criterion}
+
+\item{maxiter}{the maximum allowed number of iterations (EM steps)}
+
+\item{report.prog}{a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.}
 }
 \value{
 a list containing the fits over a grid of lambda values as well as the vector of lambda values
@@ -51,18 +61,19 @@ a list containing the fits over a grid of lambda values as well as the vector of
 Fit grouplasso logistic regression estimator with group testing data over a grid of lambda values
 }
 \examples{
-grouplasso_gt_data <- get_grouplasso_gt_data(n = 1000)
+grouplasso_gt_data <- get_grouplasso_data(n = 1000, response = "gt")
 
-grouplasso_gt_grid.out <- grouplasso_gt_grid(Y = grouplasso_gt_data$Y,
-                                             Z = grouplasso_gt_data$Z,
-                                             Se = grouplasso_gt_data$Se,
-                                             Sp = grouplasso_gt_data$Sp,
+grouplasso_gt_grid.out <- grouplasso_gt_grid(Y = grouplasso_gt_data$Y$I,
+                                             Z = grouplasso_gt_data$Y$A,
+                                             Se = grouplasso_gt_data$Y$Se,
+                                             Sp = grouplasso_gt_data$Y$Sp,
                                              X = grouplasso_gt_data$X,
+                                             E.approx = grouplasso_gt_data$Y$E.approx,
                                              groups = grouplasso_gt_data$groups,
                                              n.lambda = 10,
                                              lambda.min.ratio = 0.01,
+                                             lambda.max.ratio = 0.50,
                                              w  = grouplasso_gt_data$w,
-                                             E.approx = FALSE,
                                              tol = 1e-3,
                                              maxiter = 500,
                                              report.prog = TRUE)

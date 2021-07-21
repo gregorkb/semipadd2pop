@@ -42,7 +42,7 @@ a list containing the fits over a grid of lambda values as well as the vector of
 Choose tuning parameters by crossvalidation for grouplasso logreg when given a fixed grid of lambda values
 }
 \examples{
-grouplasso_logreg_data <- get_grouplasso_logreg_data(n = 100)
+grouplasso_logreg_data <- get_grouplasso_data(n = 100, response = "binary")
 
 grouplasso_logreg_grid.out <- grouplasso_logreg_grid(Y = grouplasso_logreg_data$Y,
                                                      X = grouplasso_logreg_data$X,
@@ -54,15 +54,12 @@ grouplasso_logreg_grid.out <- grouplasso_logreg_grid(Y = grouplasso_logreg_data$
                                                      maxiter = 500,
                                                      report.prog = FALSE)
 
-lambda.seq <- grouplasso_logreg_grid.out$lambda.seq
-b.mat <- grouplasso_logreg_grid.out$b.mat
-
 grouplasso_logreg_cv_fixedgrid.out <- grouplasso_logreg_cv_fixedgrid(Y = grouplasso_logreg_data$Y,
                                                                      X = grouplasso_logreg_data$X,
                                                                      groups = grouplasso_logreg_data$groups,
-                                                                     lambda.seq = lambda.seq,
+                                                                     lambda.seq = grouplasso_logreg_grid.out$lambda.seq,
                                                                      n.folds = 5,
-                                                                     b.init.mat = b.mat,
+                                                                     b.init.mat = grouplasso_logreg_grid.out$b.mat,
                                                                      w = grouplasso_logreg_data$w,
                                                                      tol = 1e-3,
                                                                      maxiter = 500)

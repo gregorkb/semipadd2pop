@@ -105,7 +105,7 @@ Returns the estimator of the semiparametric additive model
 Compute semiparametric binary-response regression model with 2 data sets while penalizing dissimilarity using CV to select tuning parameters after an adaptive step
 }
 \examples{
-data <- get_semipadd2pop_data(n1 = 1000,n2 = 800,response = "gt")
+data <- get_semipadd2pop_data(n1 = 500,n2 = 300,response = "continuous")
 
 semipadd2pop_cv_adapt.out <- semipadd2pop_cv_adapt(Y1 = data$Y1,
                                                    X1 = data$X1,
@@ -113,7 +113,7 @@ semipadd2pop_cv_adapt.out <- semipadd2pop_cv_adapt(Y1 = data$Y1,
                                                    Y2 = data$Y2,
                                                    X2 = data$X2,
                                                    nonparm2 = data$nonparm2,
-                                                   response = "gt",
+                                                   response = "continuous",
                                                    rho1 = 2,
                                                    rho2 = 1,
                                                    w1 = 1,
@@ -136,5 +136,9 @@ semipadd2pop_cv_adapt.out <- semipadd2pop_cv_adapt(Y1 = data$Y1,
                                                    maxiter = 1000,
                                                    report.prog = TRUE)
 
-plot_semipadd2pop_cv(semipadd2pop_cv_adapt.out) 
+plot_semipadd2pop_cv_adapt(semipadd2pop_cv_adapt.out,
+                           true.functions = list(f1 = data$f1,
+                                                 f2 = data$f2,
+                                                 X1 = data$X1,
+                                                 X2 = data$X2))
 }

@@ -18,7 +18,8 @@ spsm_cubespline_design <- function(X,d,xi,W = NULL)
     
   } else {
     
-    int.knots <- quantile(X,seq(0,1,length = d - 2 + 1)) # add one, so that one can be removed after centering to restore full-rank.
+    int.knots <- int.knots.at.empirical.quantiles(X,d)
+    # int.knots <- quantile(X,seq(0,1,length = d - 2 + 1)) # add one, so that one can be removed after centering to restore full-rank.
     
   }
   
@@ -32,7 +33,7 @@ spsm_cubespline_design <- function(X,d,xi,W = NULL)
     
   } else { # W is a vector of weights for each observation (has 0s and 1s in our context)
     
-    B <- diag(W) %*% spline.des(all.knots,X,ord=4,derivs=0,outer.ok=TRUE)$design[,-1] # remove one so we can center and keep full-rank
+    B <- diag(W) %*% splineDesign(all.knots,X,ord=4,derivs=0,outer.ok=TRUE)[,-1] # remove one so we can center and keep full-rank
     emp.cent <- apply(B[which(W!=0), ],2,mean)
   }
   
@@ -42,17 +43,35 @@ spsm_cubespline_design <- function(X,d,xi,W = NULL)
   M <- t(B.cent) %*% B.cent / n
   
   # construct matrix in which 2nd derivative penalty is a quadratic form
+  # R <- matrix(NA,d+1,d+1)
+  # dsq_bspline.mat <- splineDesign(int.knots,knots = all.knots,outer.ok=TRUE,derivs=2)
+  # for(k in 1:(d+1))
+  #   for(l in 1:(d+1))
+  #   {
+  # 
+  #     pcwiselin <- dsq_bspline.mat[,k] * dsq_bspline.mat[,l] # Get sum of trapezoidal areas.
+  #     h <- diff(int.knots)
+  #     R[k,l] <- sum(.5*(pcwiselin[-1] + pcwiselin[-length(int.knots)])*h)  # sum of trapezoidal areas.
+  # 
+  #   }
+  
+  # # construct matrix in which 2nd derivative penalty is a quadratic form
   R <- matrix(NA,d+1,d+1)
-  dsq_bspline.mat <- spline.des(int.knots,knots = all.knots,outer.ok=TRUE,derivs=2)$design
-  for(k in 1:(d+1))
-    for(l in 1:(d+1))
-    {
-      
-      pcwiselin <- dsq_bspline.mat[,k] * dsq_bspline.mat[,l] # Get sum of trapezoidal areas.
-      h <- diff(int.knots)
-      R[k,l] <- sum(.5*(pcwiselin[-1] + pcwiselin[-length(int.knots)])*h)  # sum of trapezoidal areas.
-      
+  dsq_bspline.mat <- splineDesign(int.knots,knots = all.knots,outer.ok=TRUE,derivs=2)
+  K <- length(int.knots)
+  for(l in 1:(d+1))
+    for(j in 1:(d+1)){
+
+      tk <- dsq_bspline.mat[-K,l]
+      gk <- dsq_bspline.mat[-K,j]
+
+      tkp1 <- dsq_bspline.mat[-1,l]
+      gkp1 <- dsq_bspline.mat[-1,j]
+
+      R[l,j] <- sum( diff(int.knots) * ((1/2) * (gk*tkp1 + gkp1*tk) + (1/3)* (tkp1 - tk)*( gkp1 - gk) ))
+
     }
+  
   
   Q <- chol(M + xi^2 * R[-1,-1]) # remove the one corresponding to the first coefficient (since we have removed one column)
   
@@ -67,7 +86,39 @@ spsm_cubespline_design <- function(X,d,xi,W = NULL)
   
 }
 
-
+#' Put knots at empirical quantiles, accommodating data with ties.
+#' 
+#' @param X the data
+#' @param d the number of basis functions desired (cubic B-splines)
+#' @return the interior knots needed for constructing a centered, full-rank, cubic B-spline basis with \code{d} functions
+#' @export
+int.knots.at.empirical.quantiles <-  function(X,d){
+  
+  d_star <- d - 2 + 1
+  d_try <- d_star
+  n.int.knots <- 0
+  
+  while( n.int.knots < d_star)
+  {
+    
+    
+    int.knots <- unique(quantile(X,seq(0,1,length = d_try)))
+    n.int.knots <- length(unique(int.knots))
+    d_try <- d_try + 1
+    
+  }
+  
+  # if you have gotten too many knots, which will happen only rarely, remove some at random.
+  if(n.int.knots > d_star){
+    
+    knots.rm <- sample(2:(n.int.knots - 1),n.int.knots - d_star,replace = FALSE)
+    int.knots <- int.knots[-knots.rm]
+    
+  }
+  
+  return(int.knots)
+  
+}
 
 #' The logit function
 #'
@@ -78,805 +129,8 @@ logit <- function(z){
   return(as.numeric(1/(1+exp(-z))))
 }
 
-#' The soft-thresholding function
-#'
-#' @param z the argument to which to apply soft-thresholding
-#' @param a the threshold
-#' @return the value of the soft-thresholding function
-#'
-#' @examples
-#' z <- seq(-4,4,length=21)
-#' a <- 2
-#' y <- SoftThresh(z,a)
-#' plot(y~z,type="l")
-SoftThresh_R <- function(z,a){
 
-  return( (z + a)*( z < - a) + (z - a)*(z > a) )
 
-}
-#' Minimize l2-penalized quadratic function
-#'
-#' @param h a vector
-#' @param L a matrix with number of rows equal to the length of h
-#' @param lambda a value greater than zero giving the strength of the penalty
-#' @param evals the eigenvalues of \eqn{L^TL}
-#' @param evecs the eigenvectors of \eqn{L^TL}
-#' @return Returns the unique minimizer of \deqn{(1/2) \|h - L \beta\|_2^2  + \lambda * \|\beta\|_2}
-#'
-#' See Theorem 2 of Foygel, Rina, and Mathias Drton. "Exact block-wise optimization in group lasso and sparse group lasso for linear regression." arXiv preprint arXiv:1010.3320 (2010).
-#'
-#' @examples
-#' # generate an h and L
-#' h <- rnorm(100)
-#' L <- matrix(rnorm(100*10),100,10)
-#' lambda <- 1
-#'
-#' # get eigendecomposition of t(L) %*% L
-#' LtL <- t(L) %*% L
-#' eigen.out <- eigen(LtL)
-#' evals <- eigen.out$values
-#' evecs <- t(eigen.out$vectors)
-#'
-#' # find minimizer
-#' FoygelDrton(h,L,lambda,evals,evecs)
-#'
-#' # compare to using optim() to minimize the same function
-#' obj <- function(beta,L,h,lambda){
-#'  val <- (1/2) * sum(  (h - L %*% beta )^2 ) + lambda * sqrt( sum(beta^2))
-#'  return(val)
-#' }
-#' optim(par=rep(0,d),obj,L = L, h = h, lambda = lambda)$par
-FoygelDrton_R <- function(h,L,lambda,evals,evecs)
-{
-
-  D <- diag(evals)
-  v <- as.numeric(evecs %*% t(L) %*% h)
-
-  r1 <- .1
-  conv <- 1
-  while(conv > 1e-5)
-  {
-
-    r0 <- r1
-
-    f0 <- sum(v^2/(evals*r0 + lambda)^2) - 1
-    df0 <- - 2 * sum( evals*v^2/(evals*r0 + lambda)^3 )
-    r1 <- max(r0 - f0/df0,1e-5)
-    conv <- abs(r1-r0)
-
-    # print(c(r0,f0))
-
-  }
-  r <- r1
-
-  beta <- as.numeric(t(evecs) %*% diag(1/(evals + lambda/r)) %*% v)
-
-  return(beta)
-
-}
-
-
-
-
-
-#' Prepare inputs for grouplasso function when using it to fit a semiparametric model
-#'
-#' @param X the matrix with the observed covariate values (including a column of ones for the intercept)
-#' @param nonparm a vector indicating for which covariates a nonparametric function is to be estimated
-#' @param d vector giving the dimensions the  B-spline bases to be used when fitting the nonparametric effects. If a scalar is given, this dimension is used for all nonparametric effects.
-#' @param w covariate-specific weights for different penalization toward similarity for different covariates
-#' @param lambda.beta the level of sparsity penalization for the parametric effects
-#' @param lambda.f the level of sparsity penalization for the nonparametric effects
-
-#' @param xi a tuning parameter governing the smoothness of the nonparametric estimates
-#' @export
-semipadd_to_grouplasso_noint <- function(X,nonparm,d,xi,w=1,lambda.beta=1,lambda.f=1)
-{
-  
-  ww <- ((1-nonparm) + nonparm * lambda.f/lambda.beta) * w
-
-  n <- nrow(X)
-  pp <- ncol(X)
-  
-  ##### For first data set
-  DD.tilde <- matrix(NA,n,0)
-  groups <- numeric()
-  QQ.inv <- vector("list",length=pp)
-  knots.list <- vector("list",length=pp)
-  emp.cent <- vector("list",length=pp)
-  
-  if( length(d) == 1 ){
-    
-    d <- rep(d,pp)
-    
-  }
-  
-  for( j in 1:pp )
-  {
-    
-    if(nonparm[j] == 0){
-      
-      DD.tilde <- cbind(DD.tilde,X[,j])
-      groups <- c(groups,j)
-      
-    } else {
-      
-      spsm_cubespline_design.out <- spsm_cubespline_design(X[,j],d[j],xi)
-      
-      knots.list[[j]] <- spsm_cubespline_design.out$knots
-      emp.cent[[j]] <- spsm_cubespline_design.out$emp.cent
-      QQ.inv[[j]] <- spsm_cubespline_design.out$Q.inv
-      DD.tilde <- cbind(DD.tilde, spsm_cubespline_design.out$D.tilde )
-      
-      groups <- c(groups,rep(j,d[j]))
-      
-    }
-    
-  }
-  
-  output <- list( DD.tilde = DD.tilde,
-                  groups = groups,
-                  knots.list = knots.list,
-                  QQ.inv = QQ.inv,
-                  emp.cent = emp.cent,
-                  lambda = lambda.beta,
-                  w = ww)
-  
-  return(output)
-  
-}
-
-#' Convert output from grouplasso to the fitted functions of the semi-parametric additive model
-#'
-#' @param X the matrix with the observed covariate values (including a column of ones for the intercept)
-#' @param nonparm a vector indicating for which covariates a nonparametric function is to be estimated
-#' @param groups a vector indicating to which group the entries of the coefficient vector \code{b} belong
-#' @param knots.list a list of vectors with the knot locations for nonparametric effects
-#' @param emp.cent a list of vectors of the empirical basis function centerings
-#' @param QQ.inv the matrix with which to back-transform the group lasso coefficients
-#' @param b the group lasso coefficients
-#' @export
-grouplasso_to_semipadd_noint <- function(X,nonparm,groups,knots.list,emp.cent,QQ.inv,b)
-{
-  
-  n <- nrow(X)
-  pp <- ncol(X)
-
-  # store fitted functions on data set 1 in a list
-  f.hat <- vector("list",pp)
-  f.hat.design <- matrix(0,n,pp)
-  
-  f.hat[[1]] <- eval( parse( text= paste("function(x){",paste(b[1])," }")))
-  f.hat.design[,1] <- b[1]
-  
-  
-  beta.hat <- rep(NA,pp)
-  beta.hat[1] <- b[1]
-  for(j in 2:pp)
-  {
-    
-    if(nonparm[j] == 0)
-    {
-      
-      ind <- which(groups == j)
-      f.hat[[j]] <- eval( parse( text = paste("function(x){ x * ",paste(b[ind])," }")))
-      beta.hat[j] <- b[ind]
-      
-    } else {
-      
-      ind <- which(groups == j)
-      d <- length(ind)
-      
-      Gamma.hat <- QQ.inv[[j]] %*% b[ind]
-      f.hat[[j]] <- eval(parse(text = paste("function(x)
-                                             {
-
-                                             x <- round(x,10)
-                                             x.mat <- spline.des(",paste("c(",paste(round(knots.list[[j]],10),collapse=","),")",sep=""),",x,ord=4,derivs=0,outer.ok=TRUE)$design[,-1]
-                                             x.mat.cent <- x.mat - matrix(",paste("c(",paste(emp.cent[[j]],collapse=","),"),length(x),",d,sep=""),",byrow=TRUE)
-                                             f.hat <- as.numeric(x.mat.cent %*% ",paste("c(",paste(Gamma.hat,collapse=","),")",sep=""),")
-                                             
-                                             return(f.hat)
-
-                                             }"
-      )))
-      
-    }
-    
-    f.hat.design[,j] <- f.hat[[j]](X[,j])
-    
-  }
-  
-  output <- list(f.hat = f.hat,
-                 f.hat.design = f.hat.design,
-                 beta.hat = beta.hat)
-  
-}
-
-#' Plot method for class semipadd2pop
-#' @export
-plot_semipadd2pop <- function(x,true.functions=NULL)
-{
-
-  f1.hat <- x$f1.hat
-  f2.hat <- x$f2.hat
-  f1.hat.design <- x$f1.hat.design
-  f2.hat.design <- x$f2.hat.design
-  Com <- x$Com
-  knots.list1 <- x$knots.list1
-  knots.list2 <- x$knots.list2
-
-  pp1 <- length(f1.hat)
-  pp2 <- length(f2.hat)
-
-  n.plots <- length(unique(c(which(x$nonparm1 == 1),which(x$nonparm2 == 1)) ))
-
-  ncols <- 4
-  nrows <- ceiling(n.plots/ncols)
-
-  par(mfrow=c(nrows,ncols),mar=c(2.1,2.1,1.1,1.1))
-
-  for( j in which(x$nonparm1 == 1) ){
-
-    x1j.min <- min(knots.list1[[j]]) + 1e-2
-    x1j.max <- max(knots.list1[[j]]) - 1e-2
-
-    if( j %in% Com ){
-
-      x2j.min <- min(knots.list2[[j]]) + 1e-2
-      x2j.max <- max(knots.list2[[j]]) - 1e-2
-
-      plot(NA,ylim = range(f1.hat.design[,-1],f2.hat.design[,-1]),
-           xlim=c(min(x1j.min,x2j.min),max(x1j.max,x2j.max)))
-      if(x$nonparm1[j]==1) abline(v=knots.list1[[j]],col=rgb(0,0,0,.15))
-      if(x$nonparm2[j]==1) abline(v=knots.list2[[j]],col=rgb(0,0,1,.15))
-
-      plot(f1.hat[[j]],x1j.min,x1j.max,add=TRUE,col=rgb(0,0,0,1))
-      plot(f2.hat[[j]],x2j.min,x2j.max,add=TRUE,col=rgb(0,0,.545,1))
-
-      if(length(true.functions)!=0)
-      {
-
-        x1.seq <- seq(x1j.min,x1j.max,length=300)
-        f1.cent.seq <- true.functions$f1[[j]](x1.seq) - mean(true.functions$f1[[j]](true.functions$X1[,j]))
-        lines(f1.cent.seq ~ x1.seq,lty=2)
-
-        x2.seq <- seq(x2j.min,x2j.max,length=300)
-        f2.cent.seq <- true.functions$f2[[j]](x2.seq) - mean(true.functions$f2[[j]](true.functions$X2[,j]))
-        lines(f2.cent.seq ~ x2.seq,lty=2,col=rgb(0,0,.545,1))
-
-      }
-
-    } else {
-
-      plot(NA,ylim = range(f1.hat.design[,-1],f2.hat.design[,-1]),xlim=c(x1j.min,x1j.max))
-      if(x$nonparm1[j]==1) abline(v=knots.list1[[j]],col=rgb(0,0,0,0.15))
-
-      plot(f1.hat[[j]],x1j.min,x1j.max,add=TRUE,col=rgb(0,0,0,1))
-
-      if(length(true.functions)!=0)
-      {
-
-        x1.seq <- seq(x1j.min,x1j.max,length=300)
-        f1.cent.seq <- true.functions$f1[[j]](x1.seq) - mean(true.functions$f1[[j]](true.functions$X1[,j]))
-        lines(f1.cent.seq ~ x1.seq,lty=2)
-
-      }
-
-    }
-  }
-
-  for(j in which(x$nonparm2==1)){
-
-    x2j.min <- min(knots.list2[[j]]) + 1e-2
-    x2j.max <- max(knots.list2[[j]]) - 1e-2
-
-    if(j %in% Com) next;
-
-    plot(NA,ylim = range(f1.hat.design[,-1],f2.hat.design[,-1]),xlim=c(x2j.min,x2j.max))
-
-    if(x$nonparm2[j]==1) abline(v=knots.list2[[j]],col=rgb(0,0,1,.15))
-
-    plot(f2.hat[[j]],x2j.min,x2j.max,add=TRUE,col=rgb(0,0,.545,1))
-
-    if(length(true.functions)!=0)
-    {
-
-      x2.seq <- seq(x2j.min,x2j.max,length=300)
-      f2.cent.seq <- true.functions$f2[[j]](x2.seq) - mean(true.functions$f2[[j]](true.functions$X2[,j]))
-      lines(f2.cent.seq ~ x2.seq,lty=2,col=rgb(0,0,.545,1))
-
-    }
-
-  }
-
-}
-
-
-#' Plot method for class semipadd2pop_gt_cv
-#' @export
-plot_semipadd2pop_grid <- function(x,true.functions=NULL)
-{
-
-  f1.hat <- x$f1.hat
-  f2.hat <- x$f2.hat
-  f1.hat.folds <- x$f1.hat.folds
-  f2.hat.folds <- x$f2.hat.folds
-  f1.hat.design <- x$f1.hat.design
-  f2.hat.design <- x$f2.hat.design
-  Com <- x$Com
-  knots.list1 <- x$knots.list1
-  knots.list2 <- x$knots.list2
-  n.lambda <- x$n.lambda
-  n.eta <- x$n.eta
-  
-  
-  # get cv choices if they exist
-  which.lambda.cv <- x$which.lambda.cv
-  which.eta.cv <- x$which.eta.cv
-
-  pp1 <- length(f1.hat)
-  pp2 <- length(f2.hat)
-
-  n.plots <- length(unique(c(which(x$nonparm1 == 1),which(x$nonparm2 == 1)) ))
-
-  ncols <- 4
-  nrows <- ceiling(n.plots/ncols)
-
-  par(mfrow=c(nrows,ncols),mar=c(2.1,2.1,1.1,1.1))
-
-  for( j in which(x$nonparm1 == 1) ){
-
-    x1j.min <- min(knots.list1[[j]]) + 1e-2
-    x1j.max <- max(knots.list1[[j]]) - 1e-2
-
-    if( j %in% Com ){
-
-
-      x2j.min <- min(knots.list2[[j]]) + 1e-2
-      x2j.max <- max(knots.list2[[j]]) - 1e-2
-
-      plot(NA,ylim = range(f1.hat.design[,-1,,],f2.hat.design[,-1,,]),xlim=c(min(x1j.min,x2j.min),max(x1j.max,x2j.max)))
-      if(x$nonparm1[j]==1) abline(v=knots.list1[[j]],col=rgb(0,0,0,.15))
-      if(x$nonparm2[j]==1) abline(v=knots.list2[[j]],col=rgb(0,0,1,.15))
-
-      for(l in 1:n.lambda)
-        for(k in 1:n.eta)
-        {
-          
-          if(length(which.lambda.cv) == 0){
-            
-            opacity <- 1
-            
-          } else {
-          
-            opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv,1,0.1)
-              
-          }
-          
-          
-          plot(f1.hat[[l]][[k]][[j]],x1j.min,x1j.max,add=TRUE,col=rgb(0,0,0,opacity))
-          plot(f2.hat[[l]][[k]][[j]],x2j.min,x2j.max,add=TRUE,col=rgb(0,0,.545,opacity))
-        }
-
-      if(length(true.functions)!=0)
-      {
-
-        x1.seq <- seq(x1j.min,x1j.max,length=300)
-        f1.cent.seq <- true.functions$f1[[j]](x1.seq) - mean(true.functions$f1[[j]](true.functions$X1[,j]))
-        lines(f1.cent.seq ~ x1.seq,lty=2)
-
-        x2.seq <- seq(x2j.min,x2j.max,length=300)
-        f2.cent.seq <- true.functions$f2[[j]](x2.seq) - mean(true.functions$f2[[j]](true.functions$X2[,j]))
-        lines(f2.cent.seq ~ x2.seq,lty=2,col=rgb(0,0,.545,1))
-
-      }
-
-
-    } else {
-
-      plot(NA,ylim = range(f1.hat.design[,-1,,],f2.hat.design[,-1,,]),xlim=c(x1j.min,x1j.max))
-      if(x$nonparm1[j]==1) abline(v=knots.list1[[j]],col=rgb(0,0,0,0.15))
-
-      for(l in 1:n.lambda)
-        for(k in 1:n.eta){
-          
-          if(length(which.lambda.cv) == 0){
-            
-            opacity <- 1
-            
-          } else {
-            
-            opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv,1,0.1)
-            
-          }
-          
-          plot(f1.hat[[l]][[k]][[j]],x1j.min,x1j.max,add=TRUE,col=rgb(0,0,0,opacity))
-        }
-
-      if(length(true.functions)!=0)
-      {
-
-        x1.seq <- seq(x1j.min,x1j.max,length=300)
-        f1.cent.seq <- true.functions$f1[[j]](x1.seq) - mean(true.functions$f1[[j]](true.functions$X1[,j]))
-        lines(f1.cent.seq ~ x1.seq,lty=2)
-
-      }
-
-    }
-  }
-
-  for(j in which(x$nonparm2==1)){
-
-    x2j.min <- min(knots.list2[[j]]) + 1e-2
-    x2j.max <- max(knots.list2[[j]]) - 1e-2
-
-    if(j %in% Com) next;
-
-    plot(NA,ylim = range(f1.hat.design[,-1,,],f2.hat.design[,-1,,]),xlim=c(x2j.min,x2j.max))
-
-    if(x$nonparm2[j]==1) abline(v=knots.list2[[j]],col=rgb(0,0,1,.15))
-
-    for(l in 1:n.lambda)
-      for(k in 1:n.eta){
-        
-        if(length(which.lambda.cv) == 0){
-          
-          opacity <- 1
-          
-        } else {
-          
-          opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv,1,0.1)
-          
-        }
-        
-        plot(f2.hat[[l]][[k]][[j]],x2j.min,x2j.max,add=TRUE,col=rgb(0,0,.545,opacity))
-      }
-
-    if(length(true.functions)!=0)
-    {
-
-      x2.seq <- seq(x2j.min,x2j.max,length=300)
-      f2.cent.seq <- true.functions$f2[[j]](x2.seq) - mean(true.functions$f2[[j]](true.functions$X2[,j]))
-      lines(f2.cent.seq ~ x2.seq,lty=2,col=rgb(0,0,.545,1))
-
-    }
-
-  }
-
-}
-
-#' Plot method for class semipadd2pop
-#' @export
-plot_semipadd2pop_wint <- function(x)
-{
-  
-  f1.hat <- x$f1.hat
-  f2.hat <- x$f2.hat
-  f1.hat.design <- x$f1.hat.design
-  f2.hat.design <- x$f2.hat.design
-  Com <- x$Com
-  knots.list1 <- x$knots.list1
-  knots.list2 <- x$knots.list2
-  nonparm1 <- x$nonparm1
-  nonparm2 <- x$nonparm2
-  int1 <- x$int1
-  int2 <- x$int2
-  
-  pp1 <- length(nonparm1)
-  pp2 <- length(nonparm2)
-  
-  n.plots <- length(unique(c(which(x$nonparm1 == 1),which(x$nonparm2 == 1)) ))
-  
-  ncols <- 4
-  nrows <- ceiling(n.plots/ncols)
-  
-  par(mfrow=c(nrows,ncols),mar=c(2.1,2.1,1.1,1.1))
-  
-  for( j in which(x$nonparm1 == 1) ){
-    
-    x1j.min <- min(knots.list1[[j]]) + 1e-2
-    x1j.max <- max(knots.list1[[j]]) - 1e-2
-    x1j.seq <- seq(x1j.min,x1j.max,length=200)
-    
-    if( j %in% Com ){
-      
-      x2j.min <- min(knots.list2[[j]]) + 1e-2
-      x2j.max <- max(knots.list2[[j]]) - 1e-2
-      x2j.seq <- seq(x2j.min,x2j.max,length=200)
-      
-      plot(NA,ylim = range(f1.hat.design[,-1],f2.hat.design[,-1]),
-           xlim=c(min(x1j.min,x2j.min),max(x1j.max,x2j.max)))
-      abline(v=knots.list1[[j]],col=rgb(0,0,0,.15))
-      abline(v=knots.list2[[j]],col=rgb(0,0,1,.15))
-      
-      plot(f1.hat[[j]],x1j.min,x1j.max,add=TRUE,col=rgb(0,0,0,1))
-      plot(f2.hat[[j]],x2j.min,x2j.max,add=TRUE,col=rgb(0,0,.545,1))
-      
-      
-      if(length(int1)!=0){
-        
-        if(any(int1 == j)){
-          
-          which.interactions <- which(int1 == j, arr.ind = TRUE)[,1]
-          
-          for( k in (which.interactions + pp1))
-          {
-            y.seq <- f1.hat[[k]](x1j.seq) + f1.hat[[j]](x1j.seq)
-            lines(y.seq~x1j.seq,col=rgb(0,.545,0,1))
-            
-          }
-        }
-      }
-      
-      if(length(int2)!=0){
-        
-        if(any(int2 == j)){
-          
-          which.interactions <- which(int2 == j, arr.ind = TRUE)[,1]
-          
-          for( k in (which.interactions + pp2))
-          {
-            y.seq <- f2.hat[[k]](x2j.seq) + f2.hat[[j]](x2j.seq)
-            lines(y.seq~x2j.seq,col=rgb(0,.545,.545,1))
-            
-          }
-        }
-      }
-      
-      
-    } else {
-      
-      plot(NA,ylim = range(f1.hat.design[,-1],f2.hat.design[,-1]),xlim=c(x1j.min,x1j.max))
-      if(x$nonparm1[j]==1) abline(v=knots.list1[[j]],col=rgb(0,0,0,0.15))
-      
-      plot(f1.hat[[j]],x1j.min,x1j.max,add=TRUE,col=rgb(0,0,0,1))
-      
-      if(length(int1)!=0){
-        
-        if(any(int1 == j)){
-          
-          which.interactions <- which(int1 == j, arr.ind = TRUE)[,1]
-          
-          for( k in (which.interactions + pp1))
-          {
-            y.seq <- f1.hat[[k]](x1j.seq) + f1.hat[[j]](x1j.seq)
-            lines(y.seq~x1j.seq,col=rgb(0,.545,0,1))
-            
-          }
-        }
-      }
-      
-    }
-  }
-  
-  for(j in which(x$nonparm2==1)){
-    
-    
-    x2j.min <- min(knots.list2[[j]]) + 1e-2
-    x2j.max <- max(knots.list2[[j]]) - 1e-2
-    x2j.seq <- seq(x2j.min,x2j.max,length=200)
-    
-    if(j %in% Com) next;
-    
-    plot(NA,ylim = range(f1.hat.design[,-1],f2.hat.design[,-1]),xlim=c(x2j.min,x2j.max))
-    
-    abline(v=knots.list2[[j]],col=rgb(0,0,1,.15))
-    
-    plot(f2.hat[[j]],x2j.min,x2j.max,add=TRUE,col=rgb(0,0,.545,1))
-    
-    if(length(int2)!=0){
-      
-      if(any(int2 == j)){
-        
-        which.interactions <- which(int2 == j, arr.ind = TRUE)[,1]
-        
-        for( k in (which.interactions + pp2))
-        {
-          y.seq <- f2.hat[[k]](x2j.seq) + f2.hat[[j]](x2j.seq)
-          lines(y.seq~x2j.seq,col=rgb(0,.545,.545,1))
-          
-        }
-      }
-    }
-  }
-  
-}
-
-
-
-
-#' Plot method for class semipadd2pop_cv_wint
-#' @export
-plot_semipadd2pop_grid_wint <- function(x,true.functions=NULL)
-{
-  
-  f1.hat <- x$f1.hat
-  f2.hat <- x$f2.hat
-  
-  f1.hat.design <- x$f1.hat.design
-  f2.hat.design <- x$f2.hat.design
-  Com <- x$Com
-  knots.list1 <- x$knots.list1
-  knots.list2 <- x$knots.list2
-  n.lambda <- length(x$lambda.seq)
-  n.eta <- length(x$eta.seq)
-  
-  int1 <- x$int1
-  int2 <- x$int2
-  
-  pp1 <- length(x$nonparm1)
-  pp2 <- length(x$nonparm2)
-  
-  which.lambda.cv <- x$which.lambda.cv
-  which.eta.cv <- x$which.eta.cv
-  
-  n.plots <- length(unique(c(which(x$nonparm1 == 1),which(x$nonparm2 == 1)) ))
-  
-  ncols <- 4
-  nrows <- ceiling(n.plots/ncols)
-  
-  par(mfrow=c(nrows,ncols),mar=c(2.1,2.1,1.1,1.1))
-  
-  for( j in which(x$nonparm1 == 1) ){
-    
-    x1j.min <- min(knots.list1[[j]]) + 1e-2
-    x1j.max <- max(knots.list1[[j]]) - 1e-2
-    x1j.seq <- seq(x1j.min,x1j.max,length=200)
-    
-    if( j %in% Com ){
-      
-      x2j.min <- min(knots.list2[[j]]) + 1e-2
-      x2j.max <- max(knots.list2[[j]]) - 1e-2
-      x2j.seq <- seq(x2j.min,x2j.max,length=200)
-      
-      plot(NA,ylim = range(f1.hat.design[,-1,,],f2.hat.design[,-1,,]),xlim=c(min(x1j.min,x2j.min),max(x1j.max,x2j.max)))
-      abline(v=knots.list1[[j]],col=rgb(0,0,0,.15))
-      abline(v=knots.list2[[j]],col=rgb(0,0,1,.15))
-      
-      for(l in 1:n.lambda)
-        for(k in 1:n.eta){
-          
-          if(length(which.lambda.cv) == 0){
-            
-            opacity <- 1
-            
-          } else {
-            
-            opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv,1,0.1)
-            
-          }
-            
-          plot(f1.hat[[l]][[k]][[j]],x1j.min,x1j.max,add=TRUE,col=rgb(0,0,0,opacity))
-          plot(f2.hat[[l]][[k]][[j]],x2j.min,x2j.max,add=TRUE,col=rgb(0,0,.545,opacity))
-          
-          if(length(int1)!=0){
-            
-            if(any(int1 == j)){
-              
-              which.interactions <- which(int1 == j, arr.ind = TRUE)[,1]
-              
-              for( m in (which.interactions + pp1))
-              {
-                y.seq <- f1.hat[[l]][[k]][[m]](x1j.seq) + f1.hat[[l]][[k]][[j]](x1j.seq)
-                lines(y.seq~x1j.seq,col=rgb(0,.545,0,opacity))
-                
-              }
-            }
-          }
-          
-          if(length(int2)!=0){
-            
-            if(any(int2 == j)){
-              
-              which.interactions <- which(int2 == j, arr.ind = TRUE)[,1]
-              
-              for( m in (which.interactions + pp2))
-              {
-                y.seq <- f2.hat[[l]][[k]][[m]](x2j.seq) + f2.hat[[l]][[k]][[j]](x2j.seq)
-                lines(y.seq~x2j.seq,col=rgb(0,.545,.545,opacity))
-                
-              }
-            }
-          }
-          
-          
-          
-        }
-      
-      
-    } else {
-      
-      plot(NA,ylim = range(f1.hat.design[,-1,,],f2.hat.design[,-1,,]),xlim=c(x1j.min,x1j.max))
-      if(x$nonparm1[j]==1) abline(v=knots.list1[[j]],col=rgb(0,0,0,0.15))
-      
-      for(l in 1:n.lambda)
-        for(k in 1:n.eta){
-          
-          if(length(which.lambda.cv) == 0){
-            
-            opacity <- 1
-            
-          } else {
-            
-            opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv,1,0.1)
-            
-          }
-          
-          plot(f1.hat[[l]][[k]][[j]],x1j.min,x1j.max,add=TRUE,col=rgb(0,0,0,opacity))
-          
-          
-          if(length(int1)!=0){
-            
-            if(any(int1 == j)){
-              
-              which.interactions <- which(int1 == j, arr.ind = TRUE)[,1]
-              
-              for( m in (which.interactions + pp1))
-              {
-                y.seq <- f1.hat[[l]][[k]][[m]](x1j.seq) + f1.hat[[l]][[k]][[j]](x1j.seq)
-                lines(y.seq~x1j.seq,col=rgb(0,.545,0,opacity))
-                
-              }
-            }
-          }
-          
-          
-        }
-      
-      
-    }
-  }
-  
-  for(j in which(x$nonparm2==1)){
-    
-    x2j.min <- min(knots.list2[[j]]) + 1e-2
-    x2j.max <- max(knots.list2[[j]]) - 1e-2
-    x2j.seq <- seq(x2j.min,x2j.max,length=200)
-    
-    if(j %in% Com) next;
-    
-    plot(NA,ylim = range(f1.hat.design[,-1,,],f2.hat.design[,-1,,]),xlim=c(x2j.min,x2j.max))
-    
-    if(x$nonparm2[j]==1) abline(v=knots.list2[[j]],col=rgb(0,0,1,.15))
-    
-    for(l in 1:n.lambda)
-      for(k in 1:n.eta){
-        
-        if(length(which.lambda.cv) == 0){
-          
-          opacity <- 1
-          
-        } else {
-          
-          opacity <- ifelse( l == which.lambda.cv & k == which.eta.cv,1,0.1)
-          
-        }
-        
-        plot(f2.hat[[l]][[k]][[j]],x2j.min,x2j.max,add=TRUE,col=rgb(0,0,.545,opacity))
-        
-        if(length(int2)!=0){
-          
-          if(any(int2 == j)){
-            
-            which.interactions <- which(int2 == j, arr.ind = TRUE)[,1]
-            
-            for( m in (which.interactions + pp2))
-            {
-              y.seq <- f2.hat[[l]][[k]][[m]](x2j.seq) + f2.hat[[l]][[k]][[j]](x2j.seq)
-              lines(y.seq~x2j.seq,col=rgb(0,.545,.545,opacity))
-              
-            }
-          }
-        }
-        
-        
-      }
-    
-    
-  }
-  
-}
 
 #' Generate correlated Uniform(0,1) random variables
 #'
@@ -999,29 +253,25 @@ corrBern <- function(n,probs,Rho)
 }
 
 
-#' Generate a data set with binary responses for group lasso
+#' Generate a data set for group lasso
 #'
 #' @param n the sample size
 #' @return a list containing the data
 #' @export
 get_grouplasso_data <- function(n,response){
   
-  d <- c(1,1,3,4)
+  d <- c(1,1,1,1,1,3,4,10,20)
   q <- length(d)
   X <- matrix(rnorm(n*sum(d)),n,sum(d))
   groups <- numeric() ; for(j in 1:q){ groups <- c(groups,rep(j,d[j])) }
-  beta <- c(0,2,0,0,0,1,1,1,1)
-  
+  beta <- c(0,2,0,0,0,1,1,1,0,0,0,0,rep(-1,10),rep(0,20))
   
   # set tuning parameters
   w <- rexp(q,2)
   
-  
   if( response == "continuous"){
     
-    
     Y <- X %*% beta + rnorm(n)
-    
     
   } else if(response == "binary"){
     
@@ -1068,13 +318,13 @@ get_grouplasso_data <- function(n,response){
 #' @export
 get_grouplasso2pop_data <- function(n1,n2,response){
   
-  d1 <- c(1,1,1,4,5)
+  d1 <- c(1,1,1,4,5,rep(4,20))
   q1 <- length(d1)
   X1 <- matrix(rnorm(n1*sum(d1)),n1,sum(d1))
   groups1 <- numeric() ; for(j in 1:q1){ groups1 <- c(groups1,rep(j,d1[j])) }
   beta1 <- rnorm(ncol(X1))
   
-  d2 <- c(1,1,4,3,4,1)
+  d2 <- c(1,1,4,3,4,1,rep(4,20))
   q2 <- length(d2)
   X2 <- matrix(rnorm(n2*sum(d2)),n2,sum(d2))
   groups2 <- numeric() ; for(j in 1:q2){ groups2 <- c(groups2,rep(j,d2[j])) }
@@ -1166,71 +416,6 @@ get_grouplasso2pop_data <- function(n1,n2,response){
 }
 
 
-
-#' Generate two data sets for semiparametric additive modeling with binary responses and some common covariates
-#'
-#' @param n1 the sample size for the first data set
-#' @param n2 the sample size for the second data set
-#' @return a list containing the data
-#' @export
-get_semipadd2pop_logreg_data_wint <- function(n1,n2){
-  
-  p1 <- 6
-  q1 <- 4
-  zeta1 <- 3/20
-  zeta2 <- 10/20
-  W1 <- cbind(corrBern(n1,probs=c(1:p1)/(2*p1),Rho = zeta1^abs(outer(1:p1,1:p1,"-"))))
-  X1 <- (corrUnif(n1,Rho = zeta2^abs(outer(1:q1,1:q1,"-")))-.5)*5
-  
-  XX1 <- cbind(1,X1,W1)
-  nonparm1 <- c(0,rep(1,p1),rep(0,q1))
-  pp1 <- ncol(XX1)
-  
-  lin1 <- - 2 + XX1[,2] - 2 * sin( - 2 * XX1[,3]) + XX1[,6] + XX1[,7] +  XX1[,7] * XX1[,6] + XX1[,3] * XX1[,6]
-  
-  P1 <- logit(lin1)
-  Y1 <- rbinom(n1,1,P1)
-  
-  # generate second data set
-  p2 <- 3
-  q2 <- 5
-  zeta1 <- 3/20
-  zeta2 <- 10/20
-  W2 <- cbind(corrBern(n2,probs=c(1:p2)/(2*p2),Rho = zeta1^abs(outer(1:p2,1:p2,"-"))))
-  X2 <- (corrUnif(n2,Rho = zeta2^abs(outer(1:q2,1:q2,"-")))-.5)*5
-  X2[,1] <- X2[,1] - 1 # impose different supports for some covariates
-  X2[,2] <- X2[,2] + 2
-  
-  XX2 <- cbind(1,W2[,c(1,2)],X2[,c(1,2)],W2[,-c(1,2)],X2[,-c(1,2)])
-  nonparm2 <- c(0,rep(1,p2),rep(0,q2))
-  pp2 <- ncol(XX2)
-  
-  lin2 <- - 3 + 1.5 * XX1[,2] - 2 * sin(- 2 * XX1[,3]) + XX1[,7] - XX1[,2]^2 * XX1[,7] + XX1[,3] * XX1[,6]
-  
-  P2 <- logit(lin2)
-  Y2 <- rbinom(n2,1,P2)
-  
-  nCom <- 5
-  
-  ComInt <- matrix(c(3,6),nrow=1,byrow=TRUE)
-  
-  Int1 <- matrix(c(7,6),nrow=1,byrow=TRUE)
-  Int2 <- matrix(c(2,7),nrow=1,byrow=TRUE)
-  
-  output <- list(X1 = XX1,
-                 nonparm1 = nonparm1,
-                 X2 = XX2,
-                 nonparm2 = nonparm2,
-                 Y1 = Y1,
-                 Y2 = Y2,
-                 nCom = nCom,
-                 ComInt = ComInt,
-                 Int1 = Int1,
-                 Int2 = Int2)
-  
-  return(output)
-  
-}
 
 
 #'Generates individual testing data.
@@ -1757,117 +942,6 @@ EYexact_R <- function(Z,Y,X,b,Se,Sp)
 
 
 
-#' Plot method for class semipadd
-#' @export
-plot_semipadd <- function(x)
-{
-  
-  f.hat <- x$f.hat
-  f.hat.design <- x$f.hat.design
-  knots.list <- x$knots.list
-  nonparm <- x$nonparm
-  pp <- length(nonparm)
-  n.plots <- length(which(nonparm == 1))
-  int <- x$int
-  
-  ncols <- 4
-  nrows <- ceiling(n.plots/ncols)
-  
-  par(mfrow = c(nrows,ncols), mar = c(2.1,2.1,1.1,1.1))
-  
-  for( j in which(nonparm == 1) ){
-    
-    xj.min <- min(knots.list[[j]]) + 1e-2
-    xj.max <- max(knots.list[[j]]) - 1e-2
-    
-    xj.seq <- seq(xj.min,xj.max,length=200)
-    
-    plot(NA,ylim = range(f.hat.design[,-1]),xlim=c(xj.min,xj.max))
-    if(nonparm[j]==1) abline(v=knots.list[[j]],col=rgb(0,0,0,0.15))
-    
-    plot(f.hat[[j]],xj.min,xj.max,add=TRUE,col=rgb(0,0,0,1))
-    
-    if(length(x$int)!=0){
-      
-      if(any(int == j)){
-        
-        which.interactions <- which(int == j, arr.ind = TRUE)[,1]
-        
-        for( k in (which.interactions + pp))
-        {
-          y.seq <- f.hat[[k]](xj.seq) + f.hat[[j]](xj.seq)
-          lines(y.seq~xj.seq,col=rgb(0,0,0,1))
-          
-        }
-      }
-    }
-  }
-}
-
-#' Plot method for class semipadd_cv
-#' @export
-plot_semipadd_grid <- function(x)
-{
-  
-  f.hat <- x$f.hat
-  f.hat.design <- x$f.hat.design
-  knots.list <- x$knots.list
-  nonparm <- x$nonparm
-  pp <- length(nonparm)
-  n.plots <- length(which(nonparm == 1))
-  int <- x$int
-  n.lambda <- x$n.lambda
-  
-  which.lambda.cv <- x$which.lambda.cv
-  
-  ncols <- 4
-  nrows <- ceiling(n.plots/ncols)
-  
-  par(mfrow = c(nrows,ncols), mar = c(2.1,2.1,1.1,1.1))
-  
-  for( j in which(nonparm == 1) ){
-    
-    xj.min <- min(knots.list[[j]]) + 1e-2
-    xj.max <- max(knots.list[[j]]) - 1e-2
-    
-    xj.seq <- seq(xj.min,xj.max,length=200)
-    
-    plot(NA,ylim = range(f.hat.design[,-1,]),xlim=c(xj.min,xj.max))
-    if(nonparm[j]==1) abline(v=knots.list[[j]],col=rgb(0,0,0,0.15))
-    
-    for(l in 1:n.lambda){
-      
-      
-      if(length(which.lambda.cv) == 0){
-        
-        opacity <- 1
-        
-      } else {
-        
-        opacity <- ifelse( l == which.lambda.cv,1,0.25)
-        
-      }
-      
-      plot(f.hat[[l]][[j]],xj.min,xj.max,add=TRUE,col=rgb(0,0,0,opacity))
-      
-      if(length(x$int)!=0){
-        
-        if(any(int == j)){
-          
-          which.interactions <- which(int == j, arr.ind = TRUE)[,1]
-          
-          for( k in (which.interactions + pp))
-          {
-            y.seq <- f.hat[[l]][[k]](xj.seq) + f.hat[[l]][[j]](xj.seq)
-            lines(y.seq~xj.seq,col=rgb(0,.545,0,opacity))
-            
-          }
-        }
-      }
-    }
-  }
-}
-
 
 
 
@@ -1983,9 +1057,6 @@ get_semipadd_data <- function(n,response = "continuous")
   return(output)
   
 }
-
-
-
 
 
 #' Generate two data sets for semiparametric additive modeling with group testing responses and some common covariates
@@ -2222,3 +1293,121 @@ get_semipadd2pop_data <- function(n1,n2,response,model = 1,int = FALSE){
   return(output)
   
 }
+
+
+
+#' Generate two data sets for semiparametric additive modeling with continuous responses and some common covariates
+#'
+#' @param n1 the sample size for the first data set
+#' @param n2 the sample size for the second data set
+#' @return a list containing the data
+#' @export
+get_semipadd2pop_simulation_data <- function(n1,n2,some.opposite = TRUE, binary.response = FALSE){
+
+  
+  # generate data set 1
+  p1 <- 100
+  Rho1 <- (.5)^abs(outer(1:p1,1:p1,"-"))
+  W1 <- matrix(rnorm(n1*p1),n1,p1) %*% chol(Rho1)
+  q1 <- 4
+  X1 <- (corrUnif(n1,Rho = (.5)^abs(outer(1:q1,1:q1,"-")))-.5)*5
+  
+  XX1 <- cbind(1,W1,X1)
+  nonparm1 <- c(0,rep(0,p1),rep(1,q1))
+
+  # set up the true functions
+  f1 <- vector("list",105)
+  f1[[102]] <- function(x){-2*sin(x*2)}
+  f1[[103]] <- function(x){x}
+  f1[[104]] <- function(x){0*x}
+  f1[[105]] <- function(x){(exp(-x)-2/5*sinh(5/2))/2}
+  
+  # record coefficients for covariates to be fit parametrically
+  beta1 <- c(rep(1,5),rep(1,5),rep(0,90))
+  
+  # generate responses
+  if(binary.response){
+    
+    prob1 <- logit(f1[[102]](XX1[,102]) + f1[[103]](XX1[,103]) + f1[[104]](XX1[,104]) + f1[[105]](XX1[,105]) + W1 %*% beta1)
+    
+    Y1 <- rbinom(n1,1,prob = prob1)
+    
+  } else {
+    
+    Y1 <- f1[[102]](XX1[,102]) + f1[[103]](XX1[,103]) + f1[[104]](XX1[,104]) + f1[[105]](XX1[,105]) + W1 %*% beta1 + rnorm(n1)
+  
+  }
+  
+  # generate data set 2
+  p2 <- 100
+  Rho2 <- (.5)^abs(outer(1:p2,1:p2,"-"))
+  W2 <- matrix(rnorm(n2*p2),n2,p2) %*% chol(Rho2)
+  q2 <- 5
+  X2 <- (corrUnif(n2,Rho = (.5)^abs(outer(1:q2,1:q2,"-")))-.5)*5
+  X2[,1] <- X2[,1] - 1 # impose different supports for some covariates
+  X2[,2] <- X2[,2] + 2
+  
+  XX2 <- cbind(1,W2,X2)
+  nonparm2 <- c(0,rep(0,p2),rep(1,q2))
+  
+  # set up the true functions
+  f2 <- vector("list",106)
+  f2[[102]] <- function(x){-2*sin(x*2)}
+  if(some.opposite){
+    
+    f2[[103]] <- function(x){-x}
+    
+  } else {
+    
+    f2[[103]] <- function(x){x}
+    
+  }
+  f2[[104]] <- function(x){x^2 - 25/12}
+  f2[[105]] <- function(x){0*x}
+  f2[[106]] <- function(x){0*x}
+  
+  # record coefficients for covariates to be fit parametrically
+  if(some.opposite){
+    
+    beta2 <- c(rep(1,5),rep(-1,5),rep(0,90))
+     
+  } else {
+    
+    beta2 <- c(rep(1,5),rep(1,5),rep(0,90))
+    
+  }
+  
+  # generate responses
+  if(binary.response){
+    
+    prob2 <- logit(f2[[102]](XX2[,102]) + f2[[103]](XX2[,103]) + f2[[104]](XX2[,104]) + W2 %*% beta2)
+    
+    Y2 <- rbinom(n2,1,prob = prob2)
+    
+  } else {
+    
+    Y2 <- f2[[102]](XX2[,102]) + f2[[103]](XX2[,103]) + f2[[104]](XX2[,104]) + W2 %*% beta2 + rnorm(n2)
+    
+  }
+  
+  nCom <- 102
+  
+  output <- list(X1 = XX1,
+                 nonparm1 = nonparm1,
+                 f1 = f1,
+                 X2 = XX2,
+                 nonparm2 = nonparm2,
+                 f2 = f2,
+                 Y1 = Y1,
+                 Y2 = Y2,
+                 nCom = nCom,
+                 beta1 = c(NA,beta1,rep(NA,q1)),
+                 beta2 = c(NA,beta2,rep(NA,q2)),
+                 some.opposite = some.opposite,
+                 binary.response = binary.response)
+  
+  return(output)
+  
+}
+
+

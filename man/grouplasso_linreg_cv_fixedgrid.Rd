@@ -42,7 +42,7 @@ a list containing the fits over a grid of lambda values as well as the vector of
 Choose tuning parameters by crossvalidation for grouplasso linreg when given a fixed grid of lambda values
 }
 \examples{
-grouplasso_linreg_data <- get_grouplasso_linreg_data(n = 100)
+grouplasso_linreg_data <- get_grouplasso_data(n = 400, response = "continuous")
 
 grouplasso_linreg_grid.out <- grouplasso_linreg_grid(Y = grouplasso_linreg_data$Y,
                                                      X = grouplasso_linreg_data$X,

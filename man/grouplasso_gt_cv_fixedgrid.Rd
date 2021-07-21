@@ -50,39 +50,39 @@ test specificity for individual testing, if applicable.}
 }
 \value{
 a list containing the fits over a grid of lambda values as well as the vector of lambda values
+
+Note that the crossvalidation is carried out using the individual diagnoses as though they were the true individual disease statuses.
 }
 \description{
 Choose tuning parameters by crossvalidation for grouplasso logreg when given a fixed grid of lambda values
 }
 \examples{
-grouplasso_gt_data <- get_grouplasso_gt_data(n = 400)
+grouplasso_gt_data <- get_grouplasso_data(n = 1000, response = "gt")
 
-grouplasso_gt_grid.out <- grouplasso_gt_grid(Y = grouplasso_gt_data$Y,
-                                             Z = grouplasso_gt_data$Z,
-                                             Se = grouplasso_gt_data$Se,
-                                             Sp = grouplasso_gt_data$Sp,
+grouplasso_gt_grid.out <- grouplasso_gt_grid(Y = grouplasso_gt_data$Y$I,
+                                             Z = grouplasso_gt_data$Y$A,
+                                             Se = grouplasso_gt_data$Y$Se,
+                                             Sp = grouplasso_gt_data$Y$Sp,
                                              X = grouplasso_gt_data$X,
+                                             E.approx = grouplasso_gt_data$Y$E.approx,
                                              groups = grouplasso_gt_data$groups,
-                                             n.lambda = 25,
+                                             n.lambda = 10,
                                              lambda.min.ratio = 0.01,
-                                             w = grouplasso_gt_data$w,
+                                             lambda.max.ratio = 0.50,
+                                             w  = grouplasso_gt_data$w,
                                              tol = 1e-3,
                                              maxiter = 500,
-                                             report.prog = FALSE)
+                                             report.prog = TRUE)
 
-
-lambda.seq <- grouplasso_gt_grid.out$lambda.seq
-b.mat <- grouplasso_gt_grid.out$b.mat
-
-grouplasso_gt_cv_fixedgrid.out <- grouplasso_gt_cv_fixedgrid(Y = grouplasso_gt_data$Y,
-                                                             Z = grouplasso_gt_data$Z,
-                                                             Se = grouplasso_gt_data$Se,
-                                                             Sp = grouplasso_gt_data$Sp,
+grouplasso_gt_cv_fixedgrid.out <- grouplasso_gt_cv_fixedgrid(Y = grouplasso_gt_data$Y$I,
+                                                             Z = grouplasso_gt_data$Y$A,
+                                                             Se = grouplasso_gt_data$Y$Se,
+                                                             Sp = grouplasso_gt_data$Y$Sp,
                                                              X = grouplasso_gt_data$X,
                                                              groups = grouplasso_gt_data$groups,
-                                                             lambda.seq = lambda.seq,
+                                                             lambda.seq = grouplasso_gt_grid.out$lambda.seq,
                                                              n.folds = 5,
-                                                             b.init.mat = b.mat,
+                                                             b.init.mat = grouplasso_gt_grid.out$b.mat,
                                                              w = grouplasso_gt_data$w,
                                                              tol = 1e-3,
                                                              maxiter = 500)

@@ -68,6 +68,12 @@ grouplasso2pop_logreg_grid(
 \item{AA1}{a list of the matrices A2j}
 
 \item{Com}{the indices of the covariate groups which are common in the two datasets}
+
+\item{tol}{the convergence tolerance}
+
+\item{maxiter}{the maximum number of iterations allowed for each fit}
+
+\item{report.prog}{a logical indicating whether the progress of the algorithm should be printed to the console}
 }
 \value{
 a list containing the fits over a grid of lambda and eta values as well as the vector of lambda values and the vector of eta values
@@ -76,8 +82,7 @@ a list containing the fits over a grid of lambda and eta values as well as the v
 Fit grouplasso2pop logistic regression estimator over a grid of lambda and eta values
 }
 \examples{
-grouplasso2pop_logreg_data <- get_grouplasso2pop_logreg_data(n1 = 400,
-                                                             n2 = 600)
+grouplasso2pop_logreg_data <- get_grouplasso2pop_data(n1 = 1000,n2 = 800, response = "binary")
 
 grouplasso2pop_logreg_grid.out <- grouplasso2pop_logreg_grid(Y1 = grouplasso2pop_logreg_data$Y1,
                                                              X1 = grouplasso2pop_logreg_data$X1,
@@ -85,11 +90,12 @@ grouplasso2pop_logreg_grid.out <- grouplasso2pop_logreg_grid(Y1 = grouplasso2pop
                                                              Y2 = grouplasso2pop_logreg_data$Y2,
                                                              X2 = grouplasso2pop_logreg_data$X2,
                                                              groups2 = grouplasso2pop_logreg_data$groups2,
-                                                             rho1 = 2,
+                                                             rho1 = 1,
                                                              rho2 = 1,
-                                                             n.lambda = 5,
+                                                             n.lambda = 10,
                                                              n.eta = 5,
-                                                             lambda.min.ratio = 0.01,
+                                                             lambda.min.ratio = 0.001,
+                                                             lambda.max.ratio = 0.5,
                                                              w1 = grouplasso2pop_logreg_data$w1,
                                                              w2 = grouplasso2pop_logreg_data$w2,
                                                              w = grouplasso2pop_logreg_data$w,

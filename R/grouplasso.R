@@ -1,186 +1,19 @@
-#' Compute the objective function of the 1-population group lasso problem with a continuous response
-#'
-#' @param beta the vector of coefficients
-#' @param Y the response vector
-#' @param X matrix containing the design matrices
-#' @param groups a vector indicating to which group each covariate belongs
-#' @param lambda the level of sparsity penalization
-#' @param w group-specific weights for different penalization of groups
-#' @return Returns the value of the objective function for the group lasso problem
-#' @export
-grouplasso_linreg_obj <- function(beta,Y,X,groups,lambda,w)
-{
-
-  q <- length(unique(groups))
-  n <- nrow(X)
-
-  LScrit <- sum( (Y - X %*% beta)^2 )
-
-  beta.wl2l1 <- 0
-  for(j in 1:q)
-  {
-    ind <- which(groups == j)
-    beta.wl2l1  <- beta.wl2l1 + w[j] * sqrt(sum( beta[ind]^2 ))
-  }
-
-  pen <- lambda * beta.wl2l1
-
-  val <- LScrit + pen
-
-  return(val)
-
-}
-
-#' Minimize the objective function of the 1-population group lasso problem with a continuous response
-#'
-#' @param Y the response vector
-#' @param X matrix containing the design matrices
-#' @param groups a vector of integers indicating to which group each covariate belongs
-#' @param lambda the level of sparsity penalization
-#' @param w group-specific weights for different penalization across groups
-#' @param tol a convergence criterion
-#' @param maxiter the maximum allowed number of iterations
-#' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
-#' @return Returns the minimizer of the group lasso objective function
-#'
-#' @examples
-#' # generate data
-#' grouplasso_linreg_data <- get_grouplasso_linreg_data(n = 500)
-#'
-#' # fit grouplasso1pop_linreg estimator
-#' grouplasso_linreg.out <- grouplasso_linreg_R(Y = grouplasso_linreg_data$Y,
-#'                                              X = grouplasso_linreg_data$X,
-#'                                              groups = grouplasso_linreg_data$groups,
-#'                                              lambda = 10,
-#'                                              w = grouplasso_linreg_data$w,
-#'                                              tol = 1e-4,
-#'                                              maxiter = 500,
-#'                                              plot_obj = TRUE)
-#' @export
-grouplasso_linreg_R <- function(Y,X,groups,lambda,w,tol=1e-4,maxiter=500,plot_obj=FALSE,init = NULL)
-{
-
-  # initialize estimators and convergence criteria
-  q <- ncol(X)
-  n <- nrow(X)
-  
-  if( length(init) == 0){
-    
-    beta.hat1 <- rep(0,q)
-    
-  } else {
-    
-    beta.hat1 <- init
-    
-  }
-  
-  conv <- 1
-  iter <- 0
-  got.eigen <- numeric(q)
-  
-  eigen <- vector("list", q)
-  
-  d <- table(groups)
-  singleton.grps <- which(d == 1)
-  nonsingleton.grps <- which(d != 1)
-  obj.val <- numeric()
-  
-  while( conv > tol & iter < maxiter)
-  {
-    
-    beta.hat0 <- beta.hat1
-    
-    # go through the groups of size 1 of the first data set
-    for(j in singleton.grps)
-    {
-      
-      ind <- which(groups == j)
-      rj <- as.numeric(Y - X[,-ind,drop=FALSE] %*% beta.hat1[-ind])
-      sXj <- sum(X[,ind]^2)
-      Xj.rj <- t(X[,ind]) %*% rj
-      
-      beta.hat1[ind] <- SoftThresh_R(Xj.rj,lambda*w[j])/sXj
-        
-    }
-    
-    # go through the groups of size more than 1 of the first data set
-    for(j in nonsingleton.grps)
-    {
-      
-      ind <- which(groups == j)
-      rj <- as.numeric(Y - X[,-ind,drop=FALSE] %*% beta.hat1[-ind])
-      Xrj.norm <- sqrt(sum(  (t(X[,ind]) %*% rj)^2 ))
-        
-        if( Xrj.norm < lambda * w[j])
-        {
-          
-          beta.hat1[ind] <- 0
-          
-        } else {
-          
-          # compute FD update
-          if(got.eigen[j]==0)
-          {
-            LtL <- t(X[,ind]) %*% X[,ind]
-            eigen[[j]] <- eigen(LtL)
-            got.eigen[j] <- 1
-            
-            if(any(eigen[[j]]$values==0)){
-              
-              stop("A Gram matrix is not positive definite: Try reducing the number of knots.")
-              
-            }
-            
-          }
-          
-          h <- rj
-          L <- X[,ind]
-          
-          beta.hat1[ind] <- FoygelDrton_Armadillo(h,L,lambda*w[j],eigen[[j]]$values,t(eigen[[j]]$vectors))
-          
-        }
-        
-    } 
-      
-    conv <- max(abs(beta.hat1 - beta.hat0))
-    iter <- iter + 1
-    
-    if(plot_obj == TRUE){
-      
-      obj.val[iter] <- grouplasso_linreg_obj(beta.hat1,Y,X,groups,lambda,w)
-      
-    }
-    
-  }
-    
-  if(plot_obj == TRUE){
-    
-    plot(obj.val)
-    
-  }
-  
-  beta.hat <- beta.hat1
-  
-  output <- list(beta.hat = beta.hat,
-                 obj.val = obj.val,
-                 iter = iter)
-  
-  return(output)
-
-}
-
-#' Fit group lasso regression estimator over a grid of lambda values
+#' Fit group lasso regression estimator for continuous resopnse over a grid of lambda values
 #'
 #' @param Y the response vector
 #' @param X matrix containing the design matrices
 #' @param groups a vector indicating to which group each covariate belongs
 #' @param n.lambda the number of lambda values desired
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param w group-specific weights for different penalization of different groups
+#' @param tol a convergence criterion
+#' @param maxiter the maximum allowed number of iterations
+#' @param report.prog a logical indicating whether the progress of the algorithm should be printed to the console
 #' @return a list containing the fits over a grid of lambda values as well as the vector of lambda values
 #' @examples
-#' grouplasso_linreg_data <- get_grouplasso_linreg_data(n = 400)
-#'
+#' grouplasso_linreg_data <- get_grouplasso_data(n = 400, response = "continuous")
+#' 
 #' grouplasso_linreg_grid.out <- grouplasso_linreg_grid(Y = grouplasso_linreg_data$Y,
 #'                                                      X = grouplasso_linreg_data$X,
 #'                                                      groups = grouplasso_linreg_data$groups,
@@ -277,7 +110,7 @@ grouplasso_linreg_grid <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.m
 #' @param maxiter the maximum number of iterations allowed for each fit
 #' @return a list containing the fits over a grid of lambda values as well as the vector of lambda values
 #' @examples
-#' grouplasso_linreg_data <- get_grouplasso_linreg_data(n = 100)
+#' grouplasso_linreg_data <- get_grouplasso_data(n = 400, response = "continuous")
 #' 
 #' grouplasso_linreg_grid.out <- grouplasso_linreg_grid(Y = grouplasso_linreg_data$Y,
 #'                                                      X = grouplasso_linreg_data$X,
@@ -362,11 +195,16 @@ grouplasso_linreg_cv_fixedgrid <- function(Y,X,groups,lambda.seq,n.folds,b.init.
   }
 
   meanCVll <- apply(minus2ll.mat,1,mean)
+  seCVll <- apply(minus2ll.mat,1,sd)/sqrt(n.folds)
   which.lambda.cv <- which.min(meanCVll)
 
+  plus1se.thresh <- meanCVll[which.lambda.cv] + seCVll[which.lambda.cv]
+  which.lambda.cv.1se <- max(which(meanCVll <= plus1se.thresh))
+  
   output <- list( b.folds.arr = b.folds.arr,
                   minus2ll.mat = minus2ll.mat,
                   which.lambda.cv = which.lambda.cv,
+                  which.lambda.cv.1se = which.lambda.cv.1se,
                   lambda.seq = lambda.seq,
                   iterations = iterations)
 
@@ -374,72 +212,6 @@ grouplasso_linreg_cv_fixedgrid <- function(Y,X,groups,lambda.seq,n.folds,b.init.
 
 }
 
-
-#' Choose tuning parameters by crossvalidation for grouplasso linreg.
-#'
-#' @param Y the response vector
-#' @param X matrix containing the design matrices
-#' @param groups a vector indicating to which group each covariate belongs
-#' @param n.lambda the number of lambda values desired
-#' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
-#' @param n.folds the number of crossvalidation folds
-#' @param w group-specific weights for different penalization toward similarity for different groups
-#' @return a list containing the fits over a grid of lambda values as well as the vector of lambda values
-#'
-#' @examples
-#' grouplasso_linreg_data <- get_grouplasso_linreg_data(n = 100)
-#' 
-#' grouplasso_linreg_cv.out <- grouplasso_linreg_cv(Y = grouplasso_linreg_data$Y,
-#'                                                  X = grouplasso_linreg_data$X,
-#'                                                  groups = grouplasso_linreg_data$groups,
-#'                                                  n.lambda = 25,
-#'                                                  lambda.min.ratio = 0.001,
-#'                                                  lambda.max.ratio = 0.1,
-#'                                                  n.folds = 5,
-#'                                                  w = grouplasso_linreg_data$w,
-#'                                                  tol = 1e-3,
-#'                                                  maxiter = 500,
-#'                                                  report.prog = FALSE)
-#' @export
-grouplasso_linreg_cv <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.max.ratio=1,n.folds,w,tol=1e-4,maxiter=500,report.prog = TRUE){
-
-  # obtain lambda.seq from the grid function, as well as the fits on the entire data set,
-  # which will be used as initial values for the crossvalidation training fits.
-  grouplasso_linreg_grid.out <- grouplasso_linreg_grid(Y = Y,
-                                                       X = X,
-                                                       groups = groups,
-                                                       n.lambda = n.lambda,
-                                                       lambda.min.ratio = lambda.min.ratio,
-                                                       lambda.max.ratio = lambda.max.ratio,
-                                                       w = w,
-                                                       tol = tol,
-                                                       maxiter = maxiter,
-                                                       report.prog = report.prog)
-
-  lambda.seq <- grouplasso_linreg_grid.out$lambda.seq
-  b.mat <- grouplasso_linreg_grid.out$b.mat
-
-  # do the crossvalidation
-  grouplasso_linreg_cv_fixedgrid.out <- grouplasso_linreg_cv_fixedgrid(Y = Y,
-                                                                       X = X,
-                                                                       groups = groups,
-                                                                       lambda.seq = lambda.seq,
-                                                                       n.folds = n.folds,
-                                                                       b.init.mat = b.mat,
-                                                                       w = w,
-                                                                       tol = tol,
-                                                                       maxiter = 500)
-
-  output <- list( b.mat = b.mat,
-                  b.folds.arr = grouplasso_linreg_cv_fixedgrid.out$b.folds.arr,
-                  minus2ll.mat = grouplasso_linreg_cv_fixedgrid.out$minus2ll.mat,
-                  which.lambda.cv = grouplasso_linreg_cv_fixedgrid.out$which.lambda.cv,
-                  lambda.seq = lambda.seq,
-                  iterations = grouplasso_linreg_cv_fixedgrid.out$iterations)
-
-  return(output)
-
-}
 
 
 #' Choose tuning parameters by crossvalidation for grouplasso linreg with adaptive weights
@@ -449,12 +221,16 @@ grouplasso_linreg_cv <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.max
 #' @param groups a vector indicating to which group each covariate belongs
 #' @param n.lambda the number of lambda values desired
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param n.folds the number of crossvalidation folds
 #' @param w group-specific weights for different penalization toward similarity for different groups
+#' @param tol a convergence criterion
+#' @param maxiter the maximum allowed number of iterations
+#' @param report.prog a logical indicating whether the progress of the algorithm should be printed to the console
 #' @return a list containing the fits over a grid of lambda values as well as the vector of lambda values
 #'
 #' @examples
-#' grouplasso_linreg_data <- get_grouplasso_linreg_data(n = 100)
+#' grouplasso_linreg_data <- get_grouplasso_data(n = 400, response = "continuous")
 #' 
 #' grouplasso_linreg_cv_adapt.out <- grouplasso_linreg_cv_adapt(Y = grouplasso_linreg_data$Y,
 #'                                                              X = grouplasso_linreg_data$X,
@@ -539,6 +315,7 @@ grouplasso_linreg_cv_adapt <- function(Y,X,groups,n.lambda,lambda.min.ratio,lamb
                   b.folds.arr = grouplasso_linreg_cv_fixedgrid.out$b.folds.arr,
                   minus2ll.mat = grouplasso_linreg_cv_fixedgrid.out$minus2ll.mat,
                   which.lambda.cv = grouplasso_linreg_cv_fixedgrid.out$which.lambda.cv,
+                  which.lambda.cv.1se = grouplasso_linreg_cv_fixedgrid.out$which.lambda.cv.1se,###THIS
                   lambda.seq = lambda.seq,
                   lambda.initial.fit = lambda.initial.fit,
                   w = w,
@@ -549,185 +326,8 @@ grouplasso_linreg_cv_adapt <- function(Y,X,groups,n.lambda,lambda.min.ratio,lamb
 }
 
 
-#' Compute the objective function of the 1-population group lasso problem with a binary response
-#'
-#' @param beta the vector of coefficients 
-#' @param Y the response vector
-#' @param X matrix containing the design matrices
-#' @param groups a vector indicating to which group each covariate of data set 1 belongs
-#' @param lambda the level of sparsity penalization
-#' @param w group-specific weights for different penalization of groups
-#' @return Returns the value of the objective function for the 2-population group lasso problem
-#' @export
-grouplasso_logreg_obj <- function(beta,Y,X,groups,lambda,w)
-{
-  
-  q <- length(unique(groups))
-  n <- nrow(X)
-  
-  P <- logit(X %*% beta)
-  
-  neg2LL <- - 2 * sum(  Y * log(P) + (1 - Y)*log(1-P))
-  
-  beta.wl2l1 <- 0
-  for(j in 1:q)
-  {
-    ind <- which(groups == j)
-    beta.wl2l1  <- beta.wl2l1 + w[j] * sqrt(sum( beta[ind]^2 ))
-  }
-  
-  pen <- lambda * beta.wl2l1
-  
-  val <- neg2LL + pen
-  
-  return(val)
-  
-}
 
-#' Minimize the objective function of the 1-population group lasso problem with a binary response
-#'
-#' @param Y the binary response vector
-#' @param X matrix containing the design matrices
-#' @param groups a vector of integers indicating to which group each covariate belongs
-#' @param lambda the level of sparsity penalization
-#' @param w1 group-specific weights for different penalization across groups
-#' @param tol a convergence criterion
-#' @param maxiter the maximum allowed number of iterations
-#' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
-#' @return Returns the minimizer of the group lasso objective function
-#'
-#' @examples
-#' # generate data
-#' grouplasso_logreg_data <- get_grouplasso_logreg_data(n = 500)
-#' 
-#' # fit grouplasso1pop_logreg estimator
-#' grouplasso_logreg.out <- grouplasso_logreg_R(Y = grouplasso_logreg_data$Y,
-#'                                              X = grouplasso_logreg_data$X,
-#'                                              groups = grouplasso_logreg_data$groups,
-#'                                              lambda = 10,
-#'                                              w = grouplasso_logreg_data$w,
-#'                                              tol = 1e-4,
-#'                                              maxiter = 500,
-#'                                              plot_obj = TRUE)
-#' @export
-grouplasso_logreg_R <- function(Y,X,groups,lambda,w,tol=1e-4,maxiter=500,plot_obj=FALSE,init = NULL)
-{
-  
-  # initialize estimators and convergence criteria
-  q <- ncol(X)
-  n <- nrow(X)
-  
-  if( length(init) == 0){
-    
-    beta.hat1 <- rep(0,q)
-    
-  } else {
-    
-    beta.hat1 <- init
-    
-  }
-  
-  conv <- 1
-  iter <- 0
-  
-  got.eigen <- numeric(q)
-  eigen <- vector("list", q)
-  
-  d <- table(groups)
-  singleton.grps <- which(d == 1)
-  nonsingleton.grps <- which(d != 1)
-  obj.val <- numeric()
-  
-  while( conv > tol & iter < maxiter)
-  {
-    
-    beta.hat0 <- beta.hat1
-    
-    # go through the groups of size 1
-    for(j in singleton.grps)
-    {
-      
-      P <- logit( X %*% beta.hat1)
-      if( any(P  > 1 - 1e-10) | any(P < 1e-10) ) stop("fitted probabilities diverging to 1 or 0")
-      
-      # fixed Hessian
-      ind <- which(groups == j)
-      Xj <- X[,ind,drop=FALSE]
-      Xj.tilde <- (1/2) * Xj
-      Zj.tilde <- (1/2) * ( Xj %*% beta.hat1[ind] + 4 * ( Y - P ) )
-      sxj <- sum(Xj.tilde^2)
-      
-      sxzj <- sum(Xj.tilde * Zj.tilde)
-      beta.hat1[ind] <- SoftThresh_R(sxzj,lambda*w[j]/2)/sxj
-      
-    }
-    
-    # go through the groups of size more than 1
-    for(j in nonsingleton.grps)
-    {
-      
-      P <- logit( X %*% beta.hat1)
-      if( any(P  > 1 - 1e-10) | any(P < 1e-10) ) stop("fitted probabilities diverging to 1 or 0")
-      
-      # set up iteratively re-weighted least-squares design matrix and response vector for coordinate j
-      ind <- which(groups == j)
-      Xj <- X[,ind,drop=FALSE]
-      
-      # fixed Hessian approach for the groups
-      Xj.tilde <- (1/2)*Xj
-      Zj.tilde <- (1/2)*(Xj %*% beta.hat1[ind] + 4*(Y - P))
-      xzj.norm <- sqrt(sum(  (t(Xj.tilde) %*% Zj.tilde)^2 ))
-      
-      if( xzj.norm < lambda * w[j]/2)
-      {
-        
-        beta.hat1[ind] <- 0
-        
-      } else {
-        
-        # compute FD update
-        if(got.eigen[j]==0){
-          
-          LtL <- t(Xj.tilde) %*% Xj.tilde
-          eigen[[j]] <- eigen(LtL)
-          got.eigen[j] <- 1
-          
-        }
-        
-        h <- Zj.tilde
-        L <- Xj.tilde
-        
-        beta.hat1[ind] <- FoygelDrton_R(h,L,lambda*w[j]/2,eigen[[j]]$values,t(eigen[[j]]$vectors))
-        
-      }
-      
-    } 
-    
-    conv <- max(abs(c(beta.hat1 - beta.hat0)))
-    iter <- iter + 1
-    
-    if(plot_obj == TRUE)
-    {
-      obj.val[iter] <- grouplasso_logreg_obj(beta.hat1,Y,X,groups,lambda,w)
-    }
-    
-  }
-  
-  if(plot_obj == TRUE){
-    
-    plot(obj.val)
-    
-  }
-  
-  beta.hat <- beta.hat1
-  
-  output <- list(beta.hat = beta.hat,
-                 obj.val = obj.val,
-                 iter = iter)
-  
-  return(output)
-  
-}
+
 
 #' Fit grouplasso logistic regression estimator over a grid of lambda values
 #'
@@ -736,10 +336,14 @@ grouplasso_logreg_R <- function(Y,X,groups,lambda,w,tol=1e-4,maxiter=500,plot_ob
 #' @param groups a vector indicating to which group each covariate belongs
 #' @param n.lambda the number of lambda values desired
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param w group-specific weights for different penalization of different groups
+#' @param tol a convergence criterion
+#' @param maxiter the maximum allowed number of iterations
+#' @param report.prog a logical indicating whether the progress of the algorithm should be printed to the console
 #' @return a list containing the fits over a grid of lambda values as well as the vector of lambda values
 #' @examples 
-#' grouplasso_logreg_data <- get_grouplasso_logreg_data(n = 400)
+#' grouplasso_logreg_data <- get_grouplasso_data(n = 400, response = "binary")
 #' 
 #' grouplasso_logreg_grid.out <- grouplasso_logreg_grid(Y = grouplasso_logreg_data$Y,
 #'                                                      X = grouplasso_logreg_data$X,
@@ -837,7 +441,7 @@ grouplasso_logreg_grid <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.m
 #' @param maxiter the maximum number of iterations allowed for each fit
 #' @return a list containing the fits over a grid of lambda values as well as the vector of lambda values
 #' @examples
-#' grouplasso_logreg_data <- get_grouplasso_logreg_data(n = 100)
+#' grouplasso_logreg_data <- get_grouplasso_data(n = 100, response = "binary")
 #' 
 #' grouplasso_logreg_grid.out <- grouplasso_logreg_grid(Y = grouplasso_logreg_data$Y,
 #'                                                      X = grouplasso_logreg_data$X,
@@ -849,15 +453,12 @@ grouplasso_logreg_grid <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.m
 #'                                                      maxiter = 500,
 #'                                                      report.prog = FALSE)
 #' 
-#' lambda.seq <- grouplasso_logreg_grid.out$lambda.seq
-#' b.mat <- grouplasso_logreg_grid.out$b.mat
-#' 
 #' grouplasso_logreg_cv_fixedgrid.out <- grouplasso_logreg_cv_fixedgrid(Y = grouplasso_logreg_data$Y,
 #'                                                                      X = grouplasso_logreg_data$X,
 #'                                                                      groups = grouplasso_logreg_data$groups,
-#'                                                                      lambda.seq = lambda.seq,
+#'                                                                      lambda.seq = grouplasso_logreg_grid.out$lambda.seq,
 #'                                                                      n.folds = 5,
-#'                                                                      b.init.mat = b.mat,
+#'                                                                      b.init.mat = grouplasso_logreg_grid.out$b.mat,
 #'                                                                      w = grouplasso_logreg_data$w,
 #'                                                                      tol = 1e-3,
 #'                                                                      maxiter = 500)
@@ -938,71 +539,6 @@ grouplasso_logreg_cv_fixedgrid <- function(Y,X,groups,lambda.seq,n.folds,b.init.
 }
 
 
-#' Choose tuning parameters by crossvalidation for grouplasso logreg.
-#'
-#' @param Y the binary response vector
-#' @param X matrix containing the design matrices
-#' @param groups a vector indicating to which group each covariate belongs
-#' @param n.lambda the number of lambda values desired
-#' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
-#' @param n.folds the number of crossvalidation folds
-#' @param w group-specific weights for different penalization toward similarity for different groups
-#' @return a list containing the fits over a grid of lambda values as well as the vector of lambda values
-#'
-#' @examples
-#' grouplasso_logreg_data <- get_grouplasso_logreg_data(n = 100)
-#' 
-#' grouplasso_logreg_cv.out <- grouplasso_logreg_cv(Y = grouplasso_logreg_data$Y,
-#'                                                  X = grouplasso_logreg_data$X,
-#'                                                  groups = grouplasso_logreg_data$groups,
-#'                                                  n.lambda = 25,
-#'                                                  lambda.min.ratio = 0.01,
-#'                                                  n.folds = 5,
-#'                                                  w = grouplasso_logreg_data$w,
-#'                                                  tol = 1e-3,
-#'                                                  maxiter = 500,
-#'                                                  report.prog = FALSE)
-#' @export
-grouplasso_logreg_cv <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.max.ratio,n.folds,w,tol=1e-4,maxiter=500,report.prog = TRUE){
-  
-  # obtain lambda.seq from the grid function, as well as the fits on the entire data set,
-  # which will be used as initial values for the crossvalidation training fits.
-  grouplasso_logreg_grid.out <- grouplasso_logreg_grid(Y = Y,
-                                                       X = X,
-                                                       groups = groups,
-                                                       n.lambda = n.lambda,
-                                                       lambda.min.ratio = lambda.min.ratio,
-                                                       lambda.max.ratio = lambda.max.ratio,
-                                                       w = w,
-                                                       tol = tol,
-                                                       maxiter = maxiter,
-                                                       report.prog = report.prog)
-  
-  lambda.seq <- grouplasso_logreg_grid.out$lambda.seq
-  b.mat <- grouplasso_logreg_grid.out$b.mat
-  
-  # do the crossvalidation
-  grouplasso_logreg_cv_fixedgrid.out <- grouplasso_logreg_cv_fixedgrid(Y = Y,
-                                                                       X = X,
-                                                                       groups = groups,
-                                                                       lambda.seq = lambda.seq,
-                                                                       n.folds = n.folds,
-                                                                       b.init.mat = b.mat,
-                                                                       w = w,
-                                                                       tol = tol,
-                                                                       maxiter = 500)
-  
-  output <- list( b.mat = b.mat,
-                  b.folds.arr = grouplasso_logreg_cv_fixedgrid.out$b.folds.arr,
-                  minus2ll.mat = grouplasso_logreg_cv_fixedgrid.out$minus2ll.mat,
-                  which.lambda.cv = grouplasso_logreg_cv_fixedgrid.out$which.lambda.cv,
-                  lambda.seq = lambda.seq,
-                  iterations = grouplasso_logreg_cv_fixedgrid.out$iterations)
-  
-  return(output)
-  
-}
-
 
 #' Choose tuning parameters by crossvalidation for grouplasso logreg with adaptive weights
 #'
@@ -1011,18 +547,22 @@ grouplasso_logreg_cv <- function(Y,X,groups,n.lambda,lambda.min.ratio,lambda.max
 #' @param groups a vector indicating to which group each covariate belongs
 #' @param n.lambda the number of lambda values desired
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param n.folds the number of crossvalidation folds
 #' @param w group-specific weights for different penalization toward similarity for different groups
+#' @param tol a convergence criterion
+#' @param maxiter the maximum allowed number of iterations
+#' @param report.prog a logical indicating whether the progress of the algorithm should be printed to the console
 #' @return a list containing the fits over a grid of lambda values as well as the vector of lambda values
-#'
 #' @examples
-#' grouplasso_logreg_data <- get_grouplasso_logreg_data(n = 100)
+#' grouplasso_logreg_data <- get_grouplasso_data(n = 500,response = "binary")
 #' 
 #' grouplasso_logreg_cv_adapt.out <- grouplasso_logreg_cv_adapt(Y = grouplasso_logreg_data$Y,
 #'                                                              X = grouplasso_logreg_data$X,
 #'                                                              groups = grouplasso_logreg_data$groups,
 #'                                                              n.lambda = 25,
 #'                                                              lambda.min.ratio = 0.01,
+#'                                                              lambda.max.ratio = 0.50,
 #'                                                              n.folds = 5,
 #'                                                              w = grouplasso_logreg_data$w,
 #'                                                              tol = 1e-3,
@@ -1123,27 +663,27 @@ grouplasso_logreg_cv_adapt <- function(Y,X,groups,n.lambda,lambda.min.ratio,lamb
 #'      testing specificity for pools and the second entry is the
 #'      test specificity for individual testing, if applicable.
 #' @param X the matrix with the observed covariate values (including a column of ones for the intercept)
+#' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param groups a vector indicating to which group each covariate belongs
 #' @param lambda the level of sparsity penalization
 #' @param w group-specific weights for different penalization of different groups
-#' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param tol a convergence criterion
 #' @param maxiter the maximum allowed number of iterations (EM steps)
 #' @param init a list of initial values for the coefficient 
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the semiparametric additive model with group testing data
 #' @examples 
-#' data <- get_grouplasso_data(n = 1000, response = "gt")
+#' grouplasso_gt_data <- get_grouplasso_data(n = 1000, response = "gt")
 #' 
-#' grouplasso_gt.out <- grouplasso_gt(Y = data$Y$I,
-#'                                    Z = data$Y$A,
-#'                                    Se = data$Y$Se,
-#'                                    Sp = data$Y$Sp,
-#'                                    E.approx = data$Y$E.approx,
-#'                                    X = data$X,
-#'                                    groups = data$groups,
+#' grouplasso_gt.out <- grouplasso_gt(Y = grouplasso_gt_data$Y$I,
+#'                                    Z = grouplasso_gt_data$Y$A,
+#'                                    Se = grouplasso_gt_data$Y$Se,
+#'                                    Sp = grouplasso_gt_data$Y$Sp,
+#'                                    E.approx = grouplasso_gt_data$Y$E.approx,
+#'                                    X = grouplasso_gt_data$X,
+#'                                    groups = grouplasso_gt_data$groups,
 #'                                    lambda = 1,
-#'                                    w  = data$w,
+#'                                    w  = grouplasso_gt_data$w,
 #'                                    tol = 1e-3,
 #'                                    maxiter = 500,
 #'                                    report.prog = TRUE)
@@ -1218,29 +758,35 @@ grouplasso_gt <- function(Y,Z,Se,Sp,E.approx,X,groups,lambda,w,tol=1e-3,maxiter=
 #'      testing specificity for pools and the second entry is the
 #'      test specificity for individual testing, if applicable.
 #' @param X the matrix with the observed covariate values (including a column of ones for the intercept)
+#' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param groups a vector indicating to which group each covariate belongs
 #' @param n.lambda the number of lambda values desired
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param w group-specific weights for different penalization of different groups
+#' @param tol a convergence criterion
+#' @param maxiter the maximum allowed number of iterations (EM steps)
+#' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return a list containing the fits over a grid of lambda values as well as the vector of lambda values
 #' @examples
-#' grouplasso_gt_data <- get_grouplasso_gt_data(n = 1000)
+#' grouplasso_gt_data <- get_grouplasso_data(n = 1000, response = "gt")
 #' 
-#' grouplasso_gt_grid.out <- grouplasso_gt_grid(Y = grouplasso_gt_data$Y,
-#'                                              Z = grouplasso_gt_data$Z,
-#'                                              Se = grouplasso_gt_data$Se,
-#'                                              Sp = grouplasso_gt_data$Sp,
+#' grouplasso_gt_grid.out <- grouplasso_gt_grid(Y = grouplasso_gt_data$Y$I,
+#'                                              Z = grouplasso_gt_data$Y$A,
+#'                                              Se = grouplasso_gt_data$Y$Se,
+#'                                              Sp = grouplasso_gt_data$Y$Sp,
 #'                                              X = grouplasso_gt_data$X,
+#'                                              E.approx = grouplasso_gt_data$Y$E.approx,
 #'                                              groups = grouplasso_gt_data$groups,
 #'                                              n.lambda = 10,
 #'                                              lambda.min.ratio = 0.01,
+#'                                              lambda.max.ratio = 0.50,
 #'                                              w  = grouplasso_gt_data$w,
-#'                                              E.approx = FALSE,
 #'                                              tol = 1e-3,
 #'                                              maxiter = 500,
 #'                                              report.prog = TRUE)
 #' @export
-grouplasso_gt_grid <- function(Y,Z,Se,Sp,X,groups,n.lambda,lambda.min.ratio,lambda.max.ratio=1,w,E.approx = FALSE,tol=1e-4,maxiter=500,report.prog=FALSE)
+grouplasso_gt_grid <- function(Y,Z,Se,Sp,X,E.approx = FALSE,groups,n.lambda,lambda.min.ratio,lambda.max.ratio=1,w,tol=1e-4,maxiter=500,report.prog=FALSE)
 {
   # get diagnoses; determine lambda sequence using these.
   Y.diag <- pull.diagnoses(Z,Y)
@@ -1339,35 +885,36 @@ grouplasso_gt_grid <- function(Y,Z,Se,Sp,X,groups,n.lambda,lambda.min.ratio,lamb
 #' @param tol the convergence tolerance
 #' @param maxiter the maximum number of iterations allowed for each fit
 #' @return a list containing the fits over a grid of lambda values as well as the vector of lambda values
-#' @examples
-#' grouplasso_gt_data <- get_grouplasso_gt_data(n = 400)
 #' 
-#' grouplasso_gt_grid.out <- grouplasso_gt_grid(Y = grouplasso_gt_data$Y,
-#'                                              Z = grouplasso_gt_data$Z,
-#'                                              Se = grouplasso_gt_data$Se,
-#'                                              Sp = grouplasso_gt_data$Sp,
+#' Note that the crossvalidation is carried out using the individual diagnoses as though they were the true individual disease statuses.
+#' 
+#' @examples
+#' grouplasso_gt_data <- get_grouplasso_data(n = 1000, response = "gt")
+#' 
+#' grouplasso_gt_grid.out <- grouplasso_gt_grid(Y = grouplasso_gt_data$Y$I,
+#'                                              Z = grouplasso_gt_data$Y$A,
+#'                                              Se = grouplasso_gt_data$Y$Se,
+#'                                              Sp = grouplasso_gt_data$Y$Sp,
 #'                                              X = grouplasso_gt_data$X,
+#'                                              E.approx = grouplasso_gt_data$Y$E.approx,
 #'                                              groups = grouplasso_gt_data$groups,
-#'                                              n.lambda = 25,
+#'                                              n.lambda = 10,
 #'                                              lambda.min.ratio = 0.01,
-#'                                              w = grouplasso_gt_data$w,
+#'                                              lambda.max.ratio = 0.50,
+#'                                              w  = grouplasso_gt_data$w,
 #'                                              tol = 1e-3,
 #'                                              maxiter = 500,
-#'                                              report.prog = FALSE)
+#'                                              report.prog = TRUE)
 #' 
-#' 
-#' lambda.seq <- grouplasso_gt_grid.out$lambda.seq
-#' b.mat <- grouplasso_gt_grid.out$b.mat
-#' 
-#' grouplasso_gt_cv_fixedgrid.out <- grouplasso_gt_cv_fixedgrid(Y = grouplasso_gt_data$Y,
-#'                                                              Z = grouplasso_gt_data$Z,
-#'                                                              Se = grouplasso_gt_data$Se,
-#'                                                              Sp = grouplasso_gt_data$Sp,
+#' grouplasso_gt_cv_fixedgrid.out <- grouplasso_gt_cv_fixedgrid(Y = grouplasso_gt_data$Y$I,
+#'                                                              Z = grouplasso_gt_data$Y$A,
+#'                                                              Se = grouplasso_gt_data$Y$Se,
+#'                                                              Sp = grouplasso_gt_data$Y$Sp,
 #'                                                              X = grouplasso_gt_data$X,
 #'                                                              groups = grouplasso_gt_data$groups,
-#'                                                              lambda.seq = lambda.seq,
+#'                                                              lambda.seq = grouplasso_gt_grid.out$lambda.seq,
 #'                                                              n.folds = 5,
-#'                                                              b.init.mat = b.mat,
+#'                                                              b.init.mat = grouplasso_gt_grid.out$b.mat,
 #'                                                              w = grouplasso_gt_data$w,
 #'                                                              tol = 1e-3,
 #'                                                              maxiter = 500)
@@ -1452,94 +999,6 @@ grouplasso_gt_cv_fixedgrid <- function(Y,Z,Se,Sp,X,groups,lambda.seq,n.folds,b.i
 }
 
 
-#' Choose tuning parameters for group lasso estimator with group testing data
-#'
-#' @param Y Group testing output in the format as output by one of the functions \code{individual.assay.gen}, \code{dorfman.assay.gen}, or \code{array.assay.gen}.
-#' @param Z Group testing output in the format as output by one of the functions \code{individual.assay.gen}, \code{dorfman.assay.gen}, or \code{array.assay.gen}.
-#' @param Se A vector of testing sensitivities, where the first element is the
-#'      testing specificity for pools and the second entry is the
-#'      test specificity for individual testing, if applicable.
-#' @param Sp A vector of testing specificities, where the first element is the
-#'      testing specificity for pools and the second entry is the
-#'      test specificity for individual testing, if applicable.
-#' @param X matrix containing the design matrices
-#' @param groups a vector indicating to which group each covariate belongs
-#' @param n.lambda the number of lambda values
-#' @param n.folds the number of crossvalidation folds
-#' @param w group-specific weights for different penalization toward similarity for different groups
-#' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
-#' @param tol a convergence criterion
-#' @param maxiter the maximum allowed number of iterations (EM steps)
-#' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
-#' @return Returns the estimator of the parametric model with group testing data
-#' 
-#' 
-#' @examples
-#' grouplasso_gt_data <- get_grouplasso_gt_data(n = 1000)
-#' 
-#' grouplasso_gt_cv.out <- grouplasso_gt_cv(Y = grouplasso_gt_data$Y,
-#'                                          Z = grouplasso_gt_data$Z,
-#'                                          Se = grouplasso_gt_data$Se,
-#'                                          Sp = grouplasso_gt_data$Sp,
-#'                                          X = grouplasso_gt_data$X,
-#'                                          groups = grouplasso_gt_data$groups,
-#'                                          n.lambda = 10,
-#'                                          lambda.min.ratio = 0.01,
-#'                                          n.folds = 5,
-#'                                          w  = grouplasso_gt_data$w,
-#'                                          E.approx = FALSE,
-#'                                          tol = 1e-3,
-#'                                          maxiter = 500,
-#'                                          report.prog = TRUE)
-#' @export
-grouplasso_gt_cv <- function(Y,Z,Se,Sp,X,groups,n.lambda,lambda.min.ratio,lambda.max.ratio=1,n.folds,w,E.approx = FALSE,tol=1e-3,maxiter=1000,report.prog=TRUE){
-  
-  # obtain lambda.seq and eta.seq from the grid function, as well as the fits on the entire data set,
-  # which will be used as initial values for the crossvalidation training fits.
-  grouplasso_gt_grid.out <- grouplasso_gt_grid(Y = Y,
-                                               Z = Z,
-                                               Se = Se,
-                                               Sp = Sp,
-                                               X = X,
-                                               groups = groups,
-                                               n.lambda = n.lambda,
-                                               lambda.min.ratio = lambda.min.ratio,
-                                               lambda.max.ratio = lambda.max.ratio,
-                                               w = w,
-                                               E.approx = E.approx,
-                                               tol = tol,
-                                               maxiter = maxiter,
-                                               report.prog = report.prog)
-  
-  lambda.seq <- grouplasso_gt_grid.out$lambda.seq
-  b.mat <- grouplasso_gt_grid.out$b.mat
-  
-  # do the crossvalidation
-  grouplasso_gt_cv_fixedgrid.out <- grouplasso_gt_cv_fixedgrid(Y = Y,
-                                                               Z = Z,
-                                                               Se = Se,
-                                                               Sp = Sp,
-                                                               X = X,
-                                                               groups = groups,
-                                                               lambda.seq = grouplasso_gt_grid.out$lambda.seq,
-                                                               n.folds = n.folds,
-                                                               b.init.mat = grouplasso_gt_grid.out$b.mat,
-                                                               w = w,
-                                                               tol = tol,
-                                                               maxiter = maxiter)
-  
-  output <- list( b.mat = b.mat,
-                  b.folds.arr = grouplasso_gt_cv_fixedgrid.out$b.folds.arr,
-                  minus2ll.mat = grouplasso_gt_cv_fixedgrid.out$minus2ll.mat,
-                  which.lambda.cv = grouplasso_gt_cv_fixedgrid.out$which.lambda.cv,
-                  lambda.seq = lambda.seq,
-                  iterations = grouplasso_gt_cv_fixedgrid.out$iterations)
-  
-  return(output)
-  
-}
-
-
 #' Choose tuning parameters for the group lasso estimator with group testing data
 #'
 #' @param Y Group testing output in the format as output by one of the functions \code{individual.assay.gen}, \code{dorfman.assay.gen}, or \code{array.assay.gen}.
@@ -1551,36 +1010,38 @@ grouplasso_gt_cv <- function(Y,Z,Se,Sp,X,groups,n.lambda,lambda.min.ratio,lambda
 #'      testing specificity for pools and the second entry is the
 #'      test specificity for individual testing, if applicable.
 #' @param X matrix containing the design matrices
+#' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param groups a vector indicating to which group each covariate belongs
 #' @param n.lambda the number of lambda values
 #' @param lambda.min.ratio ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model
+#' @param lambda.max.ratio ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model
 #' @param n.folds the number of crossvalidation folds
 #' @param w group-specific weights for different penalization toward similarity for different groups
-#' @param E.approx a logical indicating whether the conditional expectations in the E-step should be computed approximately or exactly.
 #' @param tol a convergence criterion
 #' @param maxiter the maximum allowed number of iterations (EM steps)
 #' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the parametric model with group testing data
 #'
 #' @examples
-#' grouplasso_gt_data <- get_grouplasso_gt_data(n = 1000)
+#' grouplasso_gt_data <- get_grouplasso_data(n = 1000, response = "gt")
 #' 
-#' grouplasso_gt_cv.out <- grouplasso_gt_cv_adapt(Y = grouplasso_gt_data$Y,
-#'                                                Z = grouplasso_gt_data$Z,
-#'                                                Se = grouplasso_gt_data$Se,
-#'                                                Sp = grouplasso_gt_data$Sp,
+#' grouplasso_gt_cv.out <- grouplasso_gt_cv_adapt(Y = grouplasso_gt_data$Y$I,
+#'                                                Z = grouplasso_gt_data$Y$A,
+#'                                                Se = grouplasso_gt_data$Y$Se,
+#'                                                Sp = grouplasso_gt_data$Y$Sp,
 #'                                                X = grouplasso_gt_data$X,
+#'                                                E.approx = grouplasso_gt_data$Y$E.approx,
 #'                                                groups = grouplasso_gt_data$groups,
 #'                                                n.lambda = 10,
 #'                                                lambda.min.ratio = 0.01,
+#'                                                lambda.max.ratio = 0.50,
 #'                                                n.folds = 5,
 #'                                                w  = grouplasso_gt_data$w,
-#'                                                E.approx = FALSE,
 #'                                                tol = 1e-3,
 #'                                                maxiter = 500,
 #'                                                report.prog = TRUE)
 #' @export
-grouplasso_gt_cv_adapt <- function(Y,Z,Se,Sp,X,groups,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio,n.folds,w,E.approx = FALSE,tol=1e-3,maxiter=1000,report.prog=TRUE)
+grouplasso_gt_cv_adapt <- function(Y,Z,Se,Sp,X,E.approx = FALSE,groups,n.lambda,n.eta,lambda.min.ratio,lambda.max.ratio,n.folds,w,tol=1e-3,maxiter=1000,report.prog=TRUE)
 {
   
   # pull the individual diagnoses to be treated as true disease statuses to find the sequence of lambda values.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{get_grouplasso_data}
 \alias{get_grouplasso_data}
-\title{Generate a data set with binary responses for group lasso}
+\title{Generate a data set for group lasso}
 \usage{
 get_grouplasso_data(n, response)
 }
@@ -13,5 +13,5 @@ get_grouplasso_data(n, response)
 a list containing the data
 }
 \description{
-Generate a data set with binary responses for group lasso
+Generate a data set for group lasso
 }

@@ -68,6 +68,12 @@ grouplasso2pop_linreg_grid(
 \item{AA1}{a list of the matrices A2j}
 
 \item{Com}{the indices of the covariate groups which are common in the two datasets}
+
+\item{tol}{a convergence criterion}
+
+\item{maxiter}{the maximum allowed number of iterations}
+
+\item{report.prog}{a logical indicating whether the progress of the algorithm should be printed to the console}
 }
 \value{
 a list containing the fits over a grid of lambda and eta values as well as the vector of lambda values and the vector of eta values

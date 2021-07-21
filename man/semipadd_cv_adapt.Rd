@@ -9,9 +9,7 @@ semipadd_cv_adapt(
   X,
   response,
   nonparm,
-  int = NULL,
   w,
-  w_int = NULL,
   d,
   xi,
   n.lambda = 5,
@@ -34,11 +32,7 @@ semipadd_cv_adapt(
 
 \item{nonparm}{a vector indicating for which covariates a nonparametric function is to be estimated}
 
-\item{int}{a matrix with rows giving the pairs of covariates for which to include interaction terms}
-
 \item{w}{covariate-specific weights for different penalization for different covariates}
-
-\item{w_int}{the penalization weights on the interaction terms}
 
 \item{d}{vector giving the dimensions the B-spline bases to be used when fitting the nonparametric effects. If a scalar is given, this dimension is used for all nonparametric effects.}
 
@@ -48,6 +42,10 @@ semipadd_cv_adapt(
 
 \item{lambda.min.ratio}{ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model}
 
+\item{lambda.max.ratio}{ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model}
+
+\item{n.folds}{the number of crossvalidation folds}
+
 \item{lambda.beta}{the level of sparsity penalization for the parametric effects (relative to nonparametric effects)}
 
 \item{lambda.f}{the level of sparsity penalization for the nonparametric effects (relative to the parametric effects)}
@@ -56,7 +54,7 @@ semipadd_cv_adapt(
 
 \item{maxiter}{the maximum allowed number of iterations}
 
-\item{return_obj}{a logical indicating whether the value of the objection function should be recorded after every step of the algorithm}
+\item{report.prog}{a logical indicating whether the progress of the algorithm should be printed to the console}
 }
 \value{
 Returns the estimator of the semiparametric additive model
@@ -72,8 +70,6 @@ semipadd_cv_adapt.out <- semipadd_cv_adapt(Y = data$Y,
                                            nonparm = data$nonparm,
                                            response = "binary",
                                            w = 1,
-                                           int = data$int,
-                                           w_int = data$w_int,
                                            d = 20,
                                            xi = 1,
                                            n.lambda = 5,
@@ -85,5 +81,7 @@ semipadd_cv_adapt.out <- semipadd_cv_adapt(Y = data$Y,
                                            maxiter = 1000,
                                            report.prog = TRUE)
 
-plot_semipadd_grid(semipadd_cv_adapt.out)
+plot_semipadd_cv_adapt(semipadd_cv_adapt.out, 
+                       true.functions  = list( f = data$f,
+                                               X = data$X))
 }

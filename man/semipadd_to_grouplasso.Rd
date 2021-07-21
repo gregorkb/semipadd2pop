@@ -4,17 +4,7 @@
 \alias{semipadd_to_grouplasso}
 \title{Prepare inputs for grouplasso function when using it to fit a semiparametric model}
 \usage{
-semipadd_to_grouplasso(
-  X,
-  nonparm,
-  d,
-  xi,
-  w = 1,
-  int = NULL,
-  w_int = NULL,
-  lambda.beta = 1,
-  lambda.f = 1
-)
+semipadd_to_grouplasso(X, nonparm, d, xi, w = 1, lambda.beta = 1, lambda.f = 1)
 }
 \arguments{
 \item{X}{the matrix with the observed covariate values (including a column of ones for the intercept)}
@@ -26,10 +16,6 @@ semipadd_to_grouplasso(
 \item{xi}{a tuning parameter governing the smoothness of the nonparametric estimates}
 
 \item{w}{covariate-specific weights for different penalization toward similarity for different covariates}
-
-\item{int}{a matrix with rows giving the pairs of covariates for which to include interaction terms}
-
-\item{w_int}{the penalization weights on the interaction terms}
 
 \item{lambda.beta}{the level of sparsity penalization for the parametric effects}
 

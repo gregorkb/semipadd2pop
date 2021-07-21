@@ -25,7 +25,8 @@ grouplasso2pop_linreg_cv_fixedgrid(
   AA2,
   Com,
   tol = 0.001,
-  maxiter = 500
+  maxiter = 500,
+  report.prog = FALSE
 )
 }
 \arguments{
@@ -68,6 +69,8 @@ grouplasso2pop_linreg_cv_fixedgrid(
 \item{tol}{the convergence tolerance}
 
 \item{maxiter}{the maximum number of iterations allowed for each fit}
+
+\item{report.prog}{a logical indicating whether the progress of the algorithm should be printed to the console}
 }
 \value{
 a list containing the fits over a grid of lambda and eta values as well as the vector of lambda values and the vector of eta values
@@ -86,10 +89,10 @@ grouplasso2pop_linreg_grid.out <- grouplasso2pop_linreg_grid(Y1 = data$Y1,
                                                              groups2 = data$groups2,
                                                              rho1 = 2,
                                                              rho2 = 1,
-                                                             n.lambda = 25,
+                                                             n.lambda = 10,
                                                              n.eta = 5,
-                                                             lambda.min.ratio = 0.001,
-                                                             lambda.max.ratio = 0.1,
+                                                             lambda.min.ratio = 0.01,
+                                                             lambda.max.ratio = 0.50,
                                                              w1 = data$w1,
                                                              w2 = data$w2,
                                                              w = data$w,
@@ -120,5 +123,6 @@ grouplasso2pop_linreg_cv_fixedgrid.out <- grouplasso2pop_linreg_cv_fixedgrid(Y1 
                                                                              AA2 = data$AA2,
                                                                              Com = data$Com,
                                                                              tol = 1e-3,
-                                                                             maxiter = 500)
+                                                                             maxiter = 500,
+                                                                             report.prog = TRUE)
 }

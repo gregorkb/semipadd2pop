@@ -71,6 +71,12 @@ grouplasso2pop_linreg_cv_adapt(
 \item{AA1}{a list of the matrices A2j}
 
 \item{Com}{the indices of the covariate groups which are common in the two datasets}
+
+\item{tol}{the convergence tolerance}
+
+\item{maxiter}{the maximum number of iterations allowed for each fit}
+
+\item{report.prog}{a logical indicating whether the progress of the algorithm should be printed to the console}
 }
 \value{
 a list containing the fits over a grid of lambda and eta values as well as the vector of lambda values and the vector of eta values
@@ -79,7 +85,7 @@ a list containing the fits over a grid of lambda and eta values as well as the v
 Choose tuning parameters by crossvalidation for grouplasso2pop linreg with adaptive weights
 }
 \examples{
-data <- get_grouplasso2pop_data(n1 = 40, n2 = 50, response = "continuous")
+data <- get_grouplasso2pop_data(n1 = 200, n2 = 150, response = "continuous")
 
 grouplasso2pop_linreg_cv_adapt.out <- grouplasso2pop_linreg_cv_adapt(Y1 = data$Y1,
                                                                      X1 = data$X1,
@@ -89,10 +95,10 @@ grouplasso2pop_linreg_cv_adapt.out <- grouplasso2pop_linreg_cv_adapt(Y1 = data$Y
                                                                      groups2 = data$groups2,
                                                                      rho1 = 1,
                                                                      rho2 = 1,
-                                                                     n.lambda = 25,
-                                                                     n.eta = 10,
-                                                                     lambda.min.ratio = 0.001,
-                                                                     lambda.max.ratio = 0.1,
+                                                                     n.lambda = 8,
+                                                                     n.eta = 3,
+                                                                     lambda.min.ratio = 0.01,
+                                                                     lambda.max.ratio = 0.5,
                                                                      n.folds = 5,
                                                                      w1 = data$w1,
                                                                      w2 = data$w2,

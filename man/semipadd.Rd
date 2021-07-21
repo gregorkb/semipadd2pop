@@ -10,8 +10,6 @@ semipadd(
   nonparm,
   response,
   w,
-  int = NULL,
-  w_int = NULL,
   d,
   xi,
   lambda.beta,
@@ -30,10 +28,6 @@ semipadd(
 \item{response}{a character string indicating the type of response.  Can be \code{"continuous"}, \code{"binary"}, or \code{"gt"}}
 
 \item{w}{covariate-specific weights for different penalization toward similarity for different covariates}
-
-\item{int}{a matrix with rows giving the pairs of covariates for which to include interaction terms}
-
-\item{w_int}{the penalization weights on the interaction terms}
 
 \item{d}{vector giving the dimensions the  B-spline bases to be used when fitting the nonparametric effects. If a scalar is given, this dimension is used for all nonparametric effects.}
 
@@ -63,8 +57,6 @@ semipadd.out <- semipadd(Y = data$Y,
                          nonparm = data$nonparm,
                          response = "continuous",
                          w = 1,
-                         int = data$int,
-                         w_int = data$w_int,
                          d = 20,
                          xi = 1,
                          lambda.beta = 1,
@@ -72,5 +64,7 @@ semipadd.out <- semipadd(Y = data$Y,
                          tol = 1e-3,
                          max.iter = 500)
 
-plot_semipadd(semipadd.out)
+plot_semipadd(semipadd.out, 
+              true.functions = list( f = data$f,
+                                     X = data$X))
 }

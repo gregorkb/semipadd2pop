@@ -28,7 +28,15 @@ grouplasso_logreg_grid(
 
 \item{lambda.min.ratio}{ratio of the smallest lambda value to the smallest value of lambda which admits no variables to the model}
 
+\item{lambda.max.ratio}{ratio of the largest lambda value to the smallest value of lambda which admits no variables to the model}
+
 \item{w}{group-specific weights for different penalization of different groups}
+
+\item{tol}{a convergence criterion}
+
+\item{maxiter}{the maximum allowed number of iterations}
+
+\item{report.prog}{a logical indicating whether the progress of the algorithm should be printed to the console}
 }
 \value{
 a list containing the fits over a grid of lambda values as well as the vector of lambda values
@@ -37,7 +45,7 @@ a list containing the fits over a grid of lambda values as well as the vector of
 Fit grouplasso logistic regression estimator over a grid of lambda values
 }
 \examples{
-grouplasso_logreg_data <- get_grouplasso_logreg_data(n = 400)
+grouplasso_logreg_data <- get_grouplasso_data(n = 400, response = "binary")
 
 grouplasso_logreg_grid.out <- grouplasso_logreg_grid(Y = grouplasso_logreg_data$Y,
                                                      X = grouplasso_logreg_data$X,

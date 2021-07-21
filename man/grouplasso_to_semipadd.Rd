@@ -4,23 +4,12 @@
 \alias{grouplasso_to_semipadd}
 \title{Convert output from grouplasso to the fitted functions of the semi-parametric additive model}
 \usage{
-grouplasso_to_semipadd(
-  X,
-  nonparm,
-  int = NULL,
-  groups,
-  knots.list,
-  emp.cent,
-  QQ.inv,
-  b
-)
+grouplasso_to_semipadd(X, nonparm, groups, knots.list, emp.cent, QQ.inv, b)
 }
 \arguments{
 \item{X}{the matrix with the observed covariate values (including a column of ones for the intercept)}
 
 \item{nonparm}{a vector indicating for which covariates a nonparametric function is to be estimated}
-
-\item{int}{a matrix with rows giving the pairs of covariates for which to include interaction terms}
 
 \item{groups}{a vector indicating to which group the entries of the coefficient vector \code{b} belong}
 
