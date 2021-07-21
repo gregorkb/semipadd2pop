@@ -1,8 +1,8 @@
 Fitting a sparse nonparametric model to a single data set
 ---------------------------------------------------------
 
-The function fits a sparse semiparametric regression model to a single
-data set using user-specified tuning parameter values.
+The `semipadd` function fits a sparse semiparametric regression model to
+a single data set using user-specified tuning parameter values.
 
 The following code generates a synthetic data set with continuous
 responses using the `get_semipadd_data` function and uses the `semipadd`
@@ -35,9 +35,9 @@ model to a single data set with the tuning parameter governing sparsity
 chosen via crossvalidation.
 
 The following code generates a synthetic data set with binary responses
-using the `get_semipadd_data` and uses the `semipadd_cv_adapt` function
-to fit a sparse semiparametric regression model. The tuning parameter
-governing sparsity is chosen via crossvalidation. The
+using the `get_semipadd_data` function and uses the `semipadd_cv_adapt`
+function to fit a sparse semiparametric regression model. The tuning
+parameter governing sparsity is chosen via crossvalidation. The
 `plot_semipadd_cv_adapt` function plots the fitted nonparametric
 effects, showing with transparent curves the fitted effects under
 candidate tuning parameter values which were not chosen by
@@ -54,7 +54,7 @@ crossvalidation. The true effects are plotted with dashed lines.
                                                xi = 1,
                                                n.lambda = 10,
                                                lambda.min.ratio = .001,
-                                               lambda.max.ratio = 5,
+                                               lambda.max.ratio = 1,
                                                lambda.beta = 1,
                                                lambda.f = 1,
                                                tol = 1e-3,
@@ -67,12 +67,14 @@ crossvalidation. The true effects are plotted with dashed lines.
 
 ![](README_files/figure-markdown_strict/semipadd_cv_adapt-1.png)
 
-Fitting two sparse semiparametric models combining two data sets
-----------------------------------------------------------------
+Combining data sets to fit two sparse semiparametric additive models
+--------------------------------------------------------------------
 
-The function fits sparse semiparametric regression models to two data
-set which have come covariates in common using user-specified tuning
-parameter values.
+The `semipadd2pop` function fits sparse semiparametric regression models
+to two data sets which have some covariates in common. The function
+requires the user to choose values of the parameters governing the
+sparsity of the fitted models and the penalization towards similar fits
+of common covariate effects.
 
 The following code generates two synthetic data sets with group testing
 responses using the `get_semipadd2pop_data` function and uses the
@@ -80,7 +82,7 @@ responses using the `get_semipadd2pop_data` function and uses the
 The `plot_semipadd2pop` function plots the fitted nonparametric effects
 in both data sets. The true effects are plotted with dashed lines.
 
-    data <- get_semipadd2pop_data(n1 = 500, n2 = 600, response = "gt")
+    data <- get_semipadd2pop_data(n1 = 1000, n2 = 800, response = "gt")
 
     semipadd2pop.out <- semipadd2pop(Y1 = data$Y1,
                                      X1 = data$X1,
@@ -114,12 +116,13 @@ in both data sets. The true effects are plotted with dashed lines.
 ![](README_files/figure-markdown_strict/semipadd2pop-1.png)
 
 The `semipadd2pop_cv_adapt` function fits sparse semiparametric
-regression models to two data sets with some common covariates with the
-tuning parameters governing sparsity and penalization towards similar
-fitting of common effect chosen via crossvalidation.
+regression models to two data sets with some common covariates. It
+choosing values of the tuning parameters governing sparsity and
+penalization towards similar fitting of common effects via
+crossvalidation.
 
 The following code generates two synthetic data sets with continuous
-responses using the `get_semipadd2pop_data` and uses the
+responses using the `get_semipadd2pop_data` function and uses the
 `semipadd2pop_cv_adapt` function to fit a sparse semiparametric
 regression models for the two data sets. The tuning parameters governing
 sparsity and penalization towards similarity in the fitted effects of
