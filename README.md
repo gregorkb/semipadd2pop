@@ -53,7 +53,7 @@ crossvalidation. The true effects are plotted with dashed lines.
                                                d = 20,
                                                xi = 1,
                                                n.lambda = 10,
-                                               lambda.min.ratio = .001,
+                                               lambda.min.ratio = .01,
                                                lambda.max.ratio = 1,
                                                lambda.beta = 1,
                                                lambda.f = 1,
