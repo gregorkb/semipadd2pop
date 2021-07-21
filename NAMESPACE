@@ -1,4 +1,4 @@
-useDynLib(semipaddgt2pop, .registration=TRUE)
+useDynLib(semipadd2pop, .registration=TRUE)
 exportPattern("^[[:alpha:]]+")
 import(splines)
 importFrom(Rcpp, evalCpp)
