@@ -308,7 +308,6 @@ grouplasso2pop_to_semipadd2pop <- function(X1,nonparm1,groups1,knots.list1,emp.c
 #' @param eta.f the level of penalization towards model similarity for nonparametric effects indicated to be common
 #' @param tol a convergence criterion
 #' @param maxiter the maximum allowed number of iterations
-#' @param return_obj a logical indicating whether the value of the objection function should be recorded after every step of the algorithm
 #' @return Returns the estimator of the semiparametric additive model
 #'
 #' @examples

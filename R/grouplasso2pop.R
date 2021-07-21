@@ -1285,7 +1285,6 @@ grouplasso2pop_logreg_cv_adapt <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2
 #' @param tol a convergence criterion
 #' @param maxiter the maximum allowed number of iterations (EM steps)
 #' @param init a list of initial values for the coefficient for each of the two data sets
-#' @param report.prog a logical. If \code{TRUE} then the number of inner loops required to complete the M step of the EM algorithm are returned after each EM step.
 #' @return Returns the estimator of the semiparametric additive model with group testing data
 #' @examples 
 #' grouplasso2pop_gt_data <- get_grouplasso2pop_data( n1 = 1000, n2 = 1200, response = "gt")
@@ -1315,10 +1314,9 @@ grouplasso2pop_logreg_cv_adapt <- function(Y1,X1,groups1,Y2,X2,groups2,rho1,rho2
 #'                                           AA2  = grouplasso2pop_gt_data$AA2,
 #'                                           Com  = grouplasso2pop_gt_data$Com,
 #'                                           tol = 1e-3,
-#'                                           maxiter = 500,
-#'                                           report.prog = TRUE)
+#'                                           maxiter = 500)
 #' @export
-grouplasso2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1 = FALSE,Y2,Z2,Se2,Sp2,X2,groups2,E.approx2=FALSE,rho1,rho2,lambda,eta,w1,w2,w,AA1,AA2,Com,tol=1e-3,maxiter=1000,init=NULL,report.prog=TRUE)
+grouplasso2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1 = FALSE,Y2,Z2,Se2,Sp2,X2,groups2,E.approx2=FALSE,rho1,rho2,lambda,eta,w1,w2,w,AA1,AA2,Com,tol=1e-3,maxiter=1000,init=NULL)
 {
   
   # set function to get conditional expectations
@@ -1385,7 +1383,7 @@ grouplasso2pop_gt <- function(Y1,Z1,Se1,Sp1,X1,groups1,E.approx1 = FALSE,Y2,Z2,S
     iter <- iter + 1
     inner.iter[iter] <- grouplasso2pop_logreg.out$iter
     
-    if(report.prog) print(grouplasso2pop_logreg.out$iter)
+    # if(report.prog) print(grouplasso2pop_logreg.out$iter)
     
   }
   
