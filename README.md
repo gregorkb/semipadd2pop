@@ -1,3 +1,12 @@
+Using the semipadd2pop package
+------------------------------
+
+See the package documentation for details. Install with the R commands:
+
+`install.packages("devtools")`
+
+`devtools::install_github("gregorkb/aenetgt")`
+
 Fitting a sparse nonparametric model to a single data set
 ---------------------------------------------------------
 
