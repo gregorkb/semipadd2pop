@@ -1,8 +1,0 @@
-datasets="/Library/Frameworks/R.framework/Versions/3.5/Resources/library/datasets"
-grDevices="/Library/Frameworks/R.framework/Versions/3.5/Resources/library/grDevices"
-graphics="/Library/Frameworks/R.framework/Versions/3.5/Resources/library/graphics"
-methods="/Library/Frameworks/R.framework/Versions/3.5/Resources/library/methods"
-semipaddgt2pop="/Library/Frameworks/R.framework/Versions/3.5/Resources/library/semipaddgt2pop"
-splines="/Library/Frameworks/R.framework/Versions/3.5/Resources/library/splines"
-stats="/Library/Frameworks/R.framework/Versions/3.5/Resources/library/stats"
-utils="/Library/Frameworks/R.framework/Versions/3.5/Resources/library/utils"
